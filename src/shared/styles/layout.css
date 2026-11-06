@@ -9,13 +9,6 @@
   padding: 24px 28px;
 }
 
-.filters {
-  width: 248px;
-  flex-shrink: 0;
-  padding: 20px 16px;
-  border-left: 1px solid var(--border);
-}
-
 .sidebar {
   width: 232px;
   flex-shrink: 0;

@@ -37,3 +37,11 @@ input[type = "email"], input[type = "password"]{
     color: var(--on-accent);
     border-color: var(--accent);
 }
+
+.stub-note {
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 12px;
+  border-left: 2px solid var(--accent);
+  padding-left: 8px;
+}
