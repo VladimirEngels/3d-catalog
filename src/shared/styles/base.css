@@ -45,3 +45,14 @@ input[type = "email"], input[type = "password"]{
   border-left: 2px solid var(--accent);
   padding-left: 8px;
 }
+
+/* Ссылка, оформленная как кнопка */
+a.btn {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+a {
+    color: var(--accent);
+}
