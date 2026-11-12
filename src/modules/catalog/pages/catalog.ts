@@ -2,9 +2,12 @@ import type { CatalogItem, FileFormat } from "../../../shared/api/types";
 import { h } from "../../../shared/ui/dom";
 import { getModels } from "../api";
 import { createTile } from "../components/tile";
+import { createTable } from "../components/table";
 import { mountMenu } from "../../../shared/ui/layout";
 
-const tilesBox = document.querySelector(".tiles") as HTMLElement;
+const resultsBox = document.querySelector("#results") as HTMLElement;
+const gridButton = document.querySelector("#view-grid") as HTMLButtonElement;
+const tableButton = document.querySelector("#view-table") as HTMLButtonElement;
 const countText = document.querySelector("#count") as HTMLElement;
 const searchInput = document.querySelector("#search") as HTMLInputElement;
 const sortSelect = document.querySelector("#sort") as HTMLSelectElement;
@@ -19,8 +22,13 @@ const maxTrianglesInput = document.querySelector(
 ) as HTMLInputElement;
 
 let allModels: CatalogItem[] = [];
+let viewMode: "grid" | "table" = "grid";
 
-function showTiles(): void {
+function showCatalog(): void {
+  resultsBox.classList.toggle("tiles", viewMode === "grid");
+  gridButton.setAttribute("aria-pressed", String(viewMode === "grid"));
+  tableButton.setAttribute("aria-pressed", String(viewMode === "table"));
+
   const text = searchInput.value.trim().toLowerCase();
 
   const minTriangles =
@@ -36,7 +44,7 @@ function showTiles(): void {
   ) {
     countText.textContent = "проверьте диапазон";
 
-    tilesBox.replaceChildren(
+    resultsBox.replaceChildren(
       h(
         "p",
         "muted",
@@ -78,9 +86,11 @@ function showTiles(): void {
 
   countText.textContent = `найдено: ${list.length}`;
   if (list.length === 0) {
-    tilesBox.replaceChildren(h("p", "muted", "Ничего не найдено"));
+    resultsBox.replaceChildren(h("p", "muted", "Ничего не найдено"));
+  } else if (viewMode === "table") {
+    resultsBox.replaceChildren(createTable(list));
   } else {
-    tilesBox.replaceChildren(...list.map(createTile));
+    resultsBox.replaceChildren(...list.map(createTile));
   }
 }
 
@@ -90,22 +100,30 @@ function resetFilters(): void {
   skeletonCheck.checked = false;
   minTrianglesInput.value = "";
   maxTrianglesInput.value = "";
-  showTiles();
+  showCatalog();
 }
 
 async function start(): Promise<void> {
   mountMenu("catalog");
 
   allModels = await getModels();
-  showTiles();
+  showCatalog();
 
-  searchInput.addEventListener("input", showTiles);
-  sortSelect.addEventListener("change", showTiles);
-  formatSelect.addEventListener("change", showTiles);
-  skeletonCheck.addEventListener("change", showTiles);
+  searchInput.addEventListener("input", showCatalog);
+  sortSelect.addEventListener("change", showCatalog);
+  formatSelect.addEventListener("change", showCatalog);
+  skeletonCheck.addEventListener("change", showCatalog);
   resetButton.addEventListener("click", resetFilters);
-  minTrianglesInput.addEventListener("input", showTiles);
-  maxTrianglesInput.addEventListener("input", showTiles);
+  minTrianglesInput.addEventListener("input", showCatalog);
+  maxTrianglesInput.addEventListener("input", showCatalog);
+  gridButton.addEventListener("click", () => {
+    viewMode = "grid";
+    showCatalog();
+  });
+  tableButton.addEventListener("click", () => {
+    viewMode = "table";
+    showCatalog();
+  });
 }
 
 start();
