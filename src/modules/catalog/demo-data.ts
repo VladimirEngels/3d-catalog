@@ -1,4 +1,3 @@
-// Заглушка: заготовленные данные, не из базы
 import type { CatalogItem } from "../../shared/api/types";
 
 export const demoModels: CatalogItem[] = [

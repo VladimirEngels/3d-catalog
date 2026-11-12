@@ -30,6 +30,8 @@ input[type = "email"], input[type = "password"]{
     font: inherit;
     font-weight: 600;
     cursor: pointer;
+    background-color: var(--surface);
+    color: var(--text);
 }
 
 .btn-primary{
@@ -46,7 +48,7 @@ input[type = "email"], input[type = "password"]{
   padding-left: 8px;
 }
 
-/* Ссылка, оформленная как кнопка */
+
 a.btn {
     display: inline-flex;
     align-items: center;
@@ -55,4 +57,19 @@ a.btn {
 
 a {
     color: var(--accent);
+}
+
+
+input[type="search"], select {
+    font: inherit;
+    height: 34px;
+    padding: 0 10px;
+    color: var(--text);
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.muted {
+    color: var(--text-muted);
 }

@@ -1,11 +1,16 @@
-// Вход на заглушке: пароль не проверяется, это сделает сервер
+import {signIn} from "../../../shared/session";
+
 const form = document.querySelector<HTMLFormElement>(".auth-form");
 
 if (form !== null) {
   form.addEventListener("submit", (event) => {
-    event.preventDefault();                          // не перезагружать страницу
-    const email = String(new FormData(form).get("email"));
-    localStorage.setItem("userEmail", email);        // запомнить, кто вошёл
-    location.href = "/pages/catalog.html";           // перейти в каталог
+    event.preventDefault();
+  
+    const data = new FormData(form);
+    const email = String(data.get("email") ?? "").trim();
+
+
+    signIn(email);
+    location.href = "/pages/catalog.html";
   });
 }

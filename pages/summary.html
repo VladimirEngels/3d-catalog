@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Сводка — 3D-Каталог</title>
+    <link rel="stylesheet" href="/src/shared/styles/tokens.css" />
+    <link rel="stylesheet" href="/src/shared/styles/base.css" />
+    <link rel="stylesheet" href="/src/shared/styles/layout.css" />
+    <link rel="stylesheet" href="/src/modules/admin/admin.css" />
+</head>
+<body>
+    <div class="layout">
+
+        <main class="main">
+            <div class="page-head">
+                <h1>Сводка</h1>
+                <span class="muted">команда за последние 7 дней</span>
+            </div>
+            <p class="stub-note">Заглушка: числа заготовлены в разметке, позже их будет считать сервер</p>
+
+            <div class="stats">
+                <div class="stat">
+                    <div class="label">Моделей</div>
+                    <div class="value">8</div>
+                </div>
+                <div class="stat">
+                    <div class="label">Участников</div>
+                    <div class="value">3</div>
+                </div>
+                <div class="stat">
+                    <div class="label">Переводов</div>
+                    <div class="value">12</div>
+                </div>
+                <div class="stat">
+                    <div class="label">Ошибок перевода</div>
+                    <div class="value">1</div>
+                </div>
+            </div>
+
+            <section class="chart-block">
+                <h2>Переводы по дням</h2>
+                <div class="columns">
+                    <div class="column"><div class="bar" style="height: 0%"></div><span>01.11</span></div>
+                    <div class="column"><div class="bar" style="height: 50%"></div><span>02.11</span></div>
+                    <div class="column"><div class="bar" style="height: 0%"></div><span>03.11</span></div>
+                    <div class="column"><div class="bar" style="height: 75%"></div><span>04.11</span></div>
+                    <div class="column"><div class="bar" style="height: 25%"></div><span>05.11</span></div>
+                    <div class="column"><div class="bar" style="height: 50%"></div><span>06.11</span></div>
+                    <div class="column"><div class="bar" style="height: 100%"></div><span>07.11</span></div>
+                </div>
+            </section>
+
+            <section class="chart-block">
+                <h2>Популярные форматы</h2>
+                <div class="rows">
+                    <div class="row"><span>OBJ</span><div class="bar" style="width: 100%"></div><b>5</b></div>
+                    <div class="row"><span>GLB</span><div class="bar" style="width: 80%"></div><b>4</b></div>
+                    <div class="row"><span>STL</span><div class="bar" style="width: 40%"></div><b>2</b></div>
+                    <div class="row"><span>PLY</span><div class="bar" style="width: 20%"></div><b>1</b></div>
+                </div>
+            </section>
+        </main>
+
+        <nav class="sidebar" aria-label="Основное меню"></nav>
+
+    </div>
+
+    <script type="module" src="/src/modules/admin/pages/summary.ts"></script>
+
+</body>
+</html>

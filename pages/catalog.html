@@ -1,48 +1,64 @@
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
     <meta charset="UTF-8">
-    <title>Каталог</title>
+    <title>Каталог — 3D-Каталог</title>
     <link rel="stylesheet" href="/src/shared/styles/tokens.css" />
     <link rel="stylesheet" href="/src/shared/styles/base.css" />
     <link rel="stylesheet" href="/src/shared/styles/layout.css" />
     <link rel="stylesheet" href="/src/modules/catalog/catalog.css" />
-
 </head>
-
 <body>
     <div class="layout">
 
         <main class="main">
-            <h1>Каталог</h1>
+            <div class="page-head">
+                <h1>Каталог</h1>
+                <span class="muted" id="count"></span>
+            </div>
             <p class="stub-note">Заглушка: модели заготовлены в коде, это не данные системы</p>
 
-            <div class="tiles">
-
-
-
+            <div class="toolbar">
+                <input id="search" type="search" placeholder="Поиск по названию" />
+                <select id="sort">
+                    <option value="new">Сначала новые</option>
+                    <option value="name">По названию</option>
+                    <option value="triangles">Больше треугольников</option>
+                </select>
             </div>
-        </main>
 
+            <div class="tiles"></div>
+        </main>
 
         <aside class="filters">
             <h2>Фильтры</h2>
 
+            <div class="filter-group">
+                <label for="format">Формат</label>
+                <select id="format">
+                    <option value="">Любой</option>
+                    <option value="OBJ">OBJ</option>
+                    <option value="STL">STL</option>
+                    <option value="PLY">PLY</option>
+                    <option value="GLTF">glTF</option>
+                    <option value="GLB">GLB</option>
+                </select>
+            </div>
 
+            <div class="filter-group">
+                <label class="check">
+                    <input id="skeleton" type="checkbox" />
+                    Есть скелет
+                </label>
+            </div>
+
+            <button id="reset" type="button" class="btn">Сбросить</button>
         </aside>
 
-        <nav class="sidebar">
-            <div class="logo">3D-Каталог</div>
-            <a href="/pages/catalog.html" class="active">Каталог</a>
-            <a href="/pages/jobs.html">Мои задания</a>
-            <a href="/pages/summary.html">Сводка</a>
-        </nav>
+        <nav class="sidebar" aria-label="Основное меню"></nav>
 
     </div>
 
     <script type="module" src="/src/modules/catalog/pages/catalog.ts"></script>
-
 </body>
-
 </html>

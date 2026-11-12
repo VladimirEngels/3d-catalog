@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Модель — 3D-Каталог</title>
+    <link rel="stylesheet" href="/src/shared/styles/tokens.css" />
+    <link rel="stylesheet" href="/src/shared/styles/base.css" />
+    <link rel="stylesheet" href="/src/shared/styles/layout.css" />
+    <link rel="stylesheet" href="/src/modules/catalog/catalog.css" />
+    <link rel="stylesheet" href="/src/modules/quality/quality.css" />
+</head>
+<body>
+    <div class="layout">
+
+        <main class="main">
+            <p class="crumbs"><a href="/pages/catalog.html">Каталог</a> / <span id="crumb-name"></span></p>
+
+            <p id="not-found" class="muted" hidden>Модель не найдена. Вернитесь в каталог и выберите другую.</p>
+
+            <div id="model">
+                <div class="model-top">
+                    <div class="viewer">
+                        <span id="preview"></span>
+                        <span class="viewer-hint">3D-просмотр появится вместе с загрузкой файлов</span>
+                    </div>
+
+                    <section class="model-info">
+                        <h1 id="name"></h1>
+                        <p id="description"></p>
+
+                        <dl class="props">
+                            <dt>Форматы</dt> <dd id="formats"></dd>
+                            <dt>Треугольников</dt> <dd id="triangles"></dd>
+                            <dt>Вершин</dt> <dd id="vertices"></dd>
+                            <dt>Скелет</dt> <dd id="skeleton"></dd>
+                            <dt>Габариты</dt> <dd id="size"></dd>
+                            <dt>Версия</dt> <dd id="version"></dd>
+                            <dt>Добавлена</dt> <dd id="created"></dd>
+                        </dl>
+                    </section>
+                </div>
+
+                <section class="quality">
+                    <h2>Контроль качества</h2>
+                    <p class="stub-note">Заглушка: пример отчёта, проверка качества пока не подключена</p>
+
+                    <div class="quality-grid">
+                        <div>
+                            <div class="label">Перевод</div>
+                            <div>GLB → OBJ</div>
+                        </div>
+                        <div>
+                            <div class="label">Оценка похожести</div>
+                            <div class="big-score">94 %</div>
+                        </div>
+                        <div>
+                            <div class="label">Что не сохранилось</div>
+                            <ul class="issues">
+                                <li>Скелет: формат OBJ его не поддерживает</li>
+                                <li>Анимации: 2 шт.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <nav class="sidebar" aria-label="Основное меню"></nav>
+
+    </div>
+
+    <script type="module" src="/src/modules/catalog/pages/model.ts"></script>
+</body>
+</html>
