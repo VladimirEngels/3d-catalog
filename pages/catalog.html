@@ -29,13 +29,13 @@
                     <option value="name">По названию</option>
                     <option value="triangles">Больше треугольников</option>
                 </select>
-                <div class="view-switch" role="group" aria-label="Вид каталога">
-                    <button id="view-grid" type="button" class="btn" aria-pressed="true">Плитки</button>
+                <div class="view-switch" role="group" aria-label="Вид каталога" aria-busy="true">
+                    <button id="view-grid" type="button" class="btn" aria-pressed="false">Плитки</button>
                     <button id="view-table" type="button" class="btn" aria-pressed="false">Таблица</button>
                 </div>
             </div>
 
-            <div id="results" class="tiles"></div>
+            <div id="results"></div>
         </main>
 
         <aside class="filters">

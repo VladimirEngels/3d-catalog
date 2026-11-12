@@ -6,6 +6,7 @@ import { createTable } from "../components/table";
 import { mountMenu } from "../../../shared/ui/layout";
 
 const resultsBox = document.querySelector("#results") as HTMLElement;
+const viewSwitch = document.querySelector(".view-switch") as HTMLElement;
 const gridButton = document.querySelector("#view-grid") as HTMLButtonElement;
 const tableButton = document.querySelector("#view-table") as HTMLButtonElement;
 const countText = document.querySelector("#count") as HTMLElement;
@@ -22,7 +23,10 @@ const maxTrianglesInput = document.querySelector(
 ) as HTMLInputElement;
 
 let allModels: CatalogItem[] = [];
-let viewMode: "grid" | "table" = "grid";
+const VIEW_KEY = "catalogView";
+
+let viewMode: "grid" | "table" =
+  localStorage.getItem(VIEW_KEY) === "table" ? "table" : "grid";
 
 function showCatalog(): void {
   resultsBox.classList.toggle("tiles", viewMode === "grid");
@@ -86,7 +90,17 @@ function showCatalog(): void {
 
   countText.textContent = `найдено: ${list.length}`;
   if (list.length === 0) {
-    resultsBox.replaceChildren(h("p", "muted", "Ничего не найдено"));
+    const clearButton = h("button", "btn", "Сбросить фильтры");
+    clearButton.setAttribute("type", "button");
+    clearButton.addEventListener("click", resetFilters);
+
+    resultsBox.replaceChildren(
+      h("div", "catalog-empty",
+        h("h2", "", "Ничего не найдено"),
+        h("p", "muted", "Измените условия поиска или сбросьте фильтры."),
+        clearButton
+      )
+    );
   } else if (viewMode === "table") {
     resultsBox.replaceChildren(createTable(list));
   } else {
@@ -118,12 +132,15 @@ async function start(): Promise<void> {
   maxTrianglesInput.addEventListener("input", showCatalog);
   gridButton.addEventListener("click", () => {
     viewMode = "grid";
+    localStorage.setItem(VIEW_KEY, viewMode);
     showCatalog();
   });
   tableButton.addEventListener("click", () => {
     viewMode = "table";
+    localStorage.setItem(VIEW_KEY, viewMode);
     showCatalog();
   });
+  viewSwitch.setAttribute("aria-busy", "false");
 }
 
 start();
