@@ -1,5 +1,5 @@
-.auth{
-    min-height: 100vh;
+.auth {
+    min-height: calc(100vh / var(--site-scale));
     display: grid;
     place-items: center;
     padding: 40px;

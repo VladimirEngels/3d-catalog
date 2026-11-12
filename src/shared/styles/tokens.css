@@ -16,4 +16,5 @@
     --gap: 14px;
     --font: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
     --mono: "IBM Plex Mono", Consolas, monospace;
+    --site-scale: 1.25;
 }

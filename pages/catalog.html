@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <title>Каталог — 3D-Каталог</title>
@@ -8,6 +9,7 @@
     <link rel="stylesheet" href="/src/shared/styles/layout.css" />
     <link rel="stylesheet" href="/src/modules/catalog/catalog.css" />
 </head>
+
 <body>
     <div class="layout">
 
@@ -19,7 +21,9 @@
             <p class="stub-note">Заглушка: модели заготовлены в коде, это не данные системы</p>
 
             <div class="toolbar">
-                <input id="search" type="search" placeholder="Поиск по названию" />
+                <input id="search" type="search" placeholder="Поиск по названию и описанию"
+                    aria-label="Поиск по названию и описанию" />
+
                 <select id="sort">
                     <option value="new">Сначала новые</option>
                     <option value="name">По названию</option>
@@ -31,7 +35,11 @@
         </main>
 
         <aside class="filters">
-            <h2>Фильтры</h2>
+
+            <div class="filters-head">
+                <h2>Фильтры</h2>
+                <button id="reset" type="button" class="btn">Сбросить</button>
+            </div>
 
             <div class="filter-group">
                 <label for="format">Формат</label>
@@ -46,13 +54,29 @@
             </div>
 
             <div class="filter-group">
+                <span>Треугольников</span>
+
+                <div class="range">
+                    <label for="min-triangles">
+                        От
+                        <input id="min-triangles" type="number" min="0" step="1" />
+                    </label>
+
+                    <label for="max-triangles">
+                        До
+                        <input id="max-triangles" type="number" min="0" step="1" />
+                    </label>
+                </div>
+            </div>
+
+            <div class="filter-group">
                 <label class="check">
                     <input id="skeleton" type="checkbox" />
                     Есть скелет
                 </label>
             </div>
 
-            <button id="reset" type="button" class="btn">Сбросить</button>
+
         </aside>
 
         <nav class="sidebar" aria-label="Основное меню"></nav>
@@ -61,4 +85,5 @@
 
     <script type="module" src="/src/modules/catalog/pages/catalog.ts"></script>
 </body>
+
 </html>

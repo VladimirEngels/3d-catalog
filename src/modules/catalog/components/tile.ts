@@ -2,14 +2,29 @@ import type { CatalogItem } from "../../../shared/api/types";
 import { h } from "../../../shared/ui/dom";
 
 export function createTile(item: CatalogItem): HTMLElement {
-  const formats = item.formats.join(" · ");
-  const triangles = item.version.triangles_count.toLocaleString("ru-RU");
+    const triangles = item.version.triangles_count.toLocaleString("ru-RU");
 
-  const tile = h("a", "tile",
-    h("div", "tile-preview", formats),
-    h("h3", "tile-title", item.model.name),
-    h("div", "tile-meta", `${triangles} треугольников`),
-  );
-  tile.setAttribute("href", `/pages/model.html?id=${item.model.id}`);
-  return tile;
+    const badges = item.formats.map((format) =>
+        h("span", "format-badge", format)
+    );
+
+    const title = h("h3", "tile-title", item.model.name);
+    title.setAttribute("title", item.model.name);
+
+    const preview = h("div", "tile-preview",
+        h("span", "tile-placeholder", "Нет превью")
+    );
+
+    const body = h("div", "tile-body",
+        title,
+        h("div", "tile-meta",
+            ...badges,
+            h("span", "", `${triangles} треуг.`)
+        )
+    );
+
+    const tile = h("a", "tile", preview, body);
+    tile.setAttribute("href", `/pages/model.html?id=${item.model.id}`);
+
+    return tile;
 }

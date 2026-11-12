@@ -10,6 +10,7 @@ body {
     font: 14px/1.45 var(--font);
     color: var(--text);
     background-color: var(--bg);
+    zoom: var(--site-scale);
 }
 
 input[type = "email"], input[type = "password"]{
@@ -60,7 +61,7 @@ a {
 }
 
 
-input[type="search"], select {
+input[type="search"], input[type="number"], select {
     font: inherit;
     height: 34px;
     padding: 0 10px;
