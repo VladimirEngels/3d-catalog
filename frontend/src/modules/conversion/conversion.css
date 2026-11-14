@@ -1,0 +1,26 @@
+.formats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.formats label { display: flex; align-items: center; gap: 8px; justify-content: center; height: 40px; cursor: pointer;
+  border: 1px solid var(--border); border-radius: var(--radius); font-weight: 600; }
+.formats label.on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+.formats input { accent-color: var(--accent); margin: 0; }
+
+
+.formats { margin-bottom: 12px; }
+.upscale-hint { display: block; margin: 0; font-weight: 400; }
+.dialog .check { margin-top: 4px; }
+.dialog .check input:disabled + span { color: var(--text-muted); }
+.dialog .demo-note { margin-top: 12px; margin-bottom: 0; }
+
+.job-note { font-size: 12px; margin-top: 4px; }
+.table .model-cell a { color: inherit; text-decoration: none; font-weight: 600; }
+.table .model-cell .preview img { position: absolute; }
+
+.running-bar { position: relative; }
+.running-bar div { width: 40%; animation: running-bar 1.4s ease-in-out infinite; }
+@keyframes running-bar {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(250%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .running-bar div { animation: none; width: 100%; opacity: .5; }
+}

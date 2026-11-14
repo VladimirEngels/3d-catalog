@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>Вход — 3D-Каталог</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="auth">
+
+  <form class="auth-card" id="login">
+    <div class="logo"><span>3D</span>-Каталог</div>
+    <div class="sub">Хранилище трёхмерных моделей команды</div>
+
+    <label class="field"><span>Электронная почта</span>
+      <input type="email" value="vladimir@studio-sever.ru"></label>
+
+    <label class="field">
+      <span>Пароль</span>
+      <input type="password" value="12345678" class="invalid">
+      <div class="err-text">Неверная почта или пароль</div>
+    </label>
+
+    <button class="btn primary" type="button">Войти</button>
+    <div class="auth-foot">Нет учётной записи? <a href="login.html?register">Зарегистрироваться</a></div>
+  </form>
+
+  <form class="auth-card" id="register" hidden>
+    <div class="logo"><span>3D</span>-Каталог</div>
+    <div class="sub">Регистрация</div>
+
+    <div class="note info">Вас пригласили в команду <b>Студия «Север»</b> с ролью «Участник». После регистрации вы сразу окажетесь в ней.</div>
+
+    <label class="field"><span>Имя</span>
+      <input type="text" placeholder="Как вас называть в команде"></label>
+
+    <label class="field"><span>Электронная почта</span>
+      <input type="email" value="anna@studio-sever.ru"></label>
+
+    <label class="field"><span>Пароль</span>
+      <input type="password"></label>
+    <div class="hint">Не короче 8 символов</div>
+
+    <label class="field"><span>Пароль ещё раз</span>
+      <input type="password"></label>
+
+    <button class="btn primary" type="button">Зарегистрироваться</button>
+    <div class="auth-foot">Уже есть учётная запись? <a href="login.html">Войти</a></div>
+  </form>
+</div>
+
+<script>
+  if (location.search.includes("register")) {
+    document.getElementById("login").hidden = true;
+    document.getElementById("register").hidden = false;
+  }
+</script>
+
+</body>
+</html>

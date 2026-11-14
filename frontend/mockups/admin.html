@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>Администрирование — 3D-Каталог</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V10 M10 20V4 M16 20v-7 M22 20H2"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0 M16 4a4 4 0 0 1 0 8 M22 21a7 7 0 0 0-4-6.3"/></symbol>
+  <symbol id="i-team" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
+</svg>
+
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="logo"><span>3D</span>-Каталог<span class="admin-mark">админ</span></div>
+    <nav class="nav">
+      <a href="#" class="active"><svg class="icon"><use href="#i-chart"/></svg>Статистика</a>
+      <a href="#"><svg class="icon"><use href="#i-users"/></svg>Пользователи<span class="count">84</span></a>
+      <a href="#"><svg class="icon"><use href="#i-team"/></svg>Команды<span class="count">12</span></a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="avatar" style="background:var(--text)">АС</div>
+      <div><div>Администратор</div><div class="tag">Выйти</div></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page-head">
+      <h1>Статистика системы</h1>
+      <div class="actions"><select style="height:38px"><option>Последние 14 дней</option><option>Последние 30 дней</option></select></div>
+    </div>
+
+    <div class="stats five">
+      <div class="stat"><div class="label">Пользователей</div><div class="value">84</div><div class="delta">+9 за период</div></div>
+      <div class="stat"><div class="label">Команд</div><div class="value">12</div><div class="delta">+1 за период</div></div>
+      <div class="stat"><div class="label">Занято на диске</div><div class="value">38,6 ГБ</div><div class="delta">из 100 ГБ</div></div>
+      <div class="stat"><div class="label">Переводов</div><div class="value">1 420</div><div class="delta">за период</div></div>
+      <div class="stat"><div class="label">Ошибок перевода</div><div class="value">97</div><div class="delta">7 % от переводов</div></div>
+    </div>
+
+    <div class="panel">
+      <h3 class="chart-title">Переводы по дням</h3>
+      <div class="chart-sub">Все команды вместе</div>
+      <div class="chart" id="byDay"></div>
+    </div>
+
+    <div class="panel">
+      <div class="filters-row" style="justify-content:space-between">
+        <h3 class="chart-title">Команды</h3>
+        <label class="search" style="height:34px;max-width:280px"><svg class="icon"><use href="#i-search"/></svg><input type="text" placeholder="Поиск команды или владельца"></label>
+      </div>
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>Команда</th><th>Владелец</th><th>Участников</th><th>Моделей</th><th>На диске</th><th>Состояние</th><th></th></tr></thead>
+          <tbody>
+            <tr><td>Студия «Север»</td><td>vladimir@studio-sever.ru</td><td>6</td><td>248</td><td>9,8 ГБ</td><td><span class="status done">Активна</span></td><td><button class="btn small">Заблокировать</button></td></tr>
+            <tr><td>Лаборатория ВР, ИТМО</td><td>lab@vr-lab.ru</td><td>14</td><td>412</td><td>12,1 ГБ</td><td><span class="status done">Активна</span></td><td><button class="btn small">Заблокировать</button></td></tr>
+            <tr><td>Pixel Forge</td><td>owner@pixelforge.io</td><td>4</td><td>96</td><td>3,4 ГБ</td><td><span class="status done">Активна</span></td><td><button class="btn small">Заблокировать</button></td></tr>
+            <tr><td>Тестовая команда 7</td><td>spam-user@mail.ru</td><td>1</td><td>1 120</td><td>7,9 ГБ</td><td><span class="status blocked">Заблокирована</span></td><td><button class="btn small">Разблокировать</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="charts.js"></script>
+<script>
+  columns(document.getElementById("byDay"),
+    ["16.10","17.10","18.10","19.10","20.10","21.10","22.10","23.10","24.10","25.10","26.10","27.10","28.10","29.10"],
+    [88, 102, 64, 41, 115, 131, 97, 120, 109, 52, 70, 143, 160, 128], "переводов");
+</script>
+
+</body>
+</html>

@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>Каталог — 3D-Каталог</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="m-cube" viewBox="0 0 100 100"><path d="M50 10 88 30v40L50 90 12 70V30z M12 30l38 20 38-20 M50 50v40"/></symbol>
+  <symbol id="m-sphere" viewBox="0 0 100 100"><circle cx="50" cy="50" r="38"/><ellipse cx="50" cy="50" rx="38" ry="13"/><ellipse cx="50" cy="50" rx="13" ry="38"/></symbol>
+  <symbol id="m-cyl" viewBox="0 0 100 100"><ellipse cx="50" cy="20" rx="30" ry="10"/><path d="M20 20v60 M80 20v60"/><path d="M20 80a30 10 0 0 0 60 0"/></symbol>
+  <symbol id="m-pyr" viewBox="0 0 100 100"><path d="M50 10 88 78 50 92 12 78z M50 10v82"/></symbol>
+  <symbol id="m-human" viewBox="0 0 100 100"><circle cx="50" cy="18" r="9"/><path d="M50 27v34 M50 61 36 90 M50 61l14 29 M28 40h44"/></symbol>
+  <symbol id="m-torus" viewBox="0 0 100 100"><ellipse cx="50" cy="50" rx="40" ry="22"/><ellipse cx="50" cy="48" rx="16" ry="7"/></symbol>
+
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path d="M12 3 21 8v8l-9 5-9-5V8z M3 8l9 5 9-5 M12 13v8"/></symbol>
+  <symbol id="i-jobs" viewBox="0 0 24 24"><path d="M4 4v6h6 M20 20v-6h-6 M5 15a8 8 0 0 0 14 2 M19 9A8 8 0 0 0 5 7"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0 M16 4a4 4 0 0 1 0 8 M22 21a7 7 0 0 0-4-6.3"/></symbol>
+  <symbol id="i-log" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z M9 11h7 M9 15h7"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V10 M10 20V4 M16 20v-7 M22 20H2"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+</svg>
+
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="logo"><span>3D</span>-Каталог</div>
+
+    <div class="team-switch">
+      <div class="avatar">СС</div>
+      <div>
+        <div class="name">Студия «Север»</div>
+        <div class="role">Владелец</div>
+      </div>
+      <svg class="icon chevron"><use href="#i-down"/></svg>
+    </div>
+
+    <nav class="nav">
+      <a href="#" class="active"><svg class="icon"><use href="#i-box"/></svg>Каталог<span class="count">248</span></a>
+      <a href="#"><svg class="icon"><use href="#i-folder"/></svg>Коллекции<span class="count">5</span></a>
+      <a href="#"><svg class="icon"><use href="#i-jobs"/></svg>Мои задания<span class="count">3</span></a>
+
+      <div class="nav-title">Управление командой</div>
+      <a href="#"><svg class="icon"><use href="#i-users"/></svg>Участники</a>
+      <a href="#"><svg class="icon"><use href="#i-log"/></svg>Журнал</a>
+      <a href="#"><svg class="icon"><use href="#i-chart"/></svg>Сводка</a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="avatar">ВП</div>
+      <div>
+        <a href="profile.html" style="color:inherit;text-decoration:none">Владимир П.</a>
+        <div class="tag">Выйти</div>
+      </div>
+    </div>
+  </aside>
+
+  <aside class="filters">
+    <div class="filters-head">
+      <h2>Фильтры</h2>
+      <button class="btn link">Сбросить</button>
+    </div>
+
+    <div class="filter-group">
+      <h3>Формат</h3>
+      <label class="check"><input type="checkbox" checked> GLB <span class="num">96</span></label>
+      <label class="check"><input type="checkbox"> glTF <span class="num">21</span></label>
+      <label class="check"><input type="checkbox" checked> OBJ <span class="num">74</span></label>
+      <label class="check"><input type="checkbox"> PLY <span class="num">12</span></label>
+      <label class="check"><input type="checkbox"> STL <span class="num">45</span></label>
+    </div>
+
+    <div class="filter-group">
+      <h3>Состав модели</h3>
+      <label class="check"><input type="checkbox" checked> Есть скелет <span class="num">38</span></label>
+      <label class="check"><input type="checkbox"> Есть текстуры <span class="num">151</span></label>
+    </div>
+
+    <div class="filter-group">
+      <h3>Треугольников</h3>
+      <div class="range">
+        <input type="number" placeholder="от">
+        <span>—</span>
+        <input type="number" placeholder="до" value="100000">
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <h3>Оценка качества</h3>
+      <select style="width:100%">
+        <option>Любая</option>
+        <option>80 % и выше</option>
+        <option>Требует проверки (ниже 80 %)</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <h3>Автор</h3>
+      <select style="width:100%"><option>Все участники</option></select>
+    </div>
+
+    <div class="filter-group">
+      <h3>Дата добавления</h3>
+      <select style="width:100%">
+        <option>За всё время</option>
+        <option>За неделю</option>
+        <option>За месяц</option>
+      </select>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page-head">
+      <h1>Каталог</h1>
+      <span class="sub">найдено 38 из 248</span>
+      <div class="actions">
+        <button class="btn primary"><svg class="icon"><use href="#i-plus"/></svg>Добавить модель</button>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <label class="search">
+        <svg class="icon"><use href="#i-search"/></svg>
+        <input type="text" placeholder="Поиск по названию, описанию и тегам">
+      </label>
+      <select style="height:38px">
+        <option>Сначала новые</option>
+        <option>По названию</option>
+        <option>По размеру</option>
+        <option>По оценке качества</option>
+      </select>
+      <div class="segmented">
+        <button class="on" title="Плитки"><svg class="icon"><use href="#i-grid"/></svg></button>
+        <button title="Таблица"><svg class="icon"><use href="#i-list"/></svg></button>
+      </div>
+    </div>
+
+    <div class="chips">
+      <span class="chip">GLB <span class="x">✕</span></span>
+      <span class="chip">OBJ <span class="x">✕</span></span>
+      <span class="chip">Есть скелет <span class="x">✕</span></span>
+      <span class="chip">до 100 000 треуг. <span class="x">✕</span></span>
+    </div>
+
+    <div class="grid">
+      <div class="tile selected">
+        <div class="preview"><span class="select-box"></span><span class="score ok">97 %</span><svg><use href="#m-human"/></svg></div>
+        <div class="tile-body">
+          <div class="tile-title">Рыцарь, базовый</div>
+          <div class="tile-meta"><span class="badge">GLB</span>24 310 треуг. · 4,2 МБ</div>
+          <div class="tile-tags"><span class="tag">#персонаж</span><span class="tag">#средневековье</span></div>
+        </div>
+      </div>
+
+      <div class="tile selected">
+        <div class="preview"><span class="select-box"></span><span class="score warn">72 %</span><svg><use href="#m-human"/></svg></div>
+        <div class="tile-body">
+          <div class="tile-title">Гоблин-лучник</div>
+          <div class="tile-meta"><span class="badge">GLB</span>18 904 треуг. · 2,9 МБ</div>
+          <div class="tile-tags"><span class="tag">#персонаж</span></div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <div class="preview"><span class="select-box"></span><span class="score ok">94 %</span><svg><use href="#m-cube"/></svg></div>
+        <div class="tile-body">
+          <div class="tile-title">Сундук деревянный</div>
+          <div class="tile-meta"><span class="badge">GLB</span>3 112 треуг. · 0,8 МБ</div>
+          <div class="tile-tags"><span class="tag">#реквизит</span></div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <div class="preview"><span class="select-box"></span><svg><use href="#m-cyl"/></svg></div>
+        <div class="tile-body">
+          <div class="tile-title">Бочка с обручами</div>
+          <div class="tile-meta"><span class="badge">OBJ</span>1 840 треуг. · 0,4 МБ</div>
+          <div class="tile-tags"><span class="tag">#реквизит</span></div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <div class="preview"><span class="select-box"></span><span class="score ok">99 %</span><svg><use href="#m-human"/></svg></div>
+        <div class="tile-body">
+          <div class="tile-title">Скелет-страж</div>
+          <div class="tile-meta"><span class="badge">GLB</span>31 006 треуг. · 5,6 МБ</div>
+          <div class="tile-tags"><span class="tag">#персонаж</span></div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <div class="preview"><span class="select-box"></span><span class="score err">41 %</span><svg><use href="#m-torus"/></svg></div>
+        <div class="tile-body">
+          <div class="tile-title">Колесо телеги</div>
+          <div class="tile-meta"><span class="badge">OBJ</span>6 220 треуг. · 1,1 МБ</div>
+          <div class="tile-tags"><span class="tag">#реквизит</span></div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <div class="preview"><span class="select-box"></span><svg><use href="#m-pyr"/></svg></div>
+        <div class="tile-body">
+          <div class="tile-title">Шатёр торговца</div>
+          <div class="tile-meta"><span class="badge">GLB</span>9 870 треуг. · 2,3 МБ</div>
+          <div class="tile-tags"><span class="tag">#окружение</span></div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <div class="preview"><span class="select-box"></span><span class="score ok">91 %</span><svg><use href="#m-sphere"/></svg></div>
+        <div class="tile-body">
+          <div class="tile-title">Магическая сфера</div>
+          <div class="tile-meta"><span class="badge">GLB</span>2 048 треуг. · 0,6 МБ</div>
+          <div class="tile-tags"><span class="tag">#эффекты</span></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="bulkbar">
+  <span>Выбрано: 2</span>
+  <button class="btn small primary">Перевести в формат…</button>
+  <button class="btn small">В коллекцию</button>
+  <button class="btn small">Скачать</button>
+  <button class="btn small">✕</button>
+</div>
+
+<div class="overlay" id="convert" hidden>
+  <div class="dialog">
+    <h2>Перевести 2 модели</h2>
+    <p>Рыцарь, базовый · Гоблин-лучник</p>
+
+    <div class="field"><span>В какой формат</span></div>
+    <div class="formats">
+      <label class="on"><input type="radio" name="f" checked>OBJ</label>
+      <label><input type="radio" name="f">GLB</label>
+      <label><input type="radio" name="f">STL</label>
+      <label><input type="radio" name="f">PLY</label>
+    </div>
+
+    <div class="note warn" style="margin-top:12px">OBJ не сохраняет скелет и анимации. У обеих моделей есть скелет — он будет потерян.</div>
+
+    <label class="check" style="margin-top:4px">
+      <input type="checkbox" checked>
+      <span>Улучшить текстуры нейросетью<span class="hint" style="display:block;margin:0">Разрешение вырастет в 4 раза, например с 256×256 до 1024×1024. Исходные текстуры сохранятся.</span></span>
+    </label>
+
+    <div class="form-actions">
+      <button class="btn">Отмена</button>
+      <button class="btn primary">Запустить перевод</button>
+    </div>
+  </div>
+</div>
+<div class="overlay" id="team" hidden>
+  <div class="dialog">
+    <h2>Новая команда</h2>
+    <p>У команды будет свой закрытый каталог. Вы станете её владельцем и сможете пригласить участников.</p>
+    <label class="field" style="margin-top:0"><span>Название команды</span>
+      <input type="text" placeholder="например: Студия «Юг»"></label>
+    <div class="form-actions">
+      <button class="btn">Отмена</button>
+      <button class="btn primary">Создать</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  if (location.search.includes("convert")) document.getElementById("convert").hidden = false;
+  if (location.search.includes("team")) document.getElementById("team").hidden = false;
+</script>
+
+</body>
+</html>

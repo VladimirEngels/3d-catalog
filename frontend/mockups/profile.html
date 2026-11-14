@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>Профиль — 3D-Каталог</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="m-cube" viewBox="0 0 100 100"><path d="M50 10 88 30v40L50 90 12 70V30z M12 30l38 20 38-20 M50 50v40"/></symbol>
+  <symbol id="m-sphere" viewBox="0 0 100 100"><circle cx="50" cy="50" r="38"/><ellipse cx="50" cy="50" rx="38" ry="13"/><ellipse cx="50" cy="50" rx="13" ry="38"/></symbol>
+  <symbol id="m-cyl" viewBox="0 0 100 100"><ellipse cx="50" cy="20" rx="30" ry="10"/><path d="M20 20v60 M80 20v60"/><path d="M20 80a30 10 0 0 0 60 0"/></symbol>
+  <symbol id="m-pyr" viewBox="0 0 100 100"><path d="M50 10 88 78 50 92 12 78z M50 10v82"/></symbol>
+  <symbol id="m-human" viewBox="0 0 100 100"><circle cx="50" cy="18" r="9"/><path d="M50 27v34 M50 61 36 90 M50 61l14 29 M28 40h44"/></symbol>
+  <symbol id="m-torus" viewBox="0 0 100 100"><ellipse cx="50" cy="50" rx="40" ry="22"/><ellipse cx="50" cy="48" rx="16" ry="7"/></symbol>
+
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path d="M12 3 21 8v8l-9 5-9-5V8z M3 8l9 5 9-5 M12 13v8"/></symbol>
+  <symbol id="i-jobs" viewBox="0 0 24 24"><path d="M4 4v6h6 M20 20v-6h-6 M5 15a8 8 0 0 0 14 2 M19 9A8 8 0 0 0 5 7"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0 M16 4a4 4 0 0 1 0 8 M22 21a7 7 0 0 0-4-6.3"/></symbol>
+  <symbol id="i-log" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z M9 11h7 M9 15h7"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V10 M10 20V4 M16 20v-7 M22 20H2"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+</svg>
+
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="logo"><span>3D</span>-Каталог</div>
+
+    <div class="team-switch">
+      <div class="avatar">СС</div>
+      <div>
+        <div class="name">Студия «Север»</div>
+        <div class="role">Владелец</div>
+      </div>
+      <svg class="icon chevron"><use href="#i-down"/></svg>
+    </div>
+
+    <nav class="nav">
+      <a href="catalog.html"><svg class="icon"><use href="#i-box"/></svg>Каталог<span class="count">248</span></a>
+      <a href="#"><svg class="icon"><use href="#i-folder"/></svg>Коллекции<span class="count">5</span></a>
+      <a href="#"><svg class="icon"><use href="#i-jobs"/></svg>Мои задания<span class="count">3</span></a>
+
+      <div class="nav-title">Управление командой</div>
+      <a href="#"><svg class="icon"><use href="#i-users"/></svg>Участники</a>
+      <a href="#"><svg class="icon"><use href="#i-log"/></svg>Журнал</a>
+      <a href="#"><svg class="icon"><use href="#i-chart"/></svg>Сводка</a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="avatar">ВП</div>
+      <div>
+        <a href="profile.html" style="color:inherit;text-decoration:none">Владимир П.</a>
+        <div class="tag">Выйти</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page-head"><h1>Профиль</h1></div>
+
+    <div class="cols-even" style="max-width:980px">
+      <div class="panel">
+        <h3 class="chart-title">Учётная запись</h3>
+        <label class="field" style="margin-top:10px"><span>Имя</span><input type="text" value="Владимир П."></label>
+        <label class="field" style="margin-top:10px"><span>Электронная почта</span><input type="email" value="vladimir@studio-sever.ru" readonly></label>
+
+        <h3 class="chart-title" style="margin-top:24px">Смена пароля</h3>
+        <label class="field" style="margin-top:10px"><span>Текущий пароль</span><input type="password"></label>
+        <label class="field" style="margin-top:10px"><span>Новый пароль</span><input type="password"></label>
+        <div class="hint">Не короче 8 символов</div>
+        <label class="field" style="margin-top:10px"><span>Новый пароль ещё раз</span><input type="password"></label>
+        <div class="form-actions"><button class="btn primary">Сохранить</button></div>
+      </div>
+
+      <div class="panel" style="margin-top:0">
+        <h3 class="chart-title">Мои команды</h3>
+        <ul class="issues" style="margin-top:10px">
+          <li><div style="flex:1">Студия «Север»<small>Владелец · 6 участников</small></div><span class="muted" style="font-size:12px">владелец не может выйти</span></li>
+          <li><div style="flex:1">Лаборатория ВР, ИТМО<small>Наблюдатель · 14 участников</small></div><button class="btn link">Выйти из команды</button></li>
+        </ul>
+        <div class="hint" style="margin-top:10px">Чтобы выйти из своей команды, сначала передайте роль владельца другому участнику.</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+</body>
+</html>

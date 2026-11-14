@@ -1,0 +1,42 @@
+.auth { min-height: calc(100vh / var(--site-scale, 1)); display: grid; place-items: center; padding: 40px; }
+.auth-card { width: 400px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; }
+.auth-card .logo { text-align: center; font-size: 22px; padding: 0 0 6px; }
+.auth-card .sub { text-align: center; color: var(--text-muted); margin-bottom: 18px; }
+.auth-card .btn.primary { width: 100%; justify-content: center; margin-top: 20px; }
+.auth-foot { text-align: center; margin-top: 16px; font-size: 13px; color: var(--text-muted); }
+.auth-foot a { color: var(--accent); text-decoration: none; }
+
+
+.profile-grid { max-width: 980px; }
+.profile-grid .field { margin-top: 10px; }
+
+.profile-section { margin-top: 24px; }
+.success-text { color: var(--ok); font-size: 13px; margin-top: 10px; }
+
+.danger-text { color: var(--err); }
+.invite-actions { display: flex; gap: 8px; flex-shrink: 0; align-items: center; }
+.invite-info { flex: 1; min-width: 0; }
+.full-button { width: 100%; justify-content: center; margin-top: 14px; }
+.panel-field { margin-top: 10px; }
+.empty-state { max-width: 520px; margin-top: 8px; }
+.empty-state .btn { margin-top: 12px; }
+.auth-card .note { margin-bottom: 4px; }
+.auth-actions { display: flex; gap: 8px; margin-top: 20px; }
+.auth-card .auth-actions .btn { flex: 1; width: auto; justify-content: center; margin-top: 0; }
+
+.settings-panel { max-width: 760px; }
+.setting { border: 0; padding: 0; margin: 0 0 22px; }
+.setting legend { font-weight: 600; padding: 0; }
+.choices { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.choice { display: flex; align-items: center; gap: 8px; padding: 8px 14px; cursor: pointer;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+.choice.on { border-color: var(--accent); background: var(--accent-soft); }
+.choice input { accent-color: var(--accent-fill); margin: 0; }
+.swatches { display: inline-flex; border: 1px solid var(--border); }
+.swatches i { width: 14px; height: 18px; }
+.color-pickers { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 12px; }
+.color-pickers[hidden] { display: none; }
+.color-field { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.color-field input { width: 40px; height: 28px; padding: 0; border: 1px solid var(--border);
+  border-radius: var(--radius); background: var(--surface); cursor: pointer; }
+.settings-footer { border-top: 1px solid var(--border); padding-top: 16px; }
