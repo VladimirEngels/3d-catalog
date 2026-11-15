@@ -5,7 +5,7 @@ import { log } from "../../logger";
 import { hashPassword, verifyPassword } from "./passwords";
 import * as repository from "./repository";
 import type { UserRow } from "./repository";
-import { isValidEmail, normalizeEmail, readText } from "./validation";
+import { isValidEmail, normalizeEmail, readText } from "../../validation";
 
 const SESSION_DAYS = 7;
 const MIN_PASSWORD_LENGTH = 8;

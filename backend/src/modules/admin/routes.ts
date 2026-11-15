@@ -4,7 +4,7 @@ import { AppError } from "../../errors";
 import { log } from "../../logger";
 import { requireAuth, requireSystemAdmin } from "../../middleware/auth";
 import { requireTeamRole } from "../../middleware/team-access";
-import { readId, readText } from "../accounts/validation";
+import { readId, readText } from "../../validation";
 import * as repository from "./repository";
 
 export const adminRouter = Router();

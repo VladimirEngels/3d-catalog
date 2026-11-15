@@ -7,7 +7,7 @@ import { log } from "../../logger";
 import { requireAuth } from "../../middleware/auth";
 import { requireTeamRole } from "../../middleware/team-access";
 import { absolutePath, removeFoldersOfFiles } from "../../storage";
-import { readId, readText } from "../accounts/validation";
+import { readId, readText } from "../../validation";
 import * as repository from "./model-repository";
 import type { FileRow, ModelRow, TextureRow } from "./model-repository";
 

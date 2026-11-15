@@ -29,6 +29,7 @@ flowchart LR
 | [backend/src/server.ts](../backend/src/server.ts) | Запуск сервера, проверка связи с БД и периодическая очистка сеансов |
 | [backend/src/app.ts](../backend/src/app.ts) | Подключение маршрутов, выдача интерфейса и обработка ошибок |
 | [backend/src/db.ts](../backend/src/db.ts) | Подключение к PostgreSQL и выполнение транзакций |
+| [backend/src/validation.ts](../backend/src/validation.ts) | Общие проверки идентификаторов, текста и почты для серверных модулей |
 | [backend/src/storage.ts](../backend/src/storage.ts) | Создание и удаление папок моделей, проверка путей в хранилище |
 | [backend/src/middleware](../backend/src/middleware) | Проверка входа и ролей, журналирование запросов |
 | [backend/schema.sql](../backend/schema.sql) | 18 таблиц, связи, ограничения и индексы |
@@ -44,7 +45,7 @@ flowchart LR
 |---|---|---|
 | `accounts` | Вход, регистрация, сеансы, команды, роли и приглашения | [routes.ts](../backend/src/modules/accounts/routes.ts), [team-routes.ts](../backend/src/modules/accounts/team-routes.ts) |
 | `upload` | Приём файлов, ZIP, разбор форматов, новые версии и сохранение превью | [routes.ts](../backend/src/modules/upload/routes.ts), [service.ts](../backend/src/modules/upload/service.ts) |
-| `catalog` | Список моделей, поиск, карточка, скачивание и коллекции | [routes.ts](../backend/src/modules/catalog/routes.ts), [model-routes.ts](../backend/src/modules/catalog/model-routes.ts), [collection-routes.ts](../backend/src/modules/catalog/collection-routes.ts) |
+| `catalog` | Список моделей, поиск, карточка, скачивание и коллекции | [catalog-routes.ts](../backend/src/modules/catalog/catalog-routes.ts), [model-routes.ts](../backend/src/modules/catalog/model-routes.ts), [collection-routes.ts](../backend/src/modules/catalog/collection-routes.ts) |
 | `conversion` | Создание, просмотр и отмена заданий в очереди | [routes.ts](../backend/src/modules/conversion/routes.ts) |
 | `quality` | Получение сохранённых отчётов качества | [routes.ts](../backend/src/modules/quality/routes.ts) |
 | `admin` | Журнал и сводка команды, системная статистика и блокировки | [routes.ts](../backend/src/modules/admin/routes.ts), [repository.ts](../backend/src/modules/admin/repository.ts) |

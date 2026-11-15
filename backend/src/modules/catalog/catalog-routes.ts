@@ -5,9 +5,9 @@ import { AppError } from "../../errors";
 import { requireAuth } from "../../middleware/auth";
 import { requireTeamRole } from "../../middleware/team-access";
 import { absolutePath } from "../../storage";
-import { readId, readText } from "../accounts/validation";
-import * as repository from "./repository";
-import type { CatalogFilters } from "./repository";
+import { readId, readText } from "../../validation";
+import * as repository from "./catalog-repository";
+import type { CatalogFilters } from "./catalog-repository";
 
 export const catalogRouter = Router();
 

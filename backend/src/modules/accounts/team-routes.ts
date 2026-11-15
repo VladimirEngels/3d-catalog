@@ -5,7 +5,7 @@ import { requireTeamRole } from "../../middleware/team-access";
 import * as repository from "./team-repository";
 import type { InvitationDetailsRow, InvitationRow } from "./team-repository";
 import * as service from "./team-service";
-import { readId } from "./validation";
+import { readId } from "../../validation";
 
 export const teamsRouter = Router();
 

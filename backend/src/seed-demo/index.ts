@@ -8,7 +8,7 @@ import yazl from "yazl";
 import { db } from "../db";
 import { hashPassword } from "../modules/accounts/passwords";
 import { createUser, type UserRow } from "../modules/accounts/repository";
-import { listTeamStoragePaths } from "../modules/catalog/repository";
+import { listTeamStoragePaths } from "../modules/catalog/catalog-repository";
 import { addModel } from "../modules/upload/service";
 import { absolutePath, removeFoldersOfFiles } from "../storage";
 import { addBox, addCylinder, addSphere, addTorus, createMesh, createPng, toGlb, toObj, toPly, toStl, type Mesh } from "./geometry";

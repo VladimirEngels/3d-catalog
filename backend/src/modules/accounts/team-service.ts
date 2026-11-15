@@ -5,11 +5,11 @@ import { AppError } from "../../errors";
 import { log } from "../../logger";
 import type { Role } from "../../middleware/team-access";
 import { removeFoldersOfFiles } from "../../storage";
-import { listTeamStoragePaths } from "../catalog/repository";
+import { listTeamStoragePaths } from "../catalog/catalog-repository";
 import type { UserRow } from "./repository";
 import * as repository from "./team-repository";
 import type { InvitationDetailsRow } from "./team-repository";
-import { isValidEmail, normalizeEmail, readText } from "./validation";
+import { isValidEmail, normalizeEmail, readText } from "../../validation";
 
 const INVITATION_DAYS = 7;
 const LAST_OWNER_TEXT = "В команде должен остаться хотя бы один владелец. Сначала назначьте владельцем другого участника";

@@ -2,7 +2,7 @@
 import type { NextFunction, Request, Response } from "express";
 import { db } from "../db";
 import { AppError } from "../errors";
-import { readId } from "../modules/accounts/validation";
+import { readId } from "../validation";
 
 export type Role = "viewer" | "member" | "owner";
 

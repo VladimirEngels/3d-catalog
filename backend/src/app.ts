@@ -10,7 +10,7 @@ import { accountsRouter } from "./modules/accounts/routes";
 import { adminRouter } from "./modules/admin/routes";
 import { collectionRouter } from "./modules/catalog/collection-routes";
 import { modelRouter } from "./modules/catalog/model-routes";
-import { catalogRouter } from "./modules/catalog/routes";
+import { catalogRouter } from "./modules/catalog/catalog-routes";
 import { conversionRouter } from "./modules/conversion/routes";
 import { qualityRouter } from "./modules/quality/routes";
 import { teamsRouter } from "./modules/accounts/team-routes";

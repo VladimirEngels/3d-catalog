@@ -6,7 +6,7 @@ import { tmpdir } from "node:os";
 import { AppError } from "../../errors";
 import { requireAuth } from "../../middleware/auth";
 import { requireTeamRole } from "../../middleware/team-access";
-import { readId } from "../accounts/validation";
+import { readId } from "../../validation";
 import * as service from "./service";
 
 export const uploadRouter = Router();

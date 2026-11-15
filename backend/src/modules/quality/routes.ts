@@ -4,7 +4,7 @@ import { db } from "../../db";
 import { AppError } from "../../errors";
 import { requireAuth } from "../../middleware/auth";
 import { requireTeamRole } from "../../middleware/team-access";
-import { readId } from "../accounts/validation";
+import { readId } from "../../validation";
 
 export const qualityRouter = Router();
 

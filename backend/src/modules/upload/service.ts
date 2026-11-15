@@ -11,7 +11,7 @@ import { log } from "../../logger";
 import type { Role } from "../../middleware/team-access";
 import { absolutePath, createVersionFolder, removeFolder } from "../../storage";
 import type { UserRow } from "../accounts/repository";
-import { readId, readText } from "../accounts/validation";
+import { readId, readText } from "../../validation";
 import { getExtension, prepareSource } from "./archive";
 import { readImageInfo } from "./image-size";
 import { parseModel } from "./parse-model";

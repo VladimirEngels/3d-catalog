@@ -5,7 +5,7 @@ import { AppError } from "../../errors";
 import { log } from "../../logger";
 import { requireAuth } from "../../middleware/auth";
 import { requireTeamRole } from "../../middleware/team-access";
-import { readId, readText } from "../accounts/validation";
+import { readId, readText } from "../../validation";
 
 export const conversionRouter = Router();
 

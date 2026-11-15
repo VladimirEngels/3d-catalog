@@ -1,5 +1,5 @@
 
-import { AppError } from "../../errors";
+import { AppError } from "./errors";
 
 export function readText(value: unknown): string {
   return typeof value === "string" ? value : "";
