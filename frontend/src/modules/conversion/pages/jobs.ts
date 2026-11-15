@@ -2,6 +2,7 @@ import { can, getSession } from "@shared/session";
 import { confirmAction, showMessage } from "@shared/ui/dialog";
 import { h } from "@shared/ui/dom";
 import { errorText } from "@shared/ui/form";
+import { formatMoment } from "@shared/ui/format";
 import { icon } from "@shared/ui/icons";
 import { mountLayout, pageHead } from "@shared/ui/layout";
 import { buildPager } from "@shared/ui/pager";
@@ -31,13 +32,6 @@ let tab = "";
 let page = 0;
 const tabBar = h("div", { class: "tabs" });
 const content = h("div", {});
-
-function formatMoment(value: string): string {
-  const date = new Date(value);
-  const day = date.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit" });
-  const time = date.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
-  return `${day}, ${time}`;
-}
 
 function buildStatus(job: Job): HTMLElement {
   const cell = h("td", {}, h("span", { class: `status ${job.status}` }, STATUS_NAMES[job.status]));

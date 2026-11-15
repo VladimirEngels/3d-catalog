@@ -1,6 +1,7 @@
 import { can, getSession } from "@shared/session";
 import { h } from "@shared/ui/dom";
 import { errorText } from "@shared/ui/form";
+import { formatMoment } from "@shared/ui/format";
 import { icon } from "@shared/ui/icons";
 import { mountLayout, pageHead } from "@shared/ui/layout";
 import { buildPager } from "@shared/ui/pager";
@@ -29,13 +30,6 @@ const ACTION_NAMES: Record<string, string> = {
 const filters: LogFilters = { user: "", action: "", days: "", query: "" };
 let page = 0;
 let authorsLoaded = false;
-
-function formatMoment(value: string): string {
-  const date = new Date(value);
-  const day = date.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit" });
-  const time = date.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
-  return `${day}, ${time}`;
-}
 
 function buildFilterSelect(label: string, options: [string, string][], onChange: (value: string) => void): HTMLSelectElement {
   const select = h("select", { "aria-label": label }) as HTMLSelectElement;

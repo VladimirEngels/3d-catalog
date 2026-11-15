@@ -2,14 +2,6 @@
 .qc .panel h3 { margin-top: 0; }
 .big-score { font-size: 44px; font-weight: 700; line-height: 1; }
 .big-score.warn { color: var(--warn); }
-.compare { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
-.compare figure { margin: 0; }
-.compare .pic { aspect-ratio: 1; background: var(--stage); border-radius: var(--radius); display: grid; place-items: center; }
-.compare svg { width: 60%; height: 60%; stroke: var(--stage-line); fill: none; stroke-width: 1.6; }
-.compare figcaption { font-size: 12px; color: var(--text-muted); text-align: center; margin-top: 4px; }
-
-.tex { width: 100%; aspect-ratio: 1; border-radius: var(--radius); display: block; }
-
 .qc-toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; }
 .qc .note { margin-top: 10px; }
 .big-score.ok { color: var(--ok); }

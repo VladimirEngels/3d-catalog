@@ -85,13 +85,9 @@
 
 a.tile { display: block; color: inherit; text-decoration: none; }
 .filters-holder { display: flex; flex-shrink: 0; }
-.empty-box b { display: block; color: var(--text); font-size: 15px; margin-bottom: 4px; }
 .empty-box .btn { margin-top: 14px; }
 .load-more { display: flex; justify-content: center; margin-top: var(--gap); }
 .filter-group select { width: 100%; }
-.table a { color: inherit; text-decoration: none; font-weight: 600; }
-.table a:hover { color: var(--accent); }
-.is-loading { opacity: .55; }
 
 .viewer { overflow: hidden; }
 .viewer canvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: grab; display: block; }
@@ -104,10 +100,8 @@ a.tile { display: block; color: inherit; text-decoration: none; }
 .model-actions { display: flex; gap: 8px; margin-top: 8px; }
 .model-actions .btn { flex: 1; justify-content: center; }
 .danger-button { color: var(--err); }
-.panel-empty { color: var(--text-muted); font-size: 13px; }
 .tabs a { cursor: pointer; }
 .tab-actions { display: flex; justify-content: flex-end; margin-bottom: 12px; }
-.table .file-name { overflow-wrap: anywhere; }
 
 .texture-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: var(--gap); }
 .texture-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
