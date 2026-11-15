@@ -1,5 +1,9 @@
 
-import { ApiError } from "./errors";
+export class ApiError extends Error {
+  constructor(public status: number, message: string) {
+    super(message);
+  }
+}
 
 export async function request<T>(method: string, url: string, body?: object): Promise<T> {
   const options: RequestInit = { method };

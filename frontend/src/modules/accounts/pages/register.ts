@@ -1,6 +1,6 @@
 import "@shared/styles/index.css";
 import "../accounts.css";
-import { ApiError } from "@shared/api/errors";
+import { ApiError } from "@shared/api/http";
 import { h } from "@shared/ui/dom";
 import { createInput, field } from "@shared/ui/form";
 import { previewInvitation, register } from "../api";

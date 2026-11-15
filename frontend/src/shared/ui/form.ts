@@ -1,5 +1,5 @@
 
-import { ApiError } from "@shared/api/errors";
+import { ApiError } from "@shared/api/http";
 import { h } from "./dom";
 
 export function createInput(attrs: Record<string, string>): HTMLInputElement {

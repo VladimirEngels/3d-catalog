@@ -1,5 +1,5 @@
 
-import { ApiError } from "@shared/api/errors";
+import { ApiError } from "@shared/api/http";
 
 export interface DuplicateModel {
   id: number;

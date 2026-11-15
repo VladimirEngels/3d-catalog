@@ -1,5 +1,5 @@
 import { getSession, roleName } from "@shared/session";
-import { ApiError } from "@shared/api/errors";
+import { ApiError } from "@shared/api/http";
 import { confirmAction, showMessage } from "@shared/ui/dialog";
 import { h } from "@shared/ui/dom";
 import { createInput, errorText, field } from "@shared/ui/form";
