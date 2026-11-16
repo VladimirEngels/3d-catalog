@@ -36,8 +36,8 @@ export async function createTeam(client: PoolClient, name: string, ownerId: numb
   return teamId;
 }
 
-export async function deleteTeam(teamId: number): Promise<void> {
-  await db.query("DELETE FROM teams WHERE id = $1", [teamId]);
+export async function deleteTeam(teamId: number, client: PoolClient | typeof db = db): Promise<void> {
+  await client.query("DELETE FROM teams WHERE id = $1", [teamId]);
 }
 
 export async function getTeamName(teamId: number): Promise<string | undefined> {

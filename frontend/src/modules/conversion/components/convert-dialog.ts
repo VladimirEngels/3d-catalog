@@ -1,4 +1,3 @@
-
 import { dialogButton, openDialog, showMessage } from "@shared/ui/dialog";
 import { h } from "@shared/ui/dom";
 import { errorText } from "@shared/ui/form";
@@ -13,25 +12,26 @@ export interface ModelToConvert {
   hasTextures: boolean;
 }
 
-const FORMATS: TargetFormat[] = ["OBJ", "GLB", "STL", "PLY"];
-const FORMATS_WITH_TEXTURES: TargetFormat[] = ["OBJ", "GLB"];
+const FORMATS: TargetFormat[] = ["OBJ", "GLB"];
 
 function describeLosses(models: ModelToConvert[], target: TargetFormat): string[] {
   const withSkeleton = models.filter((model) => model.hasSkeleton).length;
-  const withTextures = models.filter((model) => model.hasTextures).length;
   const losses: string[] = [];
+  if (models.some((model) => !FORMATS.includes(model.format as TargetFormat))) {
+    losses.push(
+      "Модели других форматов будут пропущены: конвертация доступна только для OBJ и GLB.",
+    );
+  }
 
   if (target !== "GLB" && withSkeleton > 0) {
     losses.push(`${target} не сохраняет скелет и анимации. Со скелетом моделей: ${withSkeleton}.`);
-  }
-  if ((target === "STL" || target === "PLY") && withTextures > 0) {
-    losses.push(`${target} не сохраняет текстуры и материалы. С текстурами моделей: ${withTextures}.`);
   }
   return losses;
 }
 
 export function openConvertDialog(teamId: number, models: ModelToConvert[]): void {
-  let target: TargetFormat = FORMATS.find((format) => models.some((model) => model.format !== format)) ?? "OBJ";
+  let target: TargetFormat =
+    FORMATS.find((format) => models.some((model) => model.format !== format)) ?? "OBJ";
 
   const lossBox = h("div", {});
   const errorBox = h("div", { class: "err-text", role: "alert" });
@@ -47,19 +47,18 @@ export function openConvertDialog(teamId: number, models: ModelToConvert[]): voi
     const losses = describeLosses(models, target);
     lossBox.replaceChildren(...losses.map((text) => h("div", { class: "note warn" }, text)));
 
-    const canUpscale = FORMATS_WITH_TEXTURES.includes(target) && models.some((model) => model.hasTextures);
-    upscaleInput.disabled = !canUpscale;
-    if (!canUpscale) {
-      upscaleInput.checked = false;
-    }
-    upscaleHint.textContent = canUpscale
-      ? "Разрешение вырастет в 4 раза, например с 256×256 до 1024×1024. Исходные текстуры сохранятся."
-      : "Доступно для моделей с текстурами при смене формата на OBJ или GLB.";
+    upscaleInput.disabled = true;
+    upscaleInput.checked = false;
+    upscaleHint.textContent = "Улучшение текстур пока недоступно.";
   }
 
   const formats = h("div", { class: "formats" });
   for (const format of FORMATS) {
-    const input = h("input", { type: "radio", name: "target-format", value: format }) as HTMLInputElement;
+    const input = h("input", {
+      type: "radio",
+      name: "target-format",
+      value: format,
+    }) as HTMLInputElement;
     input.checked = format === target;
     input.addEventListener("change", () => {
       target = format;
@@ -74,7 +73,12 @@ export function openConvertDialog(teamId: number, models: ModelToConvert[]): voi
   async function start(): Promise<void> {
     errorBox.textContent = "";
     try {
-      const result = await createConversions(teamId, models.map((model) => model.id), target, upscaleInput.checked);
+      const result = await createConversions(
+        teamId,
+        models.map((model) => model.id),
+        target,
+        upscaleInput.checked,
+      );
       close();
       if (result.created.length > 0 && result.skipped.length === 0) {
         location.href = "/pages/jobs.html";
@@ -87,16 +91,30 @@ export function openConvertDialog(teamId: number, models: ModelToConvert[]): voi
     }
   }
 
-  const names = models.slice(0, 3).map((model) => model.name).join(" · ");
+  const names = models
+    .slice(0, 3)
+    .map((model) => model.name)
+    .join(" · ");
   const more = models.length > 3 ? ` и ещё ${models.length - 3}` : "";
 
-  const content = h("div", {},
+  const content = h(
+    "div",
+    {},
     h("p", {}, names + more),
     h("div", { class: "field" }, h("span", {}, "В какой формат")),
     formats,
     lossBox,
-    h("label", { class: "check" }, upscaleInput, h("span", {}, "Улучшить текстуры нейросетью", upscaleHint)),
-    h("div", { class: "demo-note" }, "Конвертер пока не подключён: выбранные модели будут добавлены в очередь, но обработка не начнётся."),
+    h(
+      "label",
+      { class: "check" },
+      upscaleInput,
+      h("span", {}, "Улучшить текстуры нейросетью", upscaleHint),
+    ),
+    h(
+      "div",
+      { class: "demo-note" },
+      "Преобразование выполняется в фоне. Исходная модель сохраняется; результат появится в разделе «Конвертация».",
+    ),
     errorBox,
   );
 

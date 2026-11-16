@@ -38,11 +38,14 @@ function buildStatus(job: Job): HTMLElement {
   if (job.status === "running") {
     cell.append(h("div", { class: "progress running-bar" }, h("div")));
   } else if (job.status === "queued") {
-    const text = job.jobsBefore === 0 ? "Следующая в очереди" : `Впереди в очереди: ${job.jobsBefore}`;
+    const text =
+      job.jobsBefore === 0 ? "Следующая в очереди" : `Впереди в очереди: ${job.jobsBefore}`;
     cell.append(h("div", { class: "muted job-note" }, text));
   } else if (job.status === "failed" && job.error) {
     cell.append(h("div", { class: "err-text" }, job.error));
   }
+  for (const warning of job.warnings ?? [])
+    cell.append(h("div", { class: "muted job-note" }, warning));
   return cell;
 }
 
@@ -56,7 +59,9 @@ function buildQuality(job: Job): HTMLElement {
   } else if (job.quality >= BAD_SCORE) {
     level = "warn";
   }
-  const text = job.needsReview ? `${Math.round(job.quality)} % · проверить` : `${Math.round(job.quality)} %`;
+  const text = job.needsReview
+    ? `${Math.round(job.quality)} % · проверить`
+    : `${Math.round(job.quality)} %`;
   return h("td", {}, h("span", { class: `score ${level}` }, text));
 }
 
@@ -66,7 +71,11 @@ function buildAction(job: Job): HTMLElement | null {
   if (job.status === "queued") {
     const button = h("button", { class: "btn small", type: "button" }, "Отменить");
     button.addEventListener("click", async () => {
-      const agreed = await confirmAction("Отменить обработку?", `Модель «${job.modelName}» останется в исходном формате.`, "Отменить");
+      const agreed = await confirmAction(
+        "Отменить обработку?",
+        `Модель «${job.modelName}» останется в исходном формате.`,
+        "Отменить",
+      );
       if (!agreed) {
         return;
       }
@@ -86,24 +95,43 @@ function buildAction(job: Job): HTMLElement | null {
     return h("a", { class: "btn small", href: `${modelPage}#quality` }, "Отчёт");
   }
   if (job.status === "done" && job.resultFileId !== null) {
-    return h("a", { class: "btn small", href: `/api/teams/${teamId}/models/${job.modelId}/files/${job.resultFileId}/download` }, "Скачать");
+    return h(
+      "a",
+      {
+        class: "btn small",
+        href: `/api/teams/${teamId}/models/${job.modelId}/files/${job.resultFileId}/download`,
+      },
+      "Скачать",
+    );
   }
   return null;
 }
 
 function buildRow(job: Job): HTMLElement {
   const preview = job.hasPreview
-    ? h("img", { src: `/api/teams/${teamId}/models/${job.modelId}/preview`, alt: "", loading: "lazy" })
+    ? h("img", {
+        src: `/api/teams/${teamId}/models/${job.modelId}/preview`,
+        alt: "",
+        loading: "lazy",
+      })
     : icon("box");
 
-  return h("tr", {},
-    h("td", {},
-      h("div", { class: "model-cell" },
+  return h(
+    "tr",
+    {},
+    h(
+      "td",
+      {},
+      h(
+        "div",
+        { class: "model-cell" },
         h("div", { class: "preview" }, preview),
         h("a", { href: `/pages/model.html?id=${job.modelId}` }, job.modelName),
       ),
     ),
-    h("td", {},
+    h(
+      "td",
+      {},
       `${job.sourceFormat} → ${job.targetFormat}`,
       job.upscaleTextures ? h("div", { class: "muted job-note" }, "+ улучшение текстур") : null,
     ),
@@ -121,23 +149,33 @@ function renderTabs(data: JobsResponse): void {
     ["done", "Готово", data.counts.done],
     ["failed", "Ошибки", data.counts.failed],
   ];
-  tabBar.replaceChildren(...tabs.map(([id, label, count]) => {
-    const link = h("a", { href: "#", class: id === tab ? "active" : "tab" }, label, h("span", { class: "count" }, String(count)));
-    link.addEventListener("click", (event) => {
-      event.preventDefault();
-      tab = id;
-      page = 0;
-      load();
-    });
-    return link;
-  }));
+  tabBar.replaceChildren(
+    ...tabs.map(([id, label, count]) => {
+      const link = h(
+        "a",
+        { href: "#", class: id === tab ? "active" : "tab" },
+        label,
+        h("span", { class: "count" }, String(count)),
+      );
+      link.addEventListener("click", (event) => {
+        event.preventDefault();
+        tab = id;
+        page = 0;
+        load();
+      });
+      return link;
+    }),
+  );
 }
 
 function render(data: JobsResponse): void {
   renderTabs(data);
 
   if (data.items.length === 0) {
-    const text = data.counts.all === 0 ? "Выберите модели в каталоге и нажмите «Сменить формат»." : "По выбранному фильтру ничего не найдено.";
+    const text =
+      data.counts.all === 0
+        ? "Выберите модели в каталоге и нажмите «Сменить формат»."
+        : "По выбранному фильтру ничего не найдено.";
     const title = data.counts.all === 0 ? "Здесь пока пусто" : "Пусто";
     content.replaceChildren(h("div", { class: "empty-box" }, h("b", {}, title), text));
     return;
@@ -146,8 +184,12 @@ function render(data: JobsResponse): void {
   const head = ["Модель", "Форматы", "Состояние", "Оценка качества", "Создано", ""];
   const total = tab === "" ? data.counts.all : data.counts[tab as "active" | "done" | "failed"];
   content.replaceChildren(
-    h("div", { class: "table-wrap" },
-      h("table", { class: "table" },
+    h(
+      "div",
+      { class: "table-wrap" },
+      h(
+        "table",
+        { class: "table" },
         h("thead", {}, h("tr", {}, ...head.map((title) => h("th", {}, title)))),
         h("tbody", {}, ...data.items.map(buildRow)),
       ),
@@ -161,16 +203,35 @@ function render(data: JobsResponse): void {
 
 async function load(): Promise<void> {
   try {
-    render(await getJobs(teamId, tab, page));
+    const currentTab = tab;
+    const currentPage = page;
+    const data = await getJobs(teamId, currentTab, currentPage);
+    if (currentTab === tab && currentPage === page) render(data);
   } catch (error) {
-    content.replaceChildren(h("div", { class: "empty-box" }, h("b", {}, "Не удалось загрузить список"), errorText(error)));
+    content.replaceChildren(
+      h("div", { class: "empty-box" }, h("b", {}, "Не удалось загрузить список"), errorText(error)),
+    );
   }
 }
 
 main.append(
   pageHead("Конвертация", "смена формата моделей и результаты обработки"),
-  h("div", { class: "demo-note" }, "Конвертер пока не подключён: выбранные модели остаются в очереди. Готовые результаты в демонстрационной команде заготовлены заранее."),
+  h(
+    "div",
+    { class: "demo-note" },
+    "Модели обрабатываются в фоне. Оценка качества и улучшение текстур пока недоступны; демонстрационные оценки подготовлены заранее.",
+  ),
   tabBar,
   content,
 );
 await load();
+let refreshing = false;
+setInterval(async () => {
+  if (document.hidden || refreshing) return;
+  refreshing = true;
+  try {
+    await load();
+  } finally {
+    refreshing = false;
+  }
+}, 2000);

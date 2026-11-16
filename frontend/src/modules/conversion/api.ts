@@ -1,7 +1,6 @@
-
 import { request } from "@shared/api/http";
 
-export type TargetFormat = "OBJ" | "GLB" | "STL" | "PLY";
+export type TargetFormat = "OBJ" | "GLB";
 export type JobStatus = "queued" | "running" | "done" | "failed";
 
 export interface ConversionResult {
@@ -25,6 +24,7 @@ export interface Job {
   needsReview: boolean | null;
   resultFileId: number | null;
   jobsBefore: number;
+  warnings: string[];
 }
 
 export interface JobsResponse {
@@ -34,8 +34,17 @@ export interface JobsResponse {
   counts: { all: number; active: number; done: number; failed: number };
 }
 
-export function createConversions(teamId: number, modelIds: number[], targetFormat: TargetFormat, upscaleTextures: boolean): Promise<ConversionResult> {
-  return request("POST", `/teams/${teamId}/conversions`, { modelIds, targetFormat, upscaleTextures });
+export function createConversions(
+  teamId: number,
+  modelIds: number[],
+  targetFormat: TargetFormat,
+  upscaleTextures: boolean,
+): Promise<ConversionResult> {
+  return request("POST", `/teams/${teamId}/conversions`, {
+    modelIds,
+    targetFormat,
+    upscaleTextures,
+  });
 }
 
 export function getJobs(teamId: number, status: string, page: number): Promise<JobsResponse> {

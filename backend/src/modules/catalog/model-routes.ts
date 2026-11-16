@@ -5,6 +5,8 @@ import type { Readable } from "node:stream";
 import { posix } from "node:path";
 import yazl from "yazl";
 import { AppError } from "../../errors";
+import { transaction } from "../../db";
+import { lockTeam } from "../accounts/team-repository";
 import { log } from "../../logger";
 import { requireAuth } from "../../middleware/auth";
 import { requireTeamRole } from "../../middleware/team-access";
@@ -149,9 +151,12 @@ modelRouter.patch("/teams/:teamId/models/:modelId", requireAuth, requireTeamRole
 
 modelRouter.delete("/teams/:teamId/models/:modelId", requireAuth, requireTeamRole("owner"), async (req, res) => {
   const model = await requireModel(res, req.params.modelId);
-  const paths = await repository.listModelStoragePaths(model.id);
-
-  await repository.deleteModel(model.id);
+  const paths = await transaction(async client => {
+    await lockTeam(client, res.locals.team.id);
+    const paths = await repository.listModelStoragePaths(model.id, client);
+    await repository.deleteModel(model.id, client);
+    return paths;
+  });
   await removeFoldersOfFiles(paths);
 
   await repository.logModelAction(res.locals.user.id, res.locals.team.id, "delete", `Удалена модель «${model.name}»`);

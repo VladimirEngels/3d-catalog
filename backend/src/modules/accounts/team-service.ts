@@ -36,8 +36,12 @@ export async function createTeam(user: UserRow, nameValue: unknown): Promise<num
 }
 
 export async function deleteTeam(user: UserRow, teamId: number): Promise<void> {
-  const storagePaths = await listTeamStoragePaths(teamId);
-  await repository.deleteTeam(teamId);
+  const storagePaths = await transaction(async client => {
+    await repository.lockTeam(client, teamId);
+    const paths = await listTeamStoragePaths(teamId, client);
+    await repository.deleteTeam(teamId, client);
+    return paths;
+  });
   await removeFoldersOfFiles(storagePaths);
   log("INFO", `Команда удалена: ${teamId}, удалил ${user.email}`);
 }

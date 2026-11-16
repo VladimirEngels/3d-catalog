@@ -1,5 +1,6 @@
 
 import { db } from "../../db";
+import type { PoolClient } from "pg";
 
 export interface CatalogFilters {
   query: string;
@@ -236,8 +237,8 @@ export async function findTeamTexture(teamId: number, modelId: number, textureId
   return result.rows[0]?.storage_path;
 }
 
-export async function listTeamStoragePaths(teamId: number): Promise<string[]> {
-  const result = await db.query<{ path: string }>(
+export async function listTeamStoragePaths(teamId: number, client: PoolClient | typeof db = db): Promise<string[]> {
+  const result = await client.query<{ path: string }>(
     `SELECT f.storage_path AS path
      FROM files f
      LEFT JOIN conversion_jobs j ON j.id = f.job_id

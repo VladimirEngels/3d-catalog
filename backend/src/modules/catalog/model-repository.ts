@@ -1,5 +1,6 @@
 
 import { db } from "../../db";
+import type { PoolClient } from "pg";
 
 export interface ModelRow {
   id: number;
@@ -155,8 +156,8 @@ export async function replaceManualTags(teamId: number, modelId: number, tags: s
   }
 }
 
-export async function listModelStoragePaths(modelId: number): Promise<string[]> {
-  const result = await db.query<{ storage_path: string }>(
+export async function listModelStoragePaths(modelId: number, client: PoolClient | typeof db = db): Promise<string[]> {
+  const result = await client.query<{ storage_path: string }>(
     `SELECT f.storage_path
      FROM files f
      LEFT JOIN conversion_jobs j ON j.id = f.job_id
@@ -167,8 +168,8 @@ export async function listModelStoragePaths(modelId: number): Promise<string[]> 
   return result.rows.map((row) => row.storage_path);
 }
 
-export async function deleteModel(modelId: number): Promise<void> {
-  await db.query("DELETE FROM models WHERE id = $1", [modelId]);
+export async function deleteModel(modelId: number, client: PoolClient | typeof db = db): Promise<void> {
+  await client.query("DELETE FROM models WHERE id = $1", [modelId]);
 }
 
 export async function logModelAction(userId: number, teamId: number, action: "update" | "delete" | "download", details: string): Promise<void> {

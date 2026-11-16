@@ -1,0 +1,6 @@
+{
+  "name": "3d-catalog-converter",
+  "private": true,
+  "type": "module",
+  "exports": "./index.js"
+}
