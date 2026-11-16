@@ -147,7 +147,8 @@ export async function replaceManualTags(teamId: number, modelId: number, tags: s
       [teamId, name],
     );
     await db.query(
-      "INSERT INTO model_tags (model_id, tag_id, is_auto) VALUES ($1, $2, false) ON CONFLICT (model_id, tag_id) DO NOTHING",
+      `INSERT INTO model_tags (model_id, tag_id, is_auto) VALUES ($1, $2, false)
+       ON CONFLICT (model_id, tag_id) DO UPDATE SET is_auto = false`,
       [modelId, tag.rows[0].id],
     );
   }

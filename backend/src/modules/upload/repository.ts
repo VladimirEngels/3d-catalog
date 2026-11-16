@@ -108,7 +108,8 @@ export async function addTag(client: PoolClient, teamId: number, modelId: number
     [teamId, name],
   );
   await client.query(
-    "INSERT INTO model_tags (model_id, tag_id, is_auto) VALUES ($1, $2, $3) ON CONFLICT (model_id, tag_id) DO NOTHING",
+    `INSERT INTO model_tags (model_id, tag_id, is_auto) VALUES ($1, $2, $3)
+     ON CONFLICT (model_id, tag_id) DO UPDATE SET is_auto = model_tags.is_auto AND EXCLUDED.is_auto`,
     [modelId, tag.rows[0].id, isAuto],
   );
 }

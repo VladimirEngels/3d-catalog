@@ -92,9 +92,9 @@ export async function addMember(client: PoolClient, teamId: number, userId: numb
 
 
 export async function createInvitation(
-  teamId: number, invitedBy: number, email: string | null, token: string, role: Role, expiresAt: Date,
+  client: PoolClient, teamId: number, invitedBy: number, email: string | null, token: string, role: Role, expiresAt: Date,
 ): Promise<InvitationRow> {
-  const result = await db.query<InvitationRow>(
+  const result = await client.query<InvitationRow>(
     `INSERT INTO invitations (team_id, invited_by, email, token, role, expires_at)
      VALUES ($1, $2, $3, $4, $5, $6)
      RETURNING *`,
@@ -103,8 +103,8 @@ export async function createInvitation(
   return result.rows[0];
 }
 
-export async function isEmailMember(teamId: number, email: string): Promise<boolean> {
-  const result = await db.query(
+export async function isEmailMember(client: PoolClient, teamId: number, email: string): Promise<boolean> {
+  const result = await client.query(
     `SELECT 1 FROM team_members m JOIN users u ON u.id = m.user_id
      WHERE m.team_id = $1 AND u.email = $2`,
     [teamId, email],
@@ -112,8 +112,8 @@ export async function isEmailMember(teamId: number, email: string): Promise<bool
   return result.rows.length > 0;
 }
 
-export async function hasPendingInvitation(teamId: number, email: string): Promise<boolean> {
-  const result = await db.query(
+export async function hasPendingInvitation(client: PoolClient, teamId: number, email: string): Promise<boolean> {
+  const result = await client.query(
     `SELECT 1 FROM invitations
      WHERE team_id = $1 AND email = $2 AND status = 'pending' AND expires_at > now()`,
     [teamId, email],

@@ -6,6 +6,7 @@ import { log } from "../../logger";
 import { requireAuth } from "../../middleware/auth";
 import { requireTeamRole } from "../../middleware/team-access";
 import { readId, readText } from "../../validation";
+import { lockTeam } from "../accounts/team-repository";
 
 export const conversionRouter = Router();
 
@@ -47,6 +48,7 @@ conversionRouter.post("/teams/:teamId/conversions", requireAuth, requireTeamRole
   const { user, team } = res.locals;
 
   const result = await transaction(async (client) => {
+    await lockTeam(client, team.id);
     const models = await client.query<ModelToConvert>(
       `SELECT m.id, m.name, v.id AS version_id,
               (SELECT f.format FROM files f WHERE f.version_id = v.id ORDER BY f.id LIMIT 1) AS format,

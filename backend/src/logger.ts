@@ -2,7 +2,7 @@
 import { appendFileSync, mkdirSync } from "node:fs";
 import { resolve } from "node:path";
 
-const LOG_DIR = resolve(import.meta.dirname, "../logs");
+const LOG_DIR = process.env.LOG_DIR ?? resolve(import.meta.dirname, "../logs");
 
 function twoDigits(value: number): string {
   return String(value).padStart(2, "0");

@@ -24,7 +24,11 @@ function parseBinary(data: Buffer): ParsedModel {
     const start = HEADER_SIZE + i * TRIANGLE_SIZE + 12;
     for (let corner = 0; corner < 3; corner++) {
       const position = start + corner * 12;
-      box.add(data.readFloatLE(position), data.readFloatLE(position + 4), data.readFloatLE(position + 8));
+      const [x, y, z] = [data.readFloatLE(position), data.readFloatLE(position + 4), data.readFloatLE(position + 8)];
+      if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(z)) {
+        throw new ModelFileError("В файле STL неверные координаты вершины");
+      }
+      box.add(x, y, z);
       uniqueVertices.add(data.toString("latin1", position, position + 12));
     }
   }

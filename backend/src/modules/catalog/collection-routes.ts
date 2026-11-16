@@ -1,11 +1,13 @@
 
 import { Router, type Response } from "express";
-import { db } from "../../db";
+import type { PoolClient } from "pg";
+import { db, transaction } from "../../db";
 import { AppError } from "../../errors";
 import { log } from "../../logger";
 import { requireAuth } from "../../middleware/auth";
 import { requireTeamRole } from "../../middleware/team-access";
 import { readId, readText } from "../../validation";
+import { lockTeam } from "../accounts/team-repository";
 
 export const collectionRouter = Router();
 
@@ -19,12 +21,12 @@ interface CollectionRow {
   preview_models: number[];
 }
 
-async function readUniqueName(teamId: number, value: unknown, ownId: number | null): Promise<string> {
+async function readUniqueName(client: PoolClient, teamId: number, value: unknown, ownId: number | null): Promise<string> {
   const name = readText(value).trim();
   if (name === "" || name.length > MAX_NAME_LENGTH) {
     throw new AppError(400, `Укажите название коллекции длиной до ${MAX_NAME_LENGTH} символов`);
   }
-  const same = await db.query(
+  const same = await client.query(
     "SELECT id FROM collections WHERE team_id = $1 AND lower(name) = lower($2) AND id IS DISTINCT FROM $3",
     [teamId, name, ownId],
   );
@@ -80,20 +82,28 @@ collectionRouter.get("/teams/:teamId/collections", requireAuth, requireTeamRole(
 });
 
 collectionRouter.post("/teams/:teamId/collections", requireAuth, requireTeamRole("member"), async (req, res) => {
-  const name = await readUniqueName(res.locals.team.id, req.body?.name, null);
-  const result = await db.query<{ id: number }>(
-    "INSERT INTO collections (team_id, name) VALUES ($1, $2) RETURNING id",
-    [res.locals.team.id, name],
-  );
+  const { id, name } = await transaction(async (client) => {
+    await lockTeam(client, res.locals.team.id);
+    const name = await readUniqueName(client, res.locals.team.id, req.body?.name, null);
+    const result = await client.query<{ id: number }>(
+      "INSERT INTO collections (team_id, name) VALUES ($1, $2) RETURNING id",
+      [res.locals.team.id, name],
+    );
+    return { id: result.rows[0].id, name };
+  });
   await logUpdate(res, "create", `Создана коллекция «${name}»`);
-  log("INFO", `Коллекция создана: ${result.rows[0].id}, команда ${res.locals.team.id}`);
-  res.status(201).json({ id: result.rows[0].id, name });
+  log("INFO", `Коллекция создана: ${id}, команда ${res.locals.team.id}`);
+  res.status(201).json({ id, name });
 });
 
 collectionRouter.patch("/teams/:teamId/collections/:collectionId", requireAuth, requireTeamRole("member"), async (req, res) => {
   const collection = await requireCollection(res, req.params.collectionId);
-  const name = await readUniqueName(res.locals.team.id, req.body?.name, collection.id);
-  await db.query("UPDATE collections SET name = $1 WHERE id = $2", [name, collection.id]);
+  const name = await transaction(async (client) => {
+    await lockTeam(client, res.locals.team.id);
+    const name = await readUniqueName(client, res.locals.team.id, req.body?.name, collection.id);
+    await client.query("UPDATE collections SET name = $1 WHERE id = $2", [name, collection.id]);
+    return name;
+  });
   await logUpdate(res, "update", `Коллекция «${collection.name}» переименована в «${name}»`);
   res.status(204).end();
 });

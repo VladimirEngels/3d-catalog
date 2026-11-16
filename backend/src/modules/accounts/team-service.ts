@@ -96,21 +96,24 @@ export async function invite(user: UserRow, teamId: number, emailValue: unknown,
   const role = readRole(roleValue, ["viewer", "member"]);
   const email = emailValue ? normalizeEmail(emailValue) : null;
 
-  if (email !== null) {
-    if (!isValidEmail(email)) {
-      throw new AppError(400, "Укажите правильный адрес почты");
-    }
-    if (await repository.isEmailMember(teamId, email)) {
-      throw new AppError(409, "Этот человек уже состоит в команде");
-    }
-    if (await repository.hasPendingInvitation(teamId, email)) {
-      throw new AppError(409, "На эту почту уже отправлено приглашение");
-    }
+  if (email !== null && !isValidEmail(email)) {
+    throw new AppError(400, "Укажите правильный адрес почты");
   }
 
   const token = randomBytes(32).toString("hex");
   const expiresAt = new Date(Date.now() + INVITATION_DAYS * 24 * 60 * 60 * 1000);
-  const invitation = await repository.createInvitation(teamId, user.id, email, token, role, expiresAt);
+  const invitation = await transaction(async (client) => {
+    await repository.lockTeam(client, teamId);
+    if (email !== null) {
+      if (await repository.isEmailMember(client, teamId, email)) {
+        throw new AppError(409, "Этот человек уже состоит в команде");
+      }
+      if (await repository.hasPendingInvitation(client, teamId, email)) {
+        throw new AppError(409, "На эту почту уже отправлено приглашение");
+      }
+    }
+    return repository.createInvitation(client, teamId, user.id, email, token, role, expiresAt);
+  });
 
   await repository.logTeamAction(user.id, teamId, "invite", email ? `Приглашение на почту ${email}` : "Приглашение по ссылке");
   log("INFO", `Приглашение создано: команда ${teamId}, ${email ?? "по ссылке"}, роль ${role}`);
