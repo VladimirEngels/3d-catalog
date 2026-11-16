@@ -39,7 +39,17 @@ app.use("/api", () => {
 
 app.use(express.static(resolve(import.meta.dirname, "../../frontend/dist")));
 
-app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
+app.use((error: unknown, _req: Request, res: Response, next: NextFunction) => {
+  if (res.headersSent) {
+    next(error);
+    return;
+  }
+  res.removeHeader("Content-Disposition");
+  res.removeHeader("Content-Length");
+  if (error instanceof Error && "code" in error && error.code === "ENOENT") {
+    res.status(404).json({ error: "Файл не найден в хранилище" });
+    return;
+  }
   if (error instanceof AppError) {
     res.status(error.status).json({ error: error.message, ...error.extra });
     return;

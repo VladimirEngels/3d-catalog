@@ -1,5 +1,7 @@
 
 import { Router, type Response } from "express";
+import { access } from "node:fs/promises";
+import type { Readable } from "node:stream";
 import { posix } from "node:path";
 import yazl from "yazl";
 import { AppError } from "../../errors";
@@ -194,7 +196,7 @@ function uniqueName(name: string, used: Set<string>): string {
   return result;
 }
 
-modelRouter.get("/teams/:teamId/models/:modelId/versions/:versionId/download", requireAuth, requireTeamRole("viewer"), async (req, res) => {
+modelRouter.get("/teams/:teamId/models/:modelId/versions/:versionId/download", requireAuth, requireTeamRole("viewer"), async (req, res, next) => {
   const model = await requireModel(res, req.params.modelId);
   const version = await repository.findVersion(res.locals.team.id, model.id, readId(req.params.versionId));
   if (!version) {
@@ -217,7 +219,20 @@ modelRouter.get("/teams/:teamId/models/:modelId/versions/:versionId/download", r
     return;
   }
 
+  await Promise.all([...uploaded, ...textures].map((item) => access(absolutePath(item.storage_path))));
   const archive = new yazl.ZipFile();
+  const output = archive.outputStream as Readable;
+  let failed = false;
+  const failArchive = (error: Error) => {
+    if (failed) return;
+    failed = true;
+    output.unpipe(res);
+    output.destroy();
+    next(error);
+  };
+  archive.on("error", failArchive);
+  output.on("error", failArchive);
+  res.on("close", () => output.destroy());
   const used = new Set<string>();
   for (const item of [...uploaded, ...textures]) {
     archive.addFile(absolutePath(item.storage_path), uniqueName(item.file_name, used));
