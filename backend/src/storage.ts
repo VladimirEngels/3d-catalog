@@ -1,7 +1,9 @@
 
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
+import { createReadStream } from "node:fs";
 import { mkdir, rm } from "node:fs/promises";
 import { dirname, posix, resolve, sep } from "node:path";
+import { AppError } from "./errors";
 
 export function storageRoot(): string {
   return process.env.STORAGE_DIR ?? resolve(import.meta.dirname, "../storage");
@@ -20,6 +22,16 @@ export async function createVersionFolder(): Promise<string> {
   const folder = posix.join("models", randomUUID());
   await mkdir(absolutePath(folder), { recursive: true });
   return folder;
+}
+
+export async function verifyStoredFile(relativePath: string, checksum: string): Promise<void> {
+  const hash = createHash("sha256");
+  for await (const chunk of createReadStream(absolutePath(relativePath))) {
+    hash.update(chunk);
+  }
+  if (hash.digest("hex") !== checksum) {
+    throw new AppError(409, "Файл в хранилище повреждён. Восстановите исходный файл перед скачиванием");
+  }
 }
 
 export async function removeFolder(relativeFolder: string): Promise<void> {

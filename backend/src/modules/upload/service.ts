@@ -3,7 +3,6 @@ import { createHash } from "node:crypto";
 import { copyFile, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import type { PoolClient } from "pg";
 
-import { tmpdir } from "node:os";
 import { join, posix } from "node:path";
 import { db, transaction } from "../../db";
 import { AppError } from "../../errors";
@@ -18,6 +17,7 @@ import { parseModel } from "./parse-model";
 import type { ParsedModel, TextureSource } from "./parsers/types";
 import * as repository from "./repository";
 import type { DuplicateRow, NewFile, NewTexture } from "./repository";
+import { uploadTempFolder } from "./temporary-files";
 
 const MAX_TAGS = 20;
 const MAX_TAG_LENGTH = 50;
@@ -53,7 +53,7 @@ async function storeFile<T>(
   file: UploadedFile,
   writeToDatabase: (client: PoolClient, prepared: PreparedVersion) => Promise<T>,
 ): Promise<T> {
-  const workFolder = await mkdtemp(join(tmpdir(), "3d-katalog-"));
+  const workFolder = await mkdtemp(join(uploadTempFolder, "unpacked-"));
   try {
     const source = await prepareSource(file.originalName, file.path, workFolder);
     const parsed = await parseModel(source);

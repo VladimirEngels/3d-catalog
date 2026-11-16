@@ -2,19 +2,19 @@
 import { Router } from "express";
 import { rm } from "node:fs/promises";
 import multer from "multer";
-import { tmpdir } from "node:os";
 import { AppError } from "../../errors";
 import { requireAuth } from "../../middleware/auth";
 import { requireTeamRole } from "../../middleware/team-access";
 import { readId } from "../../validation";
 import * as service from "./service";
+import { uploadTempFolder } from "./temporary-files";
 
 export const uploadRouter = Router();
 
 const MAX_MODEL_BYTES = 100 * 1024 * 1024;
 const MAX_PREVIEW_BYTES = 5 * 1024 * 1024;
 
-const modelUpload = multer({ dest: tmpdir(), limits: { fileSize: MAX_MODEL_BYTES, files: 1 }, defParamCharset: "utf8" });
+const modelUpload = multer({ dest: uploadTempFolder, limits: { fileSize: MAX_MODEL_BYTES, files: 1 }, defParamCharset: "utf8" });
 const previewUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: MAX_PREVIEW_BYTES, files: 1 } });
 
 uploadRouter.post(

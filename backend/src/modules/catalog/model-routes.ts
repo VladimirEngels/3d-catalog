@@ -8,7 +8,7 @@ import { AppError } from "../../errors";
 import { log } from "../../logger";
 import { requireAuth } from "../../middleware/auth";
 import { requireTeamRole } from "../../middleware/team-access";
-import { absolutePath, removeFoldersOfFiles } from "../../storage";
+import { absolutePath, removeFoldersOfFiles, verifyStoredFile } from "../../storage";
 import { readId, readText } from "../../validation";
 import * as repository from "./model-repository";
 import type { FileRow, ModelRow, TextureRow } from "./model-repository";
@@ -175,6 +175,7 @@ modelRouter.get("/teams/:teamId/models/:modelId/files/:fileId/download", require
     throw new AppError(404, "Файл не найден");
   }
 
+  await verifyStoredFile(file.storage_path, file.checksum);
   const fileName = posix.basename(file.file_name);
   await repository.logModelAction(res.locals.user.id, res.locals.team.id, "download", `Скачан файл ${fileName} модели «${model.name}»`);
 
@@ -208,6 +209,10 @@ modelRouter.get("/teams/:teamId/models/:modelId/versions/:versionId/download", r
   const textures = uploaded[0].format === "GLB"
     ? []
     : (await repository.listAllVersionTextures(version.id)).filter((texture) => texture.source_texture_id === null);
+
+  for (const file of uploaded) {
+    await verifyStoredFile(file.storage_path, file.checksum);
+  }
 
   await repository.logModelAction(res.locals.user.id, res.locals.team.id, "download", `Скачана версия ${version.version_number} модели «${model.name}»`);
   res.setHeader("X-Content-Type-Options", "nosniff");

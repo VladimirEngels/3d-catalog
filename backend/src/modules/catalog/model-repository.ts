@@ -34,6 +34,7 @@ export interface FileRow {
   version_id: number | null;
   job_id: number | null;
   storage_path: string;
+  checksum: string;
   created_at: Date;
 }
 
