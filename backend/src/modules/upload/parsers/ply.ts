@@ -41,7 +41,7 @@ export function parsePly(data: Buffer): ParsedModel {
       vertices = element.count;
       readVertices(element, read, box);
     } else if (element.name === "face") {
-      triangles = readFaces(element, read);
+      triangles = readFaces(element, read, elements.find((item) => item.name === "vertex")?.count ?? 0);
     } else {
       skipElement(element, read);
     }
@@ -86,16 +86,20 @@ function readVertices(element: Element, read: ReadNumber, box: BoundingBox): voi
     for (const property of element.properties) {
       point[property.name] = readProperty(property, read);
     }
+    if (![point.x, point.y, point.z].every(Number.isFinite)) {
+      throw new ModelFileError("В файле PLY неверные координаты вершины");
+    }
     box.add(point.x, point.y, point.z);
   }
 }
 
-function readFaces(element: Element, read: ReadNumber): number {
+function readFaces(element: Element, read: ReadNumber, vertices: number): number {
   let triangles = 0;
   for (let i = 0; i < element.count; i++) {
     for (const property of element.properties) {
-      const value = readProperty(property, read);
-      if (property.listCountType && value >= 3) {
+      const isVertexList = property.listCountType !== undefined && ["vertex_indices", "vertex_index"].includes(property.name);
+      const value = readProperty(property, read, isVertexList ? vertices : undefined);
+      if (isVertexList && value >= 3) {
         triangles += value - 2;
       }
     }
@@ -111,13 +115,19 @@ function skipElement(element: Element, read: ReadNumber): void {
   }
 }
 
-function readProperty(property: Property, read: ReadNumber): number {
+function readProperty(property: Property, read: ReadNumber, vertices?: number): number {
   if (!property.listCountType) {
     return read(property.type);
   }
   const length = read(property.listCountType);
+  if (!Number.isSafeInteger(length) || length < 0) {
+    throw new ModelFileError("В файле PLY неверная длина списка");
+  }
   for (let i = 0; i < length; i++) {
-    read(property.type);
+    const value = read(property.type);
+    if (vertices !== undefined && (!Number.isInteger(value) || value < 0 || value >= vertices)) {
+      throw new ModelFileError("В файле PLY грань ссылается на несуществующую вершину");
+    }
   }
   return length;
 }

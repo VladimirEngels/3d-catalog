@@ -49,20 +49,24 @@ function readGlb(data: Buffer): { json: any; binaryChunk: Buffer | undefined } {
   return { json, binaryChunk };
 }
 
-function loadBuffers(json: any, binaryChunk: Buffer | undefined, findFile: FindFile, companions: FoundFile[]): (Buffer | undefined)[] {
+function loadBuffers(json: any, binaryChunk: Buffer | undefined, findFile: FindFile, companions: FoundFile[]): Buffer[] {
   return (json.buffers ?? []).map((buffer: any) => {
+    let bytes: Buffer | undefined;
     if (buffer.uri === undefined) {
-      return binaryChunk;
+      bytes = binaryChunk;
+    } else if (buffer.uri.startsWith("data:")) {
+      bytes = decodeDataUri(buffer.uri);
+    } else {
+      const file = findFile(buffer.uri);
+      if (file) {
+        companions.push(file);
+        bytes = readFileSync(file.path);
+      }
     }
-    if (buffer.uri.startsWith("data:")) {
-      return decodeDataUri(buffer.uri);
+    if (!bytes || !Number.isSafeInteger(buffer.byteLength) || buffer.byteLength < 0 || bytes.length < buffer.byteLength) {
+      throw new ModelFileError("В файле glTF/GLB отсутствует или повреждён буфер данных модели");
     }
-    const file = findFile(buffer.uri);
-    if (!file) {
-      return undefined;
-    }
-    companions.push(file);
-    return readFileSync(file.path);
+    return bytes;
   });
 }
 
