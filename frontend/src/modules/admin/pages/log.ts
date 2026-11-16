@@ -23,7 +23,7 @@ const ACTION_NAMES: Record<string, string> = {
   update: "Изменение",
   delete: "Удаление",
   download: "Скачивание",
-  convert: "Перевод",
+  convert: "Конвертация",
   invite: "Приглашение",
 };
 

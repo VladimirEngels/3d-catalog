@@ -59,7 +59,7 @@ export async function showQualityReport(container: HTMLElement, teamId: number, 
   }
 
   if (reports.length === 0) {
-    container.replaceChildren(h("div", { class: "empty-box" }, h("b", {}, "Переводов пока не было"), "Когда модель переведут в другой формат, здесь появится отчёт о качестве."));
+    container.replaceChildren(h("div", { class: "empty-box" }, h("b", {}, "Результатов пока нет"), "После смены формата модели здесь появится отчёт о качестве."));
     return;
   }
 
@@ -74,7 +74,7 @@ export async function showQualityReport(container: HTMLElement, teamId: number, 
 
   container.replaceChildren(
     h("div", { class: "demo-note" }, "Проверка качества пока не подключена: это заготовленный пример отчёта."),
-    h("div", { class: "qc-toolbar" }, h("span", {}, "Перевод:"), select),
+    h("div", { class: "qc-toolbar" }, h("span", {}, "Результат:"), select),
     panels,
   );
 }

@@ -15,7 +15,7 @@ interface NavItem {
 const teamNav: NavItem[] = [
   { id: "catalog", label: "Каталог", icon: "box", href: "/pages/catalog.html" },
   { id: "collections", label: "Коллекции", icon: "folder", href: "/pages/collections.html" },
-  { id: "jobs", label: "Мои переводы", icon: "jobs", href: "/pages/jobs.html", needs: "convert" },
+  { id: "jobs", label: "Конвертация", icon: "jobs", href: "/pages/jobs.html", needs: "convert" },
 ];
 
 const ownerNav: NavItem[] = [

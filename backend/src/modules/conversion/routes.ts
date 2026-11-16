@@ -31,7 +31,7 @@ interface ModelToConvert {
 conversionRouter.post("/teams/:teamId/conversions", requireAuth, requireTeamRole("member"), async (req, res) => {
   const value: unknown = req.body?.modelIds;
   if (!Array.isArray(value) || value.length === 0 || value.length > MAX_MODELS_AT_ONCE) {
-    throw new AppError(400, "Выберите модели для перевода");
+    throw new AppError(400, "Выберите модели для смены формата");
   }
   const modelIds = [...new Set(value.map(readId))];
 
@@ -72,7 +72,7 @@ conversionRouter.post("/teams/:teamId/conversions", requireAuth, requireTeamRole
       if (model.format === targetFormat) {
         skipped.push({ name: model.name, reason: `модель уже в формате ${targetFormat}` });
       } else if (model.has_same_job) {
-        skipped.push({ name: model.name, reason: "такой перевод уже в очереди" });
+        skipped.push({ name: model.name, reason: "модель с этим форматом уже в очереди" });
       } else {
         const job = await client.query<{ id: number }>(
           `INSERT INTO conversion_jobs (version_id, created_by, target_format, upscale_textures)
@@ -82,7 +82,7 @@ conversionRouter.post("/teams/:teamId/conversions", requireAuth, requireTeamRole
         created.push(job.rows[0].id);
         await client.query(
           "INSERT INTO action_log (user_id, team_id, action, details) VALUES ($1, $2, 'convert', $3)",
-          [user.id, team.id, `Перевод модели «${model.name}»: ${model.format} → ${targetFormat}, в очереди`],
+          [user.id, team.id, `Смена формата модели «${model.name}»: ${model.format} → ${targetFormat}, в очереди`],
         );
       }
     }
@@ -188,20 +188,20 @@ conversionRouter.delete("/teams/:teamId/jobs/:jobId", requireAuth, requireTeamRo
     [readId(req.params.jobId), team.id],
   );
   if (job.rows.length === 0) {
-    throw new AppError(404, "Задание не найдено");
+    throw new AppError(404, "Запись в очереди не найдена");
   }
   const found = job.rows[0];
   if (found.created_by !== user.id && team.role !== "owner") {
-    throw new AppError(403, "Отменить задание может тот, кто его запустил, или владелец команды");
+    throw new AppError(403, "Отменить обработку может тот, кто её запустил, или владелец команды");
   }
   if (found.status !== "queued") {
-    throw new AppError(409, "Отменить можно только задание в очереди");
+    throw new AppError(409, "Отменить можно только обработку, которая ещё находится в очереди");
   }
 
   await db.query("DELETE FROM conversion_jobs WHERE id = $1 AND status = 'queued'", [found.id]);
   await db.query(
     "INSERT INTO action_log (user_id, team_id, action, details) VALUES ($1, $2, 'convert', $3)",
-    [user.id, team.id, `Отменён перевод модели «${found.model_name}»`],
+    [user.id, team.id, `Отменена обработка модели «${found.model_name}»`],
   );
   res.status(204).end();
 });

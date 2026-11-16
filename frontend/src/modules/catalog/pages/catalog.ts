@@ -219,7 +219,7 @@ function showCatalog(teamId: number): void {
     });
     const closeButton = h("button", { class: "btn small", type: "button", "aria-label": "Снять выбор" }, "✕");
     closeButton.addEventListener("click", clearSelection);
-    const convertButton = h("button", { class: "btn small primary", type: "button" }, "Перевести в формат…");
+    const convertButton = h("button", { class: "btn small primary", type: "button" }, "Сменить формат…");
     convertButton.addEventListener("click", () => {
       const models = items.filter((item) => selected.has(item.id));
       openConvertDialog(teamId, models.map((item) => ({

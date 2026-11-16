@@ -48,7 +48,7 @@ function buildInfoPanel(teamId: number, card: ModelCard): HTMLElement {
   );
 
   if (can(session, "convert")) {
-    const convertButton = h("button", { class: "btn", type: "button" }, "Перевести…");
+    const convertButton = h("button", { class: "btn", type: "button" }, "Сменить формат…");
     convertButton.addEventListener("click", () => {
       openConvertDialog(teamId, [{
         id: card.id,
@@ -158,7 +158,7 @@ function buildFilesTab(teamId: number, card: ModelCard): HTMLElement {
     body.append(h("tr", {},
       h("td", { class: "file-name" }, file.name),
       h("td", {}, h("span", { class: "badge" }, file.format)),
-      h("td", {}, file.converted ? "Получен переводом" : "Исходный"),
+      h("td", {}, file.converted ? "Результат" : "Исходный"),
       h("td", {}, formatBytes(file.sizeBytes)),
       h("td", { class: "muted" }, formatDate(file.createdAt)),
       h("td", {}, h("a", { class: "btn small", href: fileDownloadUrl(teamId, card.id, file.id) }, "Скачать")),
@@ -262,7 +262,7 @@ async function showCard(teamId: number): Promise<void> {
   if (converted.length > 0) {
     const select = h("select", { class: "viewer-files", "aria-label": "Какой файл показать" },
       h("option", { value: "" }, "Исходный файл"),
-      ...converted.map((file) => h("option", { value: String(file.id) }, `Перевод: ${file.format}`)),
+      ...converted.map((file) => h("option", { value: String(file.id) }, `Результат: ${file.format}`)),
     ) as HTMLSelectElement;
     select.addEventListener("change", async () => {
       const file = converted.find((item) => String(item.id) === select.value);

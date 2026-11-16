@@ -38,7 +38,7 @@ function buildStatus(job: Job): HTMLElement {
   if (job.status === "running") {
     cell.append(h("div", { class: "progress running-bar" }, h("div")));
   } else if (job.status === "queued") {
-    const text = job.jobsBefore === 0 ? "следующее в очереди" : `заданий перед ним: ${job.jobsBefore}`;
+    const text = job.jobsBefore === 0 ? "Следующая в очереди" : `Впереди в очереди: ${job.jobsBefore}`;
     cell.append(h("div", { class: "muted job-note" }, text));
   } else if (job.status === "failed" && job.error) {
     cell.append(h("div", { class: "err-text" }, job.error));
@@ -66,7 +66,7 @@ function buildAction(job: Job): HTMLElement | null {
   if (job.status === "queued") {
     const button = h("button", { class: "btn small", type: "button" }, "Отменить");
     button.addEventListener("click", async () => {
-      const agreed = await confirmAction("Отменить задание?", `Перевод модели «${job.modelName}» не будет выполнен.`, "Отменить задание");
+      const agreed = await confirmAction("Отменить обработку?", `Модель «${job.modelName}» останется в исходном формате.`, "Отменить");
       if (!agreed) {
         return;
       }
@@ -74,7 +74,7 @@ function buildAction(job: Job): HTMLElement | null {
         await cancelJob(teamId, job.id);
         await load();
       } catch (error) {
-        showMessage("Не удалось отменить задание", errorText(error));
+        showMessage("Не удалось отменить обработку", errorText(error));
       }
     });
     return button;
@@ -137,13 +137,13 @@ function render(data: JobsResponse): void {
   renderTabs(data);
 
   if (data.items.length === 0) {
-    const text = data.counts.all === 0 ? "Выберите модели в каталоге и нажмите «Перевести в формат»." : "В этом разделе заданий нет.";
-    const title = data.counts.all === 0 ? "Заданий пока нет" : "Пусто";
+    const text = data.counts.all === 0 ? "Выберите модели в каталоге и нажмите «Сменить формат»." : "По выбранному фильтру ничего не найдено.";
+    const title = data.counts.all === 0 ? "Здесь пока пусто" : "Пусто";
     content.replaceChildren(h("div", { class: "empty-box" }, h("b", {}, title), text));
     return;
   }
 
-  const head = ["Модель", "Перевод", "Состояние", "Оценка качества", "Создано", ""];
+  const head = ["Модель", "Форматы", "Состояние", "Оценка качества", "Создано", ""];
   const total = tab === "" ? data.counts.all : data.counts[tab as "active" | "done" | "failed"];
   content.replaceChildren(
     h("div", { class: "table-wrap" },
@@ -163,13 +163,13 @@ async function load(): Promise<void> {
   try {
     render(await getJobs(teamId, tab, page));
   } catch (error) {
-    content.replaceChildren(h("div", { class: "empty-box" }, h("b", {}, "Не удалось загрузить задания"), errorText(error)));
+    content.replaceChildren(h("div", { class: "empty-box" }, h("b", {}, "Не удалось загрузить список"), errorText(error)));
   }
 }
 
 main.append(
-  pageHead("Мои переводы", "задания на перевод моделей в другие форматы"),
-  h("div", { class: "demo-note" }, "Конвертер пока не подключён: новые задания остаются в очереди. Готовые результаты в демонстрационной команде заготовлены заранее."),
+  pageHead("Конвертация", "смена формата моделей и результаты обработки"),
+  h("div", { class: "demo-note" }, "Конвертер пока не подключён: выбранные модели остаются в очереди. Готовые результаты в демонстрационной команде заготовлены заранее."),
   tabBar,
   content,
 );

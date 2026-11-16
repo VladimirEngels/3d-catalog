@@ -55,20 +55,20 @@ function render(data: TeamSummary, days: string): void {
     h("div", { class: "stats" },
       buildStat("Моделей", formatNumber(data.models), `+${data.newModels} за период`),
       buildStat("Участников", formatNumber(data.members), `+${data.newMembers} за период`),
-      buildStat("Переводов", formatNumber(data.jobs), `в среднем ${perDay} в день`),
-      buildStat("Ошибок перевода", formatNumber(data.failedJobs), `${percent(data.failedJobs, data.jobs)} от переводов`),
+      buildStat("Конвертаций", formatNumber(data.jobs), `в среднем ${perDay} в день`),
+      buildStat("С ошибкой", formatNumber(data.failedJobs), `${percent(data.failedJobs, data.jobs)} от общего числа`),
     ),
-    buildChartPanel("Переводы по дням", "Сколько переводов запустили участники за день", noJobs ? empty("За этот период переводов не было") : byDay),
+    buildChartPanel("Запуски по дням", "Сколько раз участники запускали обработку за день", noJobs ? empty("За этот период запусков не было") : byDay),
     h("div", { class: "cols-even report-row" },
-      buildChartPanel("Причины ошибок", "Почему перевод не удался", data.errorReasons.length === 0 ? empty("За этот период ошибок не было") : errors),
-      buildChartPanel("Популярные форматы", "В какой формат переводили чаще всего", noJobs ? empty("За этот период переводов не было") : formats),
+      buildChartPanel("Причины ошибок", "Почему обработка не удалась", data.errorReasons.length === 0 ? empty("За этот период ошибок не было") : errors),
+      buildChartPanel("Популярные форматы", "Какие форматы выбирали чаще всего", noJobs ? empty("За этот период запусков не было") : formats),
     ),
     buildChartPanel("Самые большие модели", "По размеру файлов текущей версии", largest),
   );
 
   if (!noJobs) {
-    drawColumns(byDay, data.jobsByDay.map((item) => item.day), data.jobsByDay.map((item) => item.count), "переводов");
-    drawBars(formats, data.formats.map((item) => item.format), data.formats.map((item) => item.count), "переводов");
+    drawColumns(byDay, data.jobsByDay.map((item) => item.day), data.jobsByDay.map((item) => item.count), "запусков");
+    drawBars(formats, data.formats.map((item) => item.format), data.formats.map((item) => item.count), "запусков");
   }
   if (data.errorReasons.length > 0) {
     drawBars(errors, data.errorReasons.map((item) => item.reason), data.errorReasons.map((item) => item.count), "ошибок");

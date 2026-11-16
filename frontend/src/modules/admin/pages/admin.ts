@@ -26,18 +26,18 @@ function render(data: SystemStats): void {
       buildStat("Пользователей", formatNumber(data.users), `+${data.newUsers} за период`),
       buildStat("Команд", formatNumber(data.teams), `+${data.newTeams} за период`),
       buildStat("Занято на диске", formatBytes(data.diskBytes), "файлы и текстуры"),
-      buildStat("Переводов", formatNumber(data.jobs), "за период"),
-      buildStat("Ошибок перевода", formatNumber(data.failedJobs), `${percent(data.failedJobs, data.jobs)} от переводов`),
+      buildStat("Конвертаций", formatNumber(data.jobs), "за период"),
+      buildStat("С ошибкой", formatNumber(data.failedJobs), `${percent(data.failedJobs, data.jobs)} от общего числа`),
     ),
     buildChartPanel(
-      "Переводы по дням",
+      "Запуски по дням",
       "Все команды вместе",
-      noJobs ? h("div", { class: "panel-empty" }, "За этот период переводов не было") : chart,
+      noJobs ? h("div", { class: "panel-empty" }, "За этот период запусков не было") : chart,
     ),
   );
 
   if (!noJobs) {
-    drawColumns(chart, data.jobsByDay.map((item) => item.day), data.jobsByDay.map((item) => item.count), "переводов");
+    drawColumns(chart, data.jobsByDay.map((item) => item.day), data.jobsByDay.map((item) => item.count), "запусков");
   }
 }
 

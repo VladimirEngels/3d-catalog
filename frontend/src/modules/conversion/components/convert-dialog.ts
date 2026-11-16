@@ -54,7 +54,7 @@ export function openConvertDialog(teamId: number, models: ModelToConvert[]): voi
     }
     upscaleHint.textContent = canUpscale
       ? "Разрешение вырастет в 4 раза, например с 256×256 до 1024×1024. Исходные текстуры сохранятся."
-      : "Доступно для моделей с текстурами при переводе в OBJ или GLB.";
+      : "Доступно для моделей с текстурами при смене формата на OBJ или GLB.";
   }
 
   const formats = h("div", { class: "formats" });
@@ -81,7 +81,7 @@ export function openConvertDialog(teamId: number, models: ModelToConvert[]): voi
         return;
       }
       const skipped = result.skipped.map((item) => `«${item.name}»: ${item.reason}`).join("; ");
-      showMessage(`Заданий создано: ${result.created.length}`, `Пропущено — ${skipped}.`);
+      showMessage(`Добавлено в очередь: ${result.created.length}`, `Пропущено — ${skipped}.`);
     } catch (error) {
       errorBox.textContent = errorText(error);
     }
@@ -96,13 +96,13 @@ export function openConvertDialog(teamId: number, models: ModelToConvert[]): voi
     formats,
     lossBox,
     h("label", { class: "check" }, upscaleInput, h("span", {}, "Улучшить текстуры нейросетью", upscaleHint)),
-    h("div", { class: "demo-note" }, "Конвертер пока не подключён: задание будет создано и останется в очереди."),
+    h("div", { class: "demo-note" }, "Конвертер пока не подключён: выбранные модели будут добавлены в очередь, но обработка не начнётся."),
     errorBox,
   );
 
-  const title = models.length === 1 ? "Перевести модель" : `Перевести модели: ${models.length}`;
+  const title = models.length === 1 ? "Сменить формат" : `Сменить формат: ${models.length}`;
   const close = openDialog(title, content, [
     dialogButton("Отмена", "btn", () => close()),
-    dialogButton("Запустить перевод", "btn primary", start),
+    dialogButton("Запустить", "btn primary", start),
   ]);
 }
