@@ -19,6 +19,18 @@ export interface QualityReport {
   before?: GeometrySummary;
   after?: GeometrySummary;
   needsReview: boolean;
+  upscale?: {
+    model: string;
+    message?: string;
+    items: {
+      status: "done" | "skipped";
+      width: number;
+      height: number;
+      outputWidth?: number;
+      outputHeight?: number;
+      reason?: string;
+    }[];
+  };
   losses: string[];
   defects: string[];
 }

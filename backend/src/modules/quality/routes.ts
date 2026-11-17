@@ -108,7 +108,10 @@ qualityRouter.get(
 );
 
 qualityRouter.get(
-  "/teams/:teamId/models/:modelId/quality/:jobId/images/:side/:view",
+  [
+    "/teams/:teamId/models/:modelId/quality/:jobId/images/:side/:view",
+    "/teams/:teamId/models/:modelId/quality/:jobId/textures/:side/:view",
+  ],
   requireAuth,
   requireTeamRole("viewer"),
   async (req, res) => {
@@ -116,7 +119,11 @@ qualityRouter.get(
     const jobId = readId(req.params.jobId);
     const side = req.params.side;
     const view = String(req.params.view);
-    if (!["before", "after"].includes(String(side)) || !/^[0-5]$/.test(view))
+    const texture = req.path.includes("/textures/");
+    if (
+      !["before", "after"].includes(String(side)) ||
+      !(texture ? /^\d{1,3}$/ : /^[0-5]$/).test(view)
+    )
       throw new AppError(404, "Изображение не найдено");
     const file = await db.query<{ storage_path: string }>(
       `SELECT f.storage_path FROM files f JOIN conversion_jobs j ON j.id=f.job_id
@@ -127,9 +134,21 @@ qualityRouter.get(
     if (!file.rows[0]) throw new AppError(404, "Изображение не найдено");
     const path = file.rows[0].storage_path;
     const report = await readStructuralReport(path);
-    if (report?.visual?.status !== "done")
+    if (
+      texture
+        ? report?.upscale?.items[Number(view)]?.status !== "done"
+        : report?.visual?.status !== "done"
+    )
       throw new AppError(404, "Визуальное сравнение недоступно");
     res.setHeader("Cache-Control", "private, no-store");
-    res.sendFile(absolutePath(posix.join(posix.dirname(path), "images", `${side}-${view}.png`)));
+    res.sendFile(
+      absolutePath(
+        posix.join(
+          posix.dirname(path),
+          texture ? "textures" : "images",
+          `${side}-${Number(view)}.png`,
+        ),
+      ),
+    );
   },
 );

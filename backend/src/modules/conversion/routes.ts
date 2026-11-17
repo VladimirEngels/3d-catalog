@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { readFile } from "node:fs/promises";
-import { posix } from "node:path";
+import { access, readFile } from "node:fs/promises";
+import { posix, resolve } from "node:path";
 import { db, transaction } from "../../db";
 import { AppError } from "../../errors";
 import { log } from "../../logger";
@@ -47,11 +47,16 @@ conversionRouter.post(
       throw new AppError(400, "Выберите формат: OBJ или GLB");
     }
     const upscaleTextures = req.body?.upscaleTextures === true;
-    if (upscaleTextures)
-      throw new AppError(
-        400,
-        "Улучшение текстур пока недоступно; запустите преобразование без этой отметки",
-      );
+    if (upscaleTextures) {
+      const modelPath =
+        process.env.UPSCALE_MODEL_PATH ??
+        resolve(import.meta.dirname, "../../../storage/ai/general-x4v3.onnx");
+      try {
+        await access(modelPath);
+      } catch {
+        throw new AppError(503, "Модель увеличения текстур не установлена на сервере");
+      }
+    }
 
     const { user, team } = res.locals;
 
@@ -62,14 +67,14 @@ conversionRouter.post(
               (SELECT f.format FROM files f WHERE f.version_id = v.id ORDER BY f.id LIMIT 1) AS format,
               EXISTS (
                 SELECT 1 FROM conversion_jobs j
-                WHERE j.version_id = v.id AND j.target_format = $3 AND j.status IN ('queued', 'running')
+                WHERE j.version_id = v.id AND j.target_format = $3 AND j.upscale_textures=$4 AND j.status IN ('queued', 'running')
               ) AS has_same_job
        FROM models m
        JOIN LATERAL (
          SELECT * FROM model_versions WHERE model_id = m.id ORDER BY version_number DESC LIMIT 1
        ) v ON true
        WHERE m.id = ANY($1) AND m.team_id = $2`,
-        [modelIds, team.id, targetFormat],
+        [modelIds, team.id, targetFormat, upscaleTextures],
       );
       if (models.rows.length !== modelIds.length) {
         throw new AppError(404, "Модель не найдена");
@@ -81,7 +86,7 @@ conversionRouter.post(
       for (const model of models.rows) {
         if (!TARGET_FORMATS.includes(model.format)) {
           skipped.push({ name: model.name, reason: "Конвертация доступна только для OBJ и GLB" });
-        } else if (model.format === targetFormat) {
+        } else if (model.format === targetFormat && !upscaleTextures) {
           skipped.push({ name: model.name, reason: `модель уже в формате ${targetFormat}` });
         } else if (model.has_same_job) {
           skipped.push({ name: model.name, reason: "модель с этим форматом уже в очереди" });

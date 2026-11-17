@@ -47,9 +47,10 @@ export function openConvertDialog(teamId: number, models: ModelToConvert[]): voi
     const losses = describeLosses(models, target);
     lossBox.replaceChildren(...losses.map((text) => h("div", { class: "note warn" }, text)));
 
-    upscaleInput.disabled = true;
-    upscaleInput.checked = false;
-    upscaleHint.textContent = "Улучшение текстур пока недоступно.";
+    upscaleInput.disabled = !models.some((model) => model.hasTextures);
+    if (upscaleInput.disabled) upscaleInput.checked = false;
+    upscaleHint.textContent =
+      "Цветовые текстуры ×4, до 1024×1024; общий лимит — 1 048 576 исходных пикселей на модель. Большие текстуры сохранятся без изменений. Результат может сглаживать детали.";
   }
 
   const formats = h("div", { class: "formats" });
@@ -108,7 +109,7 @@ export function openConvertDialog(teamId: number, models: ModelToConvert[]): voi
       "label",
       { class: "check" },
       upscaleInput,
-      h("span", {}, "Улучшить текстуры нейросетью", upscaleHint),
+      h("span", {}, "Увеличить цветовые текстуры ×4", upscaleHint),
     ),
     h(
       "div",

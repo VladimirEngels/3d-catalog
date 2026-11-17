@@ -21,6 +21,20 @@ export interface StructuralReport {
   defects: string[];
   needsReview: boolean;
   visual?: VisualReport;
+  upscale?: UpscaleReport;
+}
+
+export interface UpscaleReport {
+  model: string;
+  message?: string;
+  items: {
+    status: "done" | "skipped";
+    width: number;
+    height: number;
+    outputWidth?: number;
+    outputHeight?: number;
+    reason?: string;
+  }[];
 }
 
 export type VisualReport =
@@ -89,6 +103,30 @@ export async function readStructuralReport(storagePath: string): Promise<Structu
       }
     } else if (visual.status !== "unavailable" || typeof visual.message !== "string") {
       throw new Error("Неверное состояние визуального сравнения");
+    }
+  }
+  if (report.upscale !== undefined) {
+    const upscale = report.upscale;
+    const dimension = (value: unknown) =>
+      typeof value === "number" && Number.isSafeInteger(value) && value > 0;
+    if (
+      !upscale ||
+      typeof upscale.model !== "string" ||
+      !Array.isArray(upscale.items) ||
+      (upscale.message !== undefined && typeof upscale.message !== "string") ||
+      !upscale.items.every(
+        (item: UpscaleReport["items"][number]) =>
+          item &&
+          dimension(item.width) &&
+          dimension(item.height) &&
+          (item.status === "skipped"
+            ? typeof item.reason === "string"
+            : item.status === "done" &&
+              item.outputWidth === item.width * 4 &&
+              item.outputHeight === item.height * 4),
+      )
+    ) {
+      throw new Error("Повреждён отчёт увеличения текстур");
     }
   }
   return report;

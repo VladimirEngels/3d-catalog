@@ -16,6 +16,7 @@ export async function convertFile(
   targetFormat,
   outputDirectory,
   resourceRoot = dirname(inputPath),
+  processTextures,
 ) {
   const format = typeof targetFormat === "string" ? targetFormat.toUpperCase() : "";
   const readers = {
@@ -52,6 +53,7 @@ export async function convertFile(
   const { losses } = source;
   const before = summarizeGeometry(source.geometries);
   let { geometries } = source;
+  if (processTextures) geometries = await processTextures(geometries);
   if (format !== "GLB") {
     if (geometries.some((geo) => geo.skin))
       losses.push("Скелет не сохраняется; в результат записана статическая поза");

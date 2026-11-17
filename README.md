@@ -15,6 +15,7 @@
 - Cookie и серверные сеансы — вход и разграничение доступа.
 - Multer и yauzl — приём файлов и чтение ZIP-архивов.
 - Playwright и Chromium — серверный рендеринг моделей для сравнения изображений.
+- ONNX Runtime и sharp — увеличение цветовых текстур готовой нейросетью.
 
 ### Фронтенд — `frontend/`
 
@@ -70,8 +71,42 @@ npm --prefix frontend run build
 npm --prefix backend start
 ```
 
+Увеличение текстур — необязательная функция. Для неё подготовьте модель из
+официальных весов Real-ESRGAN General x4v3. Экспорт выполняется один раз; Python
+и PyTorch не нужны при обычной работе сайта. В PowerShell:
+
+```powershell
+python -m venv backend/storage/ai-env
+backend/storage/ai-env/Scripts/python.exe -m pip install torch==2.15.0 --index-url https://download.pytorch.org/whl/cpu
+backend/storage/ai-env/Scripts/python.exe -m pip install onnx==1.23.2 numpy==2.4.6
+backend/storage/ai-env/Scripts/python.exe backend/scripts/prepare-upscale-model.py
+```
+
+Скрипт закрепляет источники и контрольные суммы, сохраняет лицензию и файл
+`backend/storage/ai/general-x4v3.onnx`. Для другого расположения задайте
+`UPSCALE_MODEL_PATH` в `backend/.env`. Веса и окружение экспорта находятся вне Git.
+
 Откройте [localhost:3000](http://localhost:3000). Express раздаёт собранный интерфейс
 и обрабатывает запросы API. Сервер слушает только `localhost`.
+
+### Модель увеличения текстур
+
+Для этой опции один раз подготовьте ONNX-файл из официальных весов Real-ESRGAN.
+Нужен Python 3.11; Python и PyTorch используются только при подготовке модели,
+обычный сервер запускает её через ONNX Runtime Node.js.
+
+```powershell
+python -m venv "$env:LOCALAPPDATA\3d-catalog-model-export"
+& "$env:LOCALAPPDATA\3d-catalog-model-export\Scripts\python.exe" -m pip install torch==2.15.0 --index-url https://download.pytorch.org/whl/cpu
+& "$env:LOCALAPPDATA\3d-catalog-model-export\Scripts\python.exe" -m pip install onnx==1.23.2 numpy==2.4.6
+& "$env:LOCALAPPDATA\3d-catalog-model-export\Scripts\python.exe" backend/scripts/prepare-upscale-model.py
+```
+
+Скрипт проверяет SHA-256 исходников, весов и готового ONNX-файла, сохраняет модель
+и лицензию BSD-3-Clause в `backend/storage/ai/`. Эта папка не входит в Git.
+Для другого расположения задайте `UPSCALE_MODEL_PATH` в `backend/.env`.
+Без подготовленного файла обычная конвертация работает, запрос с нейрообработкой
+вернёт сообщение о необходимости установить модель.
 
 После настройки базы и `.env` сайт также можно запускать двойным щелчком по
 [Запустить сайт.bat](<Запустить сайт.bat>). Файл собирает интерфейс, запускает
@@ -169,7 +204,12 @@ npm --prefix frontend run build
 сравниваются цветные изображения методом RGB SSIM с окнами 8×8.
 При результате ниже 80 % требуется ручная проверка. В отчёте доступны обе серии
 снимков. Если Chromium или WebGL недоступны, сохраняется структурный отчёт
-с сообщением о недоступности визуального сравнения. Улучшение текстур пока не подключено.
+с сообщением о недоступности визуального сравнения. По отдельной отметке цветовые
+текстуры увеличиваются нейросетью в четыре раза. Вход ограничен 1024 пикселями по
+стороне и суммой 1 048 576 пикселей на операцию. Превышающие лимит текстуры сохраняются
+без обработки, причина указана в отчёте. Оригиналы сохраняются; доступны пары «до/после».
+Карты нормалей и служебные карты не обрабатываются. ИИ может сглаживать и дорисовывать
+детали, поэтому увеличение разрешения не гарантирует улучшение каждой текстуры.
 В демонстрационных данных оценки и отчёты подготовлены заранее.
 Загрузка по ссылке Roblox, Docker-запуск и автоматическое резервирование также
 не реализованы. Подробности — в [ограничениях архитектуры](docs/ARCHITECTURE.md#текущие-ограничения).

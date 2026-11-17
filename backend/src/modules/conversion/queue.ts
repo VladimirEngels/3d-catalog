@@ -84,6 +84,7 @@ export function startConversionQueue() {
           targetFormat: job.target_format,
           outputDirectory: join(work, "output"),
           resourceRoot: join(work, "input"),
+          upscale: job.upscale_textures,
         },
         (error) => {
           if (error) finish(error);
@@ -96,10 +97,6 @@ export function startConversionQueue() {
     let outputFolder = "";
     let published = false;
     try {
-      if (job.upscale_textures)
-        throw new Error(
-          "Улучшение текстур пока недоступно; запустите преобразование без этой отметки",
-        );
       const context = await db.query<{ team_id: number; allowed: boolean }>(
         `SELECT m.team_id, (NOT t.is_blocked AND NOT u.is_blocked AND tm.role IN ('member','owner')) AS allowed
          FROM model_versions v JOIN models m ON m.id=v.model_id JOIN teams t ON t.id=m.team_id
@@ -172,6 +169,11 @@ export function startConversionQueue() {
         const fileName = "model" + extname(result.path);
         const stored = posix.join(outputFolder, fileName);
         await copyFile(result.path, absolutePath(stored));
+        if (result.quality.upscale?.items.some((item) => item.status === "done")) {
+          await cp(join(work, "textures"), absolutePath(posix.join(outputFolder, "textures")), {
+            recursive: true,
+          });
+        }
         const imagePath = join(work, "images");
         if (result.quality.visual?.status === "done") {
           await cp(imagePath, absolutePath(posix.join(outputFolder, "images")), {

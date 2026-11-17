@@ -58,7 +58,55 @@ function buildPanels(report: QualityReport, teamId: number, modelId: number): HT
     h("div", { class: "panel" }, h("h3", {}, "Что не сохранилось"), losses),
     h("div", { class: "panel" }, h("h3", {}, "Ошибки в модели"), defects),
   );
-  return h("div", {}, buildVisual(report, teamId, modelId), panels);
+  return h(
+    "div",
+    {},
+    buildUpscale(report, teamId, modelId),
+    buildVisual(report, teamId, modelId),
+    panels,
+  );
+}
+
+function buildUpscale(report: QualityReport, teamId: number, modelId: number): HTMLElement | null {
+  if (!report.upscale) return null;
+  const panel = h(
+    "div",
+    { class: "panel" },
+    h("h3", {}, "Увеличение цветовых текстур ×4"),
+    h(
+      "p",
+      { class: "muted" },
+      "Исходные текстуры сохранены. Карты нормалей и служебные карты не обрабатываются. ИИ может сглаживать или дорисовывать детали — сравните результат.",
+    ),
+  );
+  if (report.upscale.message) panel.append(h("p", {}, report.upscale.message));
+  report.upscale.items.forEach((item, index) => {
+    panel.append(h("h4", {}, `Текстура ${index + 1}: ${item.width}×${item.height}`));
+    if (item.status === "skipped") {
+      panel.append(h("p", { class: "note warn" }, `Без изменений: ${item.reason}`));
+      return;
+    }
+    const picture = (side: string, title: string) =>
+      h(
+        "figure",
+        {},
+        h("figcaption", {}, title),
+        h("img", {
+          src: `/api/teams/${teamId}/models/${modelId}/quality/${report.jobId}/textures/${side}/${index}`,
+          alt: title,
+          loading: "lazy",
+        }),
+      );
+    panel.append(
+      h(
+        "div",
+        { class: "visual-pair" },
+        picture("before", "До обработки"),
+        picture("after", `После обработки: ${item.outputWidth}×${item.outputHeight}`),
+      ),
+    );
+  });
+  return panel;
 }
 
 function buildVisual(report: QualityReport, teamId: number, modelId: number): HTMLElement | null {
