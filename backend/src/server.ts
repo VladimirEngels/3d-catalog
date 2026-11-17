@@ -5,7 +5,7 @@ import { deleteExpiredSessions } from "./modules/accounts/repository";
 import { startConversionQueue } from "./modules/conversion/queue";
 
 const PORT = Number(process.env.PORT ?? 3000);
-const HOST = "localhost";
+const HOST = process.env.HOST ?? "localhost";
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
 const server = app.listen(PORT, HOST, () => {

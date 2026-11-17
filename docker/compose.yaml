@@ -1,0 +1,57 @@
+name: my-app
+
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    init: true
+    ports:
+      - "127.0.0.1:${APP_PORT:-3000}:3000"
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3000
+      DATABASE_URL: postgresql://catalog:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/catalog_3d
+      UPSCALE_MODEL_PATH: /opt/ai/general-x4v3.onnx
+    volumes:
+      - storage:/app/backend/storage
+      - logs:/app/backend/logs
+      - ../backend/storage/ai:/opt/ai:ro
+    shm_size: 256mb
+    stop_grace_period: 60s
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:3000/pages/login.html').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: postgres:17-bookworm
+    environment:
+      POSTGRES_DB: catalog_3d
+      POSTGRES_USER: catalog
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - database:/var/lib/postgresql/data
+      - ../backend/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "catalog", "-d", "catalog_3d"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+volumes:
+  database:
+  storage:
+  logs:
