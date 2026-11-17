@@ -1,4 +1,3 @@
-
 import { db } from "../../db";
 import type { PoolClient } from "pg";
 
@@ -83,7 +82,9 @@ export async function listTags(modelId: number): Promise<{ name: string; is_auto
   return result.rows;
 }
 
-export async function listModelCollections(modelId: number): Promise<{ id: number; name: string }[]> {
+export async function listModelCollections(
+  modelId: number,
+): Promise<{ id: number; name: string }[]> {
   const result = await db.query<{ id: number; name: string }>(
     `SELECT c.id, c.name
      FROM collection_models cm
@@ -96,7 +97,10 @@ export async function listModelCollections(modelId: number): Promise<{ id: numbe
 }
 
 export async function listMaterials(versionId: number): Promise<string[]> {
-  const result = await db.query<{ name: string }>("SELECT name FROM materials WHERE version_id = $1 ORDER BY id", [versionId]);
+  const result = await db.query<{ name: string }>(
+    "SELECT name FROM materials WHERE version_id = $1 ORDER BY id",
+    [versionId],
+  );
   return result.rows.map((row) => row.name);
 }
 
@@ -124,7 +128,11 @@ export async function listAllVersionTextures(versionId: number): Promise<Texture
   return result.rows;
 }
 
-export async function findVersion(teamId: number, modelId: number, versionId: number): Promise<{ id: number; version_number: number; model_name: string } | undefined> {
+export async function findVersion(
+  teamId: number,
+  modelId: number,
+  versionId: number,
+): Promise<{ id: number; version_number: number; model_name: string } | undefined> {
   const result = await db.query<{ id: number; version_number: number; model_name: string }>(
     `SELECT v.id, v.version_number, m.name AS model_name
      FROM model_versions v
@@ -135,11 +143,21 @@ export async function findVersion(teamId: number, modelId: number, versionId: nu
   return result.rows[0];
 }
 
-export async function updateDescription(modelId: number, description: string | null): Promise<void> {
-  await db.query("UPDATE models SET description = $1, updated_at = now() WHERE id = $2", [description, modelId]);
+export async function updateDescription(
+  modelId: number,
+  description: string | null,
+): Promise<void> {
+  await db.query("UPDATE models SET description = $1, updated_at = now() WHERE id = $2", [
+    description,
+    modelId,
+  ]);
 }
 
-export async function replaceManualTags(teamId: number, modelId: number, tags: string[]): Promise<void> {
+export async function replaceManualTags(
+  teamId: number,
+  modelId: number,
+  tags: string[],
+): Promise<void> {
   await db.query("DELETE FROM model_tags WHERE model_id = $1 AND is_auto = false", [modelId]);
   for (const name of tags) {
     const tag = await db.query<{ id: number }>(
@@ -156,7 +174,10 @@ export async function replaceManualTags(teamId: number, modelId: number, tags: s
   }
 }
 
-export async function listModelStoragePaths(modelId: number, client: PoolClient | typeof db = db): Promise<string[]> {
+export async function listModelStoragePaths(
+  modelId: number,
+  client: PoolClient | typeof db = db,
+): Promise<string[]> {
   const result = await client.query<{ storage_path: string }>(
     `SELECT f.storage_path
      FROM files f
@@ -168,11 +189,19 @@ export async function listModelStoragePaths(modelId: number, client: PoolClient 
   return result.rows.map((row) => row.storage_path);
 }
 
-export async function deleteModel(modelId: number, client: PoolClient | typeof db = db): Promise<void> {
+export async function deleteModel(
+  modelId: number,
+  client: PoolClient | typeof db = db,
+): Promise<void> {
   await client.query("DELETE FROM models WHERE id = $1", [modelId]);
 }
 
-export async function logModelAction(userId: number, teamId: number, action: "update" | "delete" | "download", details: string): Promise<void> {
+export async function logModelAction(
+  userId: number,
+  teamId: number,
+  action: "update" | "delete" | "download",
+  details: string,
+): Promise<void> {
   await db.query(
     "INSERT INTO action_log (user_id, team_id, action, details) VALUES ($1, $2, $3, $4)",
     [userId, teamId, action, details],

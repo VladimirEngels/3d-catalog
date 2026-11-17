@@ -1,4 +1,3 @@
-
 import { randomBytes } from "node:crypto";
 import { transaction } from "../../db";
 import { AppError } from "../../errors";
@@ -12,7 +11,8 @@ import type { InvitationDetailsRow } from "./team-repository";
 import { isValidEmail, normalizeEmail, readText } from "../../validation";
 
 const INVITATION_DAYS = 7;
-const LAST_OWNER_TEXT = "В команде должен остаться хотя бы один владелец. Сначала назначьте владельцем другого участника";
+const LAST_OWNER_TEXT =
+  "В команде должен остаться хотя бы один владелец. Сначала назначьте владельцем другого участника";
 const INVALID_INVITATION_TEXT = "Приглашение не найдено или больше не действует";
 
 function readRole(value: unknown, allowed: Role[]): Role {
@@ -21,7 +21,6 @@ function readRole(value: unknown, allowed: Role[]): Role {
   }
   return value as Role;
 }
-
 
 export async function createTeam(user: UserRow, nameValue: unknown): Promise<number> {
   const name = readText(nameValue).trim();
@@ -36,7 +35,7 @@ export async function createTeam(user: UserRow, nameValue: unknown): Promise<num
 }
 
 export async function deleteTeam(user: UserRow, teamId: number): Promise<void> {
-  const storagePaths = await transaction(async client => {
+  const storagePaths = await transaction(async (client) => {
     await repository.lockTeam(client, teamId);
     const paths = await listTeamStoragePaths(teamId, client);
     await repository.deleteTeam(teamId, client);
@@ -46,8 +45,12 @@ export async function deleteTeam(user: UserRow, teamId: number): Promise<void> {
   log("INFO", `Команда удалена: ${teamId}, удалил ${user.email}`);
 }
 
-
-export async function changeRole(user: UserRow, teamId: number, memberId: number, roleValue: unknown): Promise<void> {
+export async function changeRole(
+  user: UserRow,
+  teamId: number,
+  memberId: number,
+  roleValue: unknown,
+): Promise<void> {
   const role = readRole(roleValue, ["viewer", "member", "owner"]);
 
   await transaction(async (client) => {
@@ -56,13 +59,22 @@ export async function changeRole(user: UserRow, teamId: number, memberId: number
     if (!currentRole) {
       throw new AppError(404, "Участник не найден");
     }
-    if (currentRole === "owner" && role !== "owner" && (await repository.countOwners(client, teamId)) === 1) {
+    if (
+      currentRole === "owner" &&
+      role !== "owner" &&
+      (await repository.countOwners(client, teamId)) === 1
+    ) {
       throw new AppError(409, LAST_OWNER_TEXT);
     }
     await repository.updateMemberRole(client, teamId, memberId, role);
   });
 
-  await repository.logTeamAction(user.id, teamId, "update", `Изменена роль участника ${memberId}: ${role}`);
+  await repository.logTeamAction(
+    user.id,
+    teamId,
+    "update",
+    `Изменена роль участника ${memberId}: ${role}`,
+  );
   log("INFO", `Роль изменена: команда ${teamId}, участник ${memberId}, новая роль ${role}`);
 }
 
@@ -80,7 +92,11 @@ async function removeFromTeam(teamId: number, memberId: number): Promise<void> {
   });
 }
 
-export async function excludeMember(user: UserRow, teamId: number, memberId: number): Promise<void> {
+export async function excludeMember(
+  user: UserRow,
+  teamId: number,
+  memberId: number,
+): Promise<void> {
   if (memberId === user.id) {
     throw new AppError(400, "Чтобы покинуть команду, используйте выход из команды в профиле");
   }
@@ -95,8 +111,12 @@ export async function leaveTeam(user: UserRow, teamId: number): Promise<void> {
   log("INFO", `Выход из команды: ${user.email}, команда ${teamId}`);
 }
 
-
-export async function invite(user: UserRow, teamId: number, emailValue: unknown, roleValue: unknown) {
+export async function invite(
+  user: UserRow,
+  teamId: number,
+  emailValue: unknown,
+  roleValue: unknown,
+) {
   const role = readRole(roleValue, ["viewer", "member"]);
   const email = emailValue ? normalizeEmail(emailValue) : null;
 
@@ -119,12 +139,21 @@ export async function invite(user: UserRow, teamId: number, emailValue: unknown,
     return repository.createInvitation(client, teamId, user.id, email, token, role, expiresAt);
   });
 
-  await repository.logTeamAction(user.id, teamId, "invite", email ? `Приглашение на почту ${email}` : "Приглашение по ссылке");
+  await repository.logTeamAction(
+    user.id,
+    teamId,
+    "invite",
+    email ? `Приглашение на почту ${email}` : "Приглашение по ссылке",
+  );
   log("INFO", `Приглашение создано: команда ${teamId}, ${email ?? "по ссылке"}, роль ${role}`);
   return invitation;
 }
 
-export async function revokeInvitation(user: UserRow, teamId: number, invitationId: number): Promise<void> {
+export async function revokeInvitation(
+  user: UserRow,
+  teamId: number,
+  invitationId: number,
+): Promise<void> {
   if (!(await repository.deletePendingInvitation(teamId, invitationId))) {
     throw new AppError(404, "Приглашение не найдено");
   }
@@ -133,7 +162,11 @@ export async function revokeInvitation(user: UserRow, teamId: number, invitation
 }
 
 function isActive(invitation: InvitationDetailsRow): boolean {
-  return invitation.status === "pending" && invitation.expires_at > new Date() && !invitation.team_is_blocked;
+  return (
+    invitation.status === "pending" &&
+    invitation.expires_at > new Date() &&
+    !invitation.team_is_blocked
+  );
 }
 
 export async function previewInvitation(tokenValue: unknown) {

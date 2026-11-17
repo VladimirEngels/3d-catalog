@@ -1,4 +1,3 @@
-
 import { request } from "@shared/api/http";
 import type { Me, Role } from "@shared/api/types";
 
@@ -17,7 +16,6 @@ export function logout(): Promise<void> {
 export function changePassword(currentPassword: string, newPassword: string): Promise<void> {
   return request<void>("POST", "/auth/change-password", { currentPassword, newPassword });
 }
-
 
 export type InviteRole = "viewer" | "member";
 
@@ -81,7 +79,11 @@ export function getTeamInvitations(teamId: number): Promise<TeamInvitation[]> {
   return request("GET", `/teams/${teamId}/invitations`);
 }
 
-export function createInvitation(teamId: number, email: string | null, role: InviteRole): Promise<TeamInvitation> {
+export function createInvitation(
+  teamId: number,
+  email: string | null,
+  role: InviteRole,
+): Promise<TeamInvitation> {
   return request("POST", `/teams/${teamId}/invitations`, { email, role });
 }
 

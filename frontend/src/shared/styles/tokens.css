@@ -26,7 +26,7 @@
   --plate-err: #b01616;
 
   --bar-bg: #1b231d;
-  --shadow: rgba(20, 27, 23, .14);
+  --shadow: rgba(20, 27, 23, 0.14);
 
   --stage: #141614;
   --stage-line: #8f8f8f;
@@ -62,7 +62,7 @@
   --err-soft: #3a1c1c;
 
   --bar-bg: #2a332c;
-  --shadow: rgba(0, 0, 0, .4);
+  --shadow: rgba(0, 0, 0, 0.4);
 
   --stage: #0f110f;
 }

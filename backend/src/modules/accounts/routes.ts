@@ -1,4 +1,3 @@
-
 import { Router, type Response } from "express";
 import { requireAuth, SESSION_COOKIE } from "../../middleware/auth";
 import { findUserBySession } from "./repository";

@@ -1,4 +1,3 @@
-
 export type Role = "viewer" | "member" | "owner";
 export type JobStatus = "queued" | "running" | "done" | "failed";
 export type Format = "obj" | "glb" | "gltf" | "stl" | "ply";

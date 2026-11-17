@@ -1,4 +1,3 @@
-
 import { db } from "../../db";
 
 export interface UserRow {
@@ -26,7 +25,11 @@ export async function findUserById(id: number): Promise<UserRow | undefined> {
   return result.rows[0];
 }
 
-export async function createUser(email: string, passwordHash: string, name: string): Promise<UserRow> {
+export async function createUser(
+  email: string,
+  passwordHash: string,
+  name: string,
+): Promise<UserRow> {
   const result = await db.query<UserRow>(
     "INSERT INTO users (email, password_hash, name) VALUES ($1, $2, $3) RETURNING *",
     [email, passwordHash, name],
@@ -61,11 +64,16 @@ export async function countInvitations(email: string): Promise<number> {
   return Number(result.rows[0].count);
 }
 
-export async function createSession(userId: number, tokenHash: string, expiresAt: Date): Promise<void> {
-  await db.query(
-    "INSERT INTO sessions (user_id, token_hash, expires_at) VALUES ($1, $2, $3)",
-    [userId, tokenHash, expiresAt],
-  );
+export async function createSession(
+  userId: number,
+  tokenHash: string,
+  expiresAt: Date,
+): Promise<void> {
+  await db.query("INSERT INTO sessions (user_id, token_hash, expires_at) VALUES ($1, $2, $3)", [
+    userId,
+    tokenHash,
+    expiresAt,
+  ]);
 }
 
 export async function findUserBySession(tokenHash: string): Promise<UserRow | undefined> {

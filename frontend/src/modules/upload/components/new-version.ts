@@ -1,4 +1,3 @@
-
 import { createAndSavePreview } from "@modules/catalog/index";
 import { dialogButton, openDialog } from "@shared/ui/dialog";
 import { h } from "@shared/ui/dom";
@@ -7,7 +6,11 @@ import { DuplicateModelError, uploadVersion } from "../api";
 
 export function openNewVersionDialog(teamId: number, modelId: number): void {
   const fileInput = createInput({ type: "file", accept: ".obj,.stl,.ply,.gltf,.glb,.zip" });
-  const commentInput = createInput({ type: "text", maxlength: "500", placeholder: "Что изменилось" });
+  const commentInput = createInput({
+    type: "text",
+    maxlength: "500",
+    placeholder: "Что изменилось",
+  });
   const errorBox = h("div", { class: "err-text", role: "alert" });
   const statusBox = h("div", { class: "hint", role: "status" });
 
@@ -22,7 +25,8 @@ export function openNewVersionDialog(teamId: number, modelId: number): void {
     sendButton.setAttribute("disabled", "");
     try {
       await uploadVersion(teamId, modelId, file, commentInput.value, (percent) => {
-        statusBox.textContent = percent < 100 ? `Загрузка файла: ${percent} %` : "Система разбирает модель…";
+        statusBox.textContent =
+          percent < 100 ? `Загрузка файла: ${percent} %` : "Система разбирает модель…";
       });
       statusBox.textContent = "Создаём картинку-превью…";
       await createAndSavePreview(teamId, modelId);
@@ -39,8 +43,14 @@ export function openNewVersionDialog(teamId: number, modelId: number): void {
     }
   }
 
-  const content = h("div", {},
-    h("p", {}, "Прежние версии сохранятся, и их можно будет скачать. Автоматические теги пересчитаются по новому файлу."),
+  const content = h(
+    "div",
+    {},
+    h(
+      "p",
+      {},
+      "Прежние версии сохранятся, и их можно будет скачать. Автоматические теги пересчитаются по новому файлу.",
+    ),
     field("Файл модели", fileInput, "OBJ, STL, PLY, glTF, GLB или ZIP · до 100 МБ"),
     field("Комментарий", commentInput, undefined, "необязательно"),
     errorBox,

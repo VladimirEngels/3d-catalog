@@ -11,13 +11,19 @@ const token = new URLSearchParams(location.search).get("token") ?? "";
 const encodedToken = encodeURIComponent(token);
 
 function showCard(...content: (HTMLElement | string)[]): void {
-  document.body.replaceChildren(h("div", { class: "auth" },
-    h("div", { class: "auth-card" },
-      h("div", { class: "logo" }, h("span", {}, "3D"), "-Каталог"),
-      h("div", { class: "sub" }, "Приглашение в команду"),
-      ...content,
+  document.body.replaceChildren(
+    h(
+      "div",
+      { class: "auth" },
+      h(
+        "div",
+        { class: "auth-card" },
+        h("div", { class: "logo" }, h("span", {}, "3D"), "-Каталог"),
+        h("div", { class: "sub" }, "Приглашение в команду"),
+        ...content,
+      ),
     ),
-  ));
+  );
 }
 
 async function getCurrentUser(): Promise<Me | null> {
@@ -28,16 +34,25 @@ async function getCurrentUser(): Promise<Me | null> {
 try {
   const invitation = await previewInvitation(token);
   const me = await getCurrentUser();
-  const text = h("div", { class: "note info" },
-    `${invitation.invitedBy} приглашает вас в команду `, h("b", {}, invitation.teamName),
+  const text = h(
+    "div",
+    { class: "note info" },
+    `${invitation.invitedBy} приглашает вас в команду `,
+    h("b", {}, invitation.teamName),
     ` с ролью «${roleName[invitation.role]}».`,
   );
 
   if (me === null) {
     showCard(
       text,
-      h("div", { class: "auth-actions" },
-        h("a", { class: "btn primary", href: `/pages/register.html?invite=${encodedToken}` }, "Зарегистрироваться"),
+      h(
+        "div",
+        { class: "auth-actions" },
+        h(
+          "a",
+          { class: "btn primary", href: `/pages/register.html?invite=${encodedToken}` },
+          "Зарегистрироваться",
+        ),
         h("a", { class: "btn", href: `/pages/login.html?invite=${encodedToken}` }, "Войти"),
       ),
     );
@@ -57,7 +72,9 @@ try {
       text,
       h("div", { class: "hint" }, `Вы вошли как ${me.user.email}`),
       errorBox,
-      h("div", { class: "auth-actions" },
+      h(
+        "div",
+        { class: "auth-actions" },
         acceptButton,
         h("a", { class: "btn", href: "/pages/catalog.html" }, "Не сейчас"),
       ),
@@ -67,6 +84,10 @@ try {
   const text = error instanceof ApiError ? error.message : errorText(error);
   showCard(
     h("div", { class: "err-text" }, text),
-    h("div", { class: "auth-actions" }, h("a", { class: "btn", href: "/pages/catalog.html" }, "На главную")),
+    h(
+      "div",
+      { class: "auth-actions" },
+      h("a", { class: "btn", href: "/pages/catalog.html" }, "На главную"),
+    ),
   );
 }

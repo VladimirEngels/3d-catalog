@@ -1,4 +1,3 @@
-
 import { createHash } from "node:crypto";
 import { copyFile, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import type { PoolClient } from "pg";
@@ -66,7 +65,13 @@ async function storeFile<T>(
 
     const folder = await createVersionFolder();
     try {
-      const mainFile = await saveMainFile(source.path, source.fileName, source.format, checksum, folder);
+      const mainFile = await saveMainFile(
+        source.path,
+        source.fileName,
+        source.format,
+        checksum,
+        folder,
+      );
       const companions = await saveCompanions(parsed, source.format, folder);
       const textures = await saveTextures(parsed.textures, folder);
 
@@ -95,7 +100,13 @@ async function storeFile<T>(
   }
 }
 
-async function insertPreparedVersion(client: PoolClient, modelId: number, number: number, comment: string | null, prepared: PreparedVersion): Promise<void> {
+async function insertPreparedVersion(
+  client: PoolClient,
+  modelId: number,
+  number: number,
+  comment: string | null,
+  prepared: PreparedVersion,
+): Promise<void> {
   const { parsed } = prepared;
   const versionId = await repository.insertVersion(client, {
     modelId,
@@ -132,11 +143,20 @@ export async function addModel(user: UserRow, teamId: number, request: UploadReq
   }
 
   return storeFile(teamId, request.file, async (client, prepared) => {
-    if (collectionId !== null && !(await repository.collectionExists(client, teamId, collectionId))) {
+    if (
+      collectionId !== null &&
+      !(await repository.collectionExists(client, teamId, collectionId))
+    ) {
       throw new AppError(400, "Такой коллекции в команде нет");
     }
 
-    const modelId = await repository.insertModel(client, teamId, user.id, name, description || null);
+    const modelId = await repository.insertModel(
+      client,
+      teamId,
+      user.id,
+      name,
+      description || null,
+    );
     await insertPreparedVersion(client, modelId, 1, null, prepared);
 
     for (const tag of getAutoTags(prepared.parsed)) {
@@ -148,14 +168,30 @@ export async function addModel(user: UserRow, teamId: number, request: UploadReq
     if (collectionId !== null) {
       await repository.addToCollection(client, collectionId, modelId);
     }
-    await repository.logAction(client, user.id, teamId, "create", `Добавлена модель «${name}» (${prepared.fileName})`);
+    await repository.logAction(
+      client,
+      user.id,
+      teamId,
+      "create",
+      `Добавлена модель «${name}» (${prepared.fileName})`,
+    );
 
-    log("INFO", `Модель добавлена: ${modelId}, команда ${teamId}, ${prepared.format}, треугольников ${prepared.parsed.triangles}`);
+    log(
+      "INFO",
+      `Модель добавлена: ${modelId}, команда ${teamId}, ${prepared.format}, треугольников ${prepared.parsed.triangles}`,
+    );
     return { modelId, textureCount: prepared.textures.length };
   });
 }
 
-export async function addVersion(user: UserRow, teamId: number, role: Role, modelId: number, file: UploadedFile, commentValue: unknown) {
+export async function addVersion(
+  user: UserRow,
+  teamId: number,
+  role: Role,
+  modelId: number,
+  file: UploadedFile,
+  commentValue: unknown,
+) {
   const comment = readText(commentValue).trim();
   if (comment.length > 500) {
     throw new AppError(400, "Комментарий должен быть не длиннее 500 символов");
@@ -178,7 +214,13 @@ export async function addVersion(user: UserRow, teamId: number, role: Role, mode
       await repository.addTag(client, teamId, modelId, tag, true);
     }
     await repository.touchModel(client, modelId);
-    await repository.logAction(client, user.id, teamId, "update", `Новая версия ${number} модели «${model.name}»`);
+    await repository.logAction(
+      client,
+      user.id,
+      teamId,
+      "update",
+      `Новая версия ${number} модели «${model.name}»`,
+    );
 
     log("INFO", `Новая версия: модель ${modelId}, версия ${number}`);
     return { versionNumber: number };
@@ -230,10 +272,18 @@ function duplicateError(duplicate: DuplicateRow): AppError {
 }
 
 async function calculateChecksum(path: string): Promise<string> {
-  return createHash("sha256").update(await readFile(path)).digest("hex");
+  return createHash("sha256")
+    .update(await readFile(path))
+    .digest("hex");
 }
 
-async function saveMainFile(path: string, fileName: string, format: string, checksum: string, folder: string): Promise<NewFile> {
+async function saveMainFile(
+  path: string,
+  fileName: string,
+  format: string,
+  checksum: string,
+  folder: string,
+): Promise<NewFile> {
   const storagePath = posix.join(folder, `model.${format.toLowerCase()}`);
   await copyFile(path, absolutePath(storagePath));
   return {
@@ -245,7 +295,11 @@ async function saveMainFile(path: string, fileName: string, format: string, chec
   };
 }
 
-async function saveCompanions(parsed: ParsedModel, format: string, folder: string): Promise<NewFile[]> {
+async function saveCompanions(
+  parsed: ParsedModel,
+  format: string,
+  folder: string,
+): Promise<NewFile[]> {
   const saved: NewFile[] = [];
   const seenPaths = new Set<string>();
 
@@ -286,13 +340,24 @@ async function saveTextures(sources: TextureSource[], folder: string): Promise<N
     const storagePath = posix.join(folder, `texture-${saved.length + 1}.${info.extension}`);
     await writeFile(absolutePath(storagePath), data);
 
-    saved.push({ fileName: fileName.slice(-255), storagePath, width: info.width, height: info.height, sizeBytes: data.length });
+    saved.push({
+      fileName: fileName.slice(-255),
+      storagePath,
+      width: info.width,
+      height: info.height,
+      sizeBytes: data.length,
+    });
   }
   return saved;
 }
 
-
-export async function savePreview(user: UserRow, teamId: number, role: Role, modelId: number, image: Buffer): Promise<void> {
+export async function savePreview(
+  user: UserRow,
+  teamId: number,
+  role: Role,
+  modelId: number,
+  image: Buffer,
+): Promise<void> {
   const target = await repository.findPreviewTarget(teamId, modelId);
   if (!target) {
     throw new AppError(404, "Модель не найдена");
@@ -302,7 +367,12 @@ export async function savePreview(user: UserRow, teamId: number, role: Role, mod
   }
 
   const info = readImageInfo(image);
-  if (!info || info.extension !== "png" || info.width > MAX_PREVIEW_SIDE || info.height > MAX_PREVIEW_SIDE) {
+  if (
+    !info ||
+    info.extension !== "png" ||
+    info.width > MAX_PREVIEW_SIDE ||
+    info.height > MAX_PREVIEW_SIDE
+  ) {
     throw new AppError(400, "Превью должно быть картинкой PNG");
   }
 

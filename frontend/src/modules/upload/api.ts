@@ -1,4 +1,3 @@
-
 import { ApiError } from "@shared/api/http";
 
 export interface DuplicateModel {
@@ -20,7 +19,11 @@ export class DuplicateModelError extends ApiError {
   }
 }
 
-function sendForm<T>(url: string, form: FormData, onProgress: (percent: number) => void): Promise<T> {
+function sendForm<T>(
+  url: string,
+  form: FormData,
+  onProgress: (percent: number) => void,
+): Promise<T> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open("POST", url);
@@ -41,10 +44,14 @@ function sendForm<T>(url: string, form: FormData, onProgress: (percent: number) 
       } else if (xhr.status === 409 && data.duplicate) {
         reject(new DuplicateModelError(data.error, data.duplicate));
       } else {
-        reject(new ApiError(xhr.status, data.error ?? "Не удалось загрузить файл. Попробуйте ещё раз"));
+        reject(
+          new ApiError(xhr.status, data.error ?? "Не удалось загрузить файл. Попробуйте ещё раз"),
+        );
       }
     });
-    xhr.addEventListener("error", () => reject(new ApiError(0, "Не удалось связаться с сервером. Проверьте подключение")));
+    xhr.addEventListener("error", () =>
+      reject(new ApiError(0, "Не удалось связаться с сервером. Проверьте подключение")),
+    );
 
     xhr.send(form);
   });

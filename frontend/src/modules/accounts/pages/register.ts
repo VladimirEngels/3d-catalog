@@ -16,15 +16,34 @@ async function buildInviteNote(): Promise<HTMLElement[]> {
     if (invitation.email !== null) {
       emailInput.value = invitation.email;
     }
-    return [h("div", { class: "note info" }, "Вас пригласили в команду ", h("b", {}, invitation.teamName), `. После регистрации останется принять приглашение.`)];
+    return [
+      h(
+        "div",
+        { class: "note info" },
+        "Вас пригласили в команду ",
+        h("b", {}, invitation.teamName),
+        `. После регистрации останется принять приглашение.`,
+      ),
+    ];
   } catch {
     return [];
   }
 }
 
-const nameInput = createInput({ type: "text", required: "", maxlength: "100", autocomplete: "name", placeholder: "Как вас называть в команде" });
+const nameInput = createInput({
+  type: "text",
+  required: "",
+  maxlength: "100",
+  autocomplete: "name",
+  placeholder: "Как вас называть в команде",
+});
 const emailInput = createInput({ type: "email", required: "", autocomplete: "email" });
-const passwordInput = createInput({ type: "password", required: "", minlength: "8", autocomplete: "new-password" });
+const passwordInput = createInput({
+  type: "password",
+  required: "",
+  minlength: "8",
+  autocomplete: "new-password",
+});
 const repeatInput = createInput({ type: "password", required: "", autocomplete: "new-password" });
 
 showAuthForm({
@@ -37,7 +56,12 @@ showAuthForm({
     field("Пароль ещё раз", repeatInput),
   ],
   buttonText: "Зарегистрироваться",
-  footer: h("div", { class: "auth-foot" }, "Уже есть учётная запись? ", h("a", { href: authLink("login") }, "Войти")),
+  footer: h(
+    "div",
+    { class: "auth-foot" },
+    "Уже есть учётная запись? ",
+    h("a", { href: authLink("login") }, "Войти"),
+  ),
   onSubmit: async () => {
     if (passwordInput.value !== repeatInput.value) {
       throw new ApiError(400, "Пароли не совпадают");

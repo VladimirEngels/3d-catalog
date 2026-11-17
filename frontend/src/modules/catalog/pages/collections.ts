@@ -4,7 +4,14 @@ import { h } from "@shared/ui/dom";
 import { errorText } from "@shared/ui/form";
 import { icon } from "@shared/ui/icons";
 import { mountLayout, pageHead } from "@shared/ui/layout";
-import { createCollection, deleteCollection, getCollections, previewUrl, renameCollection, type Collection } from "../api";
+import {
+  createCollection,
+  deleteCollection,
+  getCollections,
+  previewUrl,
+  renameCollection,
+  type Collection,
+} from "../api";
 import { openNameDialog } from "../components/collection-dialogs";
 import "../catalog.css";
 
@@ -36,17 +43,29 @@ function buildMosaic(collection: Collection): HTMLElement {
   const cells: HTMLElement[] = [];
   for (let i = 0; i < 4; i++) {
     const modelId = collection.previewModels[i];
-    cells.push(h("div", { class: "preview" }, modelId ? h("img", { src: previewUrl(teamId, modelId), alt: "", loading: "lazy" }) : null));
+    cells.push(
+      h(
+        "div",
+        { class: "preview" },
+        modelId ? h("img", { src: previewUrl(teamId, modelId), alt: "", loading: "lazy" }) : null,
+      ),
+    );
   }
   return h("div", { class: "mosaic" }, ...cells);
 }
 
 function buildCard(collection: Collection): HTMLElement {
-  const link = h("a", { class: "coll-link", href: `/pages/catalog.html?collection=${collection.id}` },
+  const link = h(
+    "a",
+    { class: "coll-link", href: `/pages/catalog.html?collection=${collection.id}` },
     buildMosaic(collection),
   );
-  const body = h("div", { class: "coll-body" },
-    h("a", { class: "coll-text", href: `/pages/catalog.html?collection=${collection.id}` },
+  const body = h(
+    "div",
+    { class: "coll-body" },
+    h(
+      "a",
+      { class: "coll-text", href: `/pages/catalog.html?collection=${collection.id}` },
       h("div", { class: "tile-title", title: collection.name }, collection.name),
       h("div", { class: "tag" }, modelsText(collection.modelCount)),
     ),
@@ -61,9 +80,17 @@ function buildCard(collection: Collection): HTMLElement {
       });
     });
 
-    const deleteButton = h("button", { class: "btn link danger-button", type: "button" }, "Удалить");
+    const deleteButton = h(
+      "button",
+      { class: "btn link danger-button", type: "button" },
+      "Удалить",
+    );
     deleteButton.addEventListener("click", async () => {
-      const agreed = await confirmAction(`Удалить коллекцию «${collection.name}»?`, "Модели не удалятся: они останутся в каталоге.", "Удалить");
+      const agreed = await confirmAction(
+        `Удалить коллекцию «${collection.name}»?`,
+        "Модели не удалятся: они останутся в каталоге.",
+        "Удалить",
+      );
       if (!agreed) {
         return;
       }
@@ -84,13 +111,24 @@ async function load(): Promise<void> {
     const collections = await getCollections(teamId);
     subtitle.textContent = `коллекций: ${collections.length}`;
     if (collections.length === 0) {
-      const text = canManage ? "Создайте коллекцию, чтобы собрать модели в подборку: например, для одного уровня игры." : "Когда участники создадут коллекции, они появятся здесь.";
-      list.replaceChildren(h("div", { class: "empty-box" }, h("b", {}, "Коллекций пока нет"), text));
+      const text = canManage
+        ? "Создайте коллекцию, чтобы собрать модели в подборку: например, для одного уровня игры."
+        : "Когда участники создадут коллекции, они появятся здесь.";
+      list.replaceChildren(
+        h("div", { class: "empty-box" }, h("b", {}, "Коллекций пока нет"), text),
+      );
     } else {
       list.replaceChildren(h("div", { class: "coll-grid" }, ...collections.map(buildCard)));
     }
   } catch (error) {
-    list.replaceChildren(h("div", { class: "empty-box" }, h("b", {}, "Не удалось загрузить коллекции"), errorText(error)));
+    list.replaceChildren(
+      h(
+        "div",
+        { class: "empty-box" },
+        h("b", {}, "Не удалось загрузить коллекции"),
+        errorText(error),
+      ),
+    );
   }
 }
 
@@ -98,7 +136,12 @@ const head = pageHead("Коллекции");
 const subtitle = h("span", { class: "sub" });
 head.append(subtitle);
 if (canManage) {
-  const createButton = h("button", { class: "btn primary", type: "button" }, icon("plus"), "Создать коллекцию");
+  const createButton = h(
+    "button",
+    { class: "btn primary", type: "button" },
+    icon("plus"),
+    "Создать коллекцию",
+  );
   createButton.addEventListener("click", () => {
     openNameDialog("Новая коллекция", "Создать", "", async (name) => {
       await createCollection(teamId, name);

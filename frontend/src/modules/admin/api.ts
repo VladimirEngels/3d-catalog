@@ -1,6 +1,4 @@
-
 import { request } from "@shared/api/http";
-
 
 export interface LogItem {
   id: number;
@@ -25,7 +23,11 @@ export interface LogFilters {
   query: string;
 }
 
-export function getTeamLog(teamId: number, filters: LogFilters, page: number): Promise<LogResponse> {
+export function getTeamLog(
+  teamId: number,
+  filters: LogFilters,
+  page: number,
+): Promise<LogResponse> {
   const params = new URLSearchParams({ page: String(page) });
   if (filters.user !== "") params.set("user", filters.user);
   if (filters.action !== "") params.set("action", filters.action);
@@ -33,7 +35,6 @@ export function getTeamLog(teamId: number, filters: LogFilters, page: number): P
   if (filters.query.trim() !== "") params.set("q", filters.query.trim());
   return request("GET", `/teams/${teamId}/log?${params}`);
 }
-
 
 export interface DayCount {
   day: string;
@@ -50,13 +51,18 @@ export interface TeamSummary {
   jobsByDay: DayCount[];
   errorReasons: { reason: string; count: number }[];
   formats: { format: string; count: number }[];
-  largestModels: { id: number; name: string; authorName: string; triangles: number; sizeBytes: number }[];
+  largestModels: {
+    id: number;
+    name: string;
+    authorName: string;
+    triangles: number;
+    sizeBytes: number;
+  }[];
 }
 
 export function getTeamSummary(teamId: number, days: string): Promise<TeamSummary> {
   return request("GET", `/teams/${teamId}/summary?days=${days}`);
 }
-
 
 export interface SystemStats {
   users: number;
@@ -106,11 +112,19 @@ function listQuery(query: string, status: string, page: number): string {
   return new URLSearchParams({ q: query.trim(), status, page: String(page) }).toString();
 }
 
-export function getAdminUsers(query: string, status: string, page: number): Promise<PagedList<AdminUser>> {
+export function getAdminUsers(
+  query: string,
+  status: string,
+  page: number,
+): Promise<PagedList<AdminUser>> {
   return request("GET", `/admin/users?${listQuery(query, status, page)}`);
 }
 
-export function getAdminTeams(query: string, status: string, page: number): Promise<PagedList<AdminTeam>> {
+export function getAdminTeams(
+  query: string,
+  status: string,
+  page: number,
+): Promise<PagedList<AdminTeam>> {
   return request("GET", `/admin/teams?${listQuery(query, status, page)}`);
 }
 

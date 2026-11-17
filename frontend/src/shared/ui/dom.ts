@@ -1,4 +1,3 @@
-
 export function h(
   tag: string,
   attrs: Record<string, string> = {},

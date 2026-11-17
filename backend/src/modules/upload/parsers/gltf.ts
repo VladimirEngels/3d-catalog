@@ -1,6 +1,12 @@
-
 import { readFileSync } from "node:fs";
-import { BoundingBox, ModelFileError, type FindFile, type FoundFile, type ParsedModel, type TextureSource } from "./types";
+import {
+  BoundingBox,
+  ModelFileError,
+  type FindFile,
+  type FoundFile,
+  type ParsedModel,
+  type TextureSource,
+} from "./types";
 
 type Matrix = number[];
 
@@ -8,7 +14,9 @@ const IDENTITY: Matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 const MAX_NODE_VISITS = 100000;
 
 export function parseGltf(data: Buffer, isBinary: boolean, findFile: FindFile): ParsedModel {
-  const { json, binaryChunk } = isBinary ? readGlb(data) : { json: JSON.parse(data.toString("utf8")), binaryChunk: undefined };
+  const { json, binaryChunk } = isBinary
+    ? readGlb(data)
+    : { json: JSON.parse(data.toString("utf8")), binaryChunk: undefined };
 
   if (typeof json.asset?.version !== "string" || !json.asset.version.startsWith("2")) {
     throw new ModelFileError("Поддерживается только glTF версии 2");
@@ -23,7 +31,9 @@ export function parseGltf(data: Buffer, isBinary: boolean, findFile: FindFile): 
     vertices: stats.vertices,
     hasSkeleton: (json.skins ?? []).length > 0,
     size: stats.box.getSize(),
-    materials: (json.materials ?? []).map((material: any, index: number) => material.name || `Материал ${index + 1}`),
+    materials: (json.materials ?? []).map(
+      (material: any, index: number) => material.name || `Материал ${index + 1}`,
+    ),
     textures: readImages(json, buffers, findFile),
     companions,
   };
@@ -49,7 +59,12 @@ function readGlb(data: Buffer): { json: any; binaryChunk: Buffer | undefined } {
   return { json, binaryChunk };
 }
 
-function loadBuffers(json: any, binaryChunk: Buffer | undefined, findFile: FindFile, companions: FoundFile[]): Buffer[] {
+function loadBuffers(
+  json: any,
+  binaryChunk: Buffer | undefined,
+  findFile: FindFile,
+  companions: FoundFile[],
+): Buffer[] {
   return (json.buffers ?? []).map((buffer: any) => {
     let bytes: Buffer | undefined;
     if (buffer.uri === undefined) {
@@ -63,7 +78,12 @@ function loadBuffers(json: any, binaryChunk: Buffer | undefined, findFile: FindF
         bytes = readFileSync(file.path);
       }
     }
-    if (!bytes || !Number.isSafeInteger(buffer.byteLength) || buffer.byteLength < 0 || bytes.length < buffer.byteLength) {
+    if (
+      !bytes ||
+      !Number.isSafeInteger(buffer.byteLength) ||
+      buffer.byteLength < 0 ||
+      bytes.length < buffer.byteLength
+    ) {
       throw new ModelFileError("В файле glTF/GLB отсутствует или повреждён буфер данных модели");
     }
     return bytes;
@@ -117,7 +137,8 @@ function countGeometry(json: any): { triangles: number; vertices: number; box: B
 }
 
 function countPrimitiveTriangles(primitive: any, position: any, json: any): number {
-  const indexCount = primitive.indices !== undefined ? json.accessors[primitive.indices].count : position.count;
+  const indexCount =
+    primitive.indices !== undefined ? json.accessors[primitive.indices].count : position.count;
   const mode = primitive.mode ?? 4;
   if (mode === 4) {
     return Math.floor(indexCount / 3);
@@ -152,10 +173,22 @@ function getNodeMatrix(node: any): Matrix {
   const [x, y, z, w] = node.rotation ?? [0, 0, 0, 1];
   const [sx, sy, sz] = node.scale ?? [1, 1, 1];
   return [
-    (1 - 2 * (y * y + z * z)) * sx, 2 * (x * y + z * w) * sx, 2 * (x * z - y * w) * sx, 0,
-    2 * (x * y - z * w) * sy, (1 - 2 * (x * x + z * z)) * sy, 2 * (y * z + x * w) * sy, 0,
-    2 * (x * z + y * w) * sz, 2 * (y * z - x * w) * sz, (1 - 2 * (x * x + y * y)) * sz, 0,
-    tx, ty, tz, 1,
+    (1 - 2 * (y * y + z * z)) * sx,
+    2 * (x * y + z * w) * sx,
+    2 * (x * z - y * w) * sx,
+    0,
+    2 * (x * y - z * w) * sy,
+    (1 - 2 * (x * x + z * z)) * sy,
+    2 * (y * z + x * w) * sy,
+    0,
+    2 * (x * z + y * w) * sz,
+    2 * (y * z - x * w) * sz,
+    (1 - 2 * (x * x + y * y)) * sz,
+    0,
+    tx,
+    ty,
+    tz,
+    1,
   ];
 }
 
@@ -171,7 +204,11 @@ function multiply(a: Matrix, b: Matrix): Matrix {
   return result;
 }
 
-function readImages(json: any, buffers: (Buffer | undefined)[], findFile: FindFile): TextureSource[] {
+function readImages(
+  json: any,
+  buffers: (Buffer | undefined)[],
+  findFile: FindFile,
+): TextureSource[] {
   const textures: TextureSource[] = [];
 
   (json.images ?? []).forEach((image: any, index: number) => {

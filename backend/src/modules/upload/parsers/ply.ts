@@ -1,4 +1,3 @@
-
 import { BoundingBox, ModelFileError, type ParsedModel } from "./types";
 
 interface Property {
@@ -14,10 +13,22 @@ interface Element {
 }
 
 const TYPE_SIZES: Record<string, number> = {
-  char: 1, uchar: 1, int8: 1, uint8: 1,
-  short: 2, ushort: 2, int16: 2, uint16: 2,
-  int: 4, uint: 4, int32: 4, uint32: 4, float: 4, float32: 4,
-  double: 8, float64: 8,
+  char: 1,
+  uchar: 1,
+  int8: 1,
+  uint8: 1,
+  short: 2,
+  ushort: 2,
+  int16: 2,
+  uint16: 2,
+  int: 4,
+  uint: 4,
+  int32: 4,
+  uint32: 4,
+  float: 4,
+  float32: 4,
+  double: 8,
+  float64: 8,
 };
 
 type ReadNumber = (type: string) => number;
@@ -30,7 +41,10 @@ export function parsePly(data: Buffer): ParsedModel {
 
   const { format, elements } = readHeader(data.toString("latin1", 0, headerEnd));
   const bodyStart = data.indexOf("\n", headerEnd) + 1;
-  const read = format === "ascii" ? createTextReader(data, bodyStart) : createBinaryReader(data, bodyStart, format);
+  const read =
+    format === "ascii"
+      ? createTextReader(data, bodyStart)
+      : createBinaryReader(data, bodyStart, format);
 
   const box = new BoundingBox();
   let vertices = 0;
@@ -41,13 +55,25 @@ export function parsePly(data: Buffer): ParsedModel {
       vertices = element.count;
       readVertices(element, read, box);
     } else if (element.name === "face") {
-      triangles = readFaces(element, read, elements.find((item) => item.name === "vertex")?.count ?? 0);
+      triangles = readFaces(
+        element,
+        read,
+        elements.find((item) => item.name === "vertex")?.count ?? 0,
+      );
     } else {
       skipElement(element, read);
     }
   }
 
-  return { triangles, vertices, hasSkeleton: false, size: box.getSize(), materials: [], textures: [], companions: [] };
+  return {
+    triangles,
+    vertices,
+    hasSkeleton: false,
+    size: box.getSize(),
+    materials: [],
+    textures: [],
+    companions: [],
+  };
 }
 
 function readHeader(text: string): { format: string; elements: Element[] } {
@@ -97,7 +123,9 @@ function readFaces(element: Element, read: ReadNumber, vertices: number): number
   let triangles = 0;
   for (let i = 0; i < element.count; i++) {
     for (const property of element.properties) {
-      const isVertexList = property.listCountType !== undefined && ["vertex_indices", "vertex_index"].includes(property.name);
+      const isVertexList =
+        property.listCountType !== undefined &&
+        ["vertex_indices", "vertex_index"].includes(property.name);
       const value = readProperty(property, read, isVertexList ? vertices : undefined);
       if (isVertexList && value >= 3) {
         triangles += value - 2;
@@ -161,15 +189,35 @@ function createBinaryReader(data: Buffer, start: number, format: string): ReadNu
   };
 }
 
-function readBinaryValue(view: DataView, position: number, type: string, littleEndian: boolean): number {
+function readBinaryValue(
+  view: DataView,
+  position: number,
+  type: string,
+  littleEndian: boolean,
+): number {
   switch (type) {
-    case "char": case "int8": return view.getInt8(position);
-    case "uchar": case "uint8": return view.getUint8(position);
-    case "short": case "int16": return view.getInt16(position, littleEndian);
-    case "ushort": case "uint16": return view.getUint16(position, littleEndian);
-    case "int": case "int32": return view.getInt32(position, littleEndian);
-    case "uint": case "uint32": return view.getUint32(position, littleEndian);
-    case "float": case "float32": return view.getFloat32(position, littleEndian);
-    default: return view.getFloat64(position, littleEndian);
+    case "char":
+    case "int8":
+      return view.getInt8(position);
+    case "uchar":
+    case "uint8":
+      return view.getUint8(position);
+    case "short":
+    case "int16":
+      return view.getInt16(position, littleEndian);
+    case "ushort":
+    case "uint16":
+      return view.getUint16(position, littleEndian);
+    case "int":
+    case "int32":
+      return view.getInt32(position, littleEndian);
+    case "uint":
+    case "uint32":
+      return view.getUint32(position, littleEndian);
+    case "float":
+    case "float32":
+      return view.getFloat32(position, littleEndian);
+    default:
+      return view.getFloat64(position, littleEndian);
   }
 }

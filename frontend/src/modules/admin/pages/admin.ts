@@ -22,12 +22,18 @@ function render(data: SystemStats): void {
   const noJobs = data.jobs === 0;
 
   content.replaceChildren(
-    h("div", { class: "stats five" },
+    h(
+      "div",
+      { class: "stats five" },
       buildStat("Пользователей", formatNumber(data.users), `+${data.newUsers} за период`),
       buildStat("Команд", formatNumber(data.teams), `+${data.newTeams} за период`),
       buildStat("Занято на диске", formatBytes(data.diskBytes), "файлы и текстуры"),
       buildStat("Конвертаций", formatNumber(data.jobs), "за период"),
-      buildStat("С ошибкой", formatNumber(data.failedJobs), `${percent(data.failedJobs, data.jobs)} от общего числа`),
+      buildStat(
+        "С ошибкой",
+        formatNumber(data.failedJobs),
+        `${percent(data.failedJobs, data.jobs)} от общего числа`,
+      ),
     ),
     buildChartPanel(
       "Запуски по дням",
@@ -37,7 +43,12 @@ function render(data: SystemStats): void {
   );
 
   if (!noJobs) {
-    drawColumns(chart, data.jobsByDay.map((item) => item.day), data.jobsByDay.map((item) => item.count), "запусков");
+    drawColumns(
+      chart,
+      data.jobsByDay.map((item) => item.day),
+      data.jobsByDay.map((item) => item.count),
+      "запусков",
+    );
   }
 }
 
@@ -45,7 +56,14 @@ async function load(days: string): Promise<void> {
   try {
     render(await getSystemStats(days));
   } catch (error) {
-    content.replaceChildren(h("div", { class: "empty-box" }, h("b", {}, "Не удалось загрузить статистику"), errorText(error)));
+    content.replaceChildren(
+      h(
+        "div",
+        { class: "empty-box" },
+        h("b", {}, "Не удалось загрузить статистику"),
+        errorText(error),
+      ),
+    );
   }
 }
 

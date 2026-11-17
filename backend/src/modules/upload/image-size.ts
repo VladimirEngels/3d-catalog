@@ -1,4 +1,3 @@
-
 export interface ImageInfo {
   width: number;
   height: number;
@@ -31,9 +30,14 @@ function readJpeg(data: Buffer): ImageInfo | null {
       return null;
     }
     const marker = data[position + 1];
-    const isSof = marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc;
+    const isSof =
+      marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc;
     if (isSof) {
-      return { height: data.readUInt16BE(position + 5), width: data.readUInt16BE(position + 7), extension: "jpg" };
+      return {
+        height: data.readUInt16BE(position + 5),
+        width: data.readUInt16BE(position + 7),
+        extension: "jpg",
+      };
     }
     position += 2 + data.readUInt16BE(position + 2);
   }

@@ -1,4 +1,3 @@
-
 import { h } from "@shared/ui/dom";
 import { errorText } from "@shared/ui/form";
 
@@ -12,9 +11,15 @@ interface AuthFormOptions {
 
 export function showAuthForm(options: AuthFormOptions): void {
   const errorBox = h("div", { class: "err-text", role: "alert" });
-  const button = h("button", { class: "btn primary", type: "submit" }, options.buttonText) as HTMLButtonElement;
+  const button = h(
+    "button",
+    { class: "btn primary", type: "submit" },
+    options.buttonText,
+  ) as HTMLButtonElement;
 
-  const form = h("form", { class: "auth-card" },
+  const form = h(
+    "form",
+    { class: "auth-card" },
     h("div", { class: "logo" }, h("span", {}, "3D"), "-Каталог"),
     h("div", { class: "sub" }, options.subtitle),
     ...options.fields,

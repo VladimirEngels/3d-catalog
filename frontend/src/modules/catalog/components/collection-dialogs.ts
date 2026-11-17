@@ -1,10 +1,14 @@
-
 import { dialogButton, openDialog } from "@shared/ui/dialog";
 import { h } from "@shared/ui/dom";
 import { createInput, errorText, field } from "@shared/ui/form";
 import { addModelsToCollection, createCollection, getCollections } from "../api";
 
-export function openNameDialog(title: string, buttonText: string, startValue: string, save: (name: string) => Promise<void>): void {
+export function openNameDialog(
+  title: string,
+  buttonText: string,
+  startValue: string,
+  save: (name: string) => Promise<void>,
+): void {
   const nameInput = createInput({ type: "text", maxlength: "100", value: startValue });
   const errorBox = h("div", { class: "err-text", role: "alert" });
 
@@ -31,7 +35,11 @@ export function openNameDialog(title: string, buttonText: string, startValue: st
   nameInput.focus();
 }
 
-export async function openAddToCollectionDialog(teamId: number, modelIds: number[], onDone: () => void): Promise<void> {
+export async function openAddToCollectionDialog(
+  teamId: number,
+  modelIds: number[],
+  onDone: () => void,
+): Promise<void> {
   const collections = await getCollections(teamId);
 
   const NEW_COLLECTION = "new";
@@ -41,7 +49,11 @@ export async function openAddToCollectionDialog(teamId: number, modelIds: number
   }
   select.append(h("option", { value: NEW_COLLECTION }, "+ Новая коллекция"));
 
-  const nameInput = createInput({ type: "text", maxlength: "100", placeholder: "Название новой коллекции" });
+  const nameInput = createInput({
+    type: "text",
+    maxlength: "100",
+    placeholder: "Название новой коллекции",
+  });
   const nameField = field("Название", nameInput);
   nameField.hidden = collections.length > 0;
   select.addEventListener("change", () => {
@@ -53,9 +65,10 @@ export async function openAddToCollectionDialog(teamId: number, modelIds: number
   async function save(): Promise<void> {
     errorBox.textContent = "";
     try {
-      const id = select.value === NEW_COLLECTION
-        ? (await createCollection(teamId, nameInput.value)).id
-        : Number(select.value);
+      const id =
+        select.value === NEW_COLLECTION
+          ? (await createCollection(teamId, nameInput.value)).id
+          : Number(select.value);
       await addModelsToCollection(teamId, id, modelIds);
       close();
       onDone();
@@ -64,7 +77,10 @@ export async function openAddToCollectionDialog(teamId: number, modelIds: number
     }
   }
 
-  const text = modelIds.length === 1 ? "Одна модель может входить в несколько коллекций." : `Выбрано моделей: ${modelIds.length}.`;
+  const text =
+    modelIds.length === 1
+      ? "Одна модель может входить в несколько коллекций."
+      : `Выбрано моделей: ${modelIds.length}.`;
   const content = h("div", {}, h("p", {}, text), field("Коллекция", select), nameField, errorBox);
   const close = openDialog("Добавить в коллекцию", content, [
     dialogButton("Отмена", "btn", () => close()),

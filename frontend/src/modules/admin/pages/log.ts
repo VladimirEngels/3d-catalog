@@ -31,7 +31,11 @@ const filters: LogFilters = { user: "", action: "", days: "", query: "" };
 let page = 0;
 let authorsLoaded = false;
 
-function buildFilterSelect(label: string, options: [string, string][], onChange: (value: string) => void): HTMLSelectElement {
+function buildFilterSelect(
+  label: string,
+  options: [string, string][],
+  onChange: (value: string) => void,
+): HTMLSelectElement {
   const select = h("select", { "aria-label": label }) as HTMLSelectElement;
   for (const [value, text] of options) {
     select.append(h("option", { value }, text));
@@ -44,19 +48,33 @@ function buildFilterSelect(label: string, options: [string, string][], onChange:
   return select;
 }
 
-const userSelect = buildFilterSelect("Участник", [["", "Все участники"]], (value) => { filters.user = value; });
+const userSelect = buildFilterSelect("Участник", [["", "Все участники"]], (value) => {
+  filters.user = value;
+});
 const actionSelect = buildFilterSelect(
   "Действие",
   [["", "Все действия"], ...Object.entries(ACTION_NAMES)],
-  (value) => { filters.action = value; },
+  (value) => {
+    filters.action = value;
+  },
 );
 const periodSelect = buildFilterSelect(
   "Период",
-  [["", "За всё время"], ["7", "За неделю"], ["30", "За месяц"]],
-  (value) => { filters.days = value; },
+  [
+    ["", "За всё время"],
+    ["7", "За неделю"],
+    ["30", "За месяц"],
+  ],
+  (value) => {
+    filters.days = value;
+  },
 );
 
-const searchInput = h("input", { type: "text", placeholder: "Поиск по описанию", "aria-label": "Поиск по описанию" }) as HTMLInputElement;
+const searchInput = h("input", {
+  type: "text",
+  placeholder: "Поиск по описанию",
+  "aria-label": "Поиск по описанию",
+}) as HTMLInputElement;
 let searchTimer: number | undefined;
 searchInput.addEventListener("input", () => {
   clearTimeout(searchTimer);
@@ -78,23 +96,44 @@ function render(data: LogResponse): void {
   }
 
   if (data.items.length === 0) {
-    content.replaceChildren(h("div", { class: "empty-box" }, h("b", {}, "Записей нет"), "Измените условия отбора."));
+    content.replaceChildren(
+      h("div", { class: "empty-box" }, h("b", {}, "Записей нет"), "Измените условия отбора."),
+    );
     return;
   }
 
   const body = h("tbody");
   for (const item of data.items) {
-    body.append(h("tr", {},
-      h("td", { class: "muted" }, formatMoment(item.createdAt)),
-      h("td", {}, item.userName),
-      h("td", {}, h("span", { class: "badge" }, ACTION_NAMES[item.action] ?? item.action)),
-      h("td", { class: "file-name" }, item.details ?? "—"),
-    ));
+    body.append(
+      h(
+        "tr",
+        {},
+        h("td", { class: "muted" }, formatMoment(item.createdAt)),
+        h("td", {}, item.userName),
+        h("td", {}, h("span", { class: "badge" }, ACTION_NAMES[item.action] ?? item.action)),
+        h("td", { class: "file-name" }, item.details ?? "—"),
+      ),
+    );
   }
   content.replaceChildren(
-    h("div", { class: "table-wrap" },
-      h("table", { class: "table" },
-        h("thead", {}, h("tr", {}, h("th", {}, "Когда"), h("th", {}, "Кто"), h("th", {}, "Действие"), h("th", {}, "Что"))),
+    h(
+      "div",
+      { class: "table-wrap" },
+      h(
+        "table",
+        { class: "table" },
+        h(
+          "thead",
+          {},
+          h(
+            "tr",
+            {},
+            h("th", {}, "Когда"),
+            h("th", {}, "Кто"),
+            h("th", {}, "Действие"),
+            h("th", {}, "Что"),
+          ),
+        ),
         body,
       ),
     ),
@@ -109,13 +148,17 @@ async function load(): Promise<void> {
   try {
     render(await getTeamLog(team.teamId, filters, page));
   } catch (error) {
-    content.replaceChildren(h("div", { class: "empty-box" }, h("b", {}, "Не удалось загрузить журнал"), errorText(error)));
+    content.replaceChildren(
+      h("div", { class: "empty-box" }, h("b", {}, "Не удалось загрузить журнал"), errorText(error)),
+    );
   }
 }
 
 main.append(
   pageHead("Журнал", "кто, когда и что сделал в команде"),
-  h("div", { class: "filters-row" },
+  h(
+    "div",
+    { class: "filters-row" },
     userSelect,
     actionSelect,
     periodSelect,

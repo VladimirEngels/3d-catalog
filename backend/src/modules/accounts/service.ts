@@ -1,4 +1,3 @@
-
 import { createHash, randomBytes } from "node:crypto";
 import { AppError } from "../../errors";
 import { log } from "../../logger";
@@ -34,7 +33,11 @@ function checkNewPassword(password: string): void {
   }
 }
 
-export async function register(emailValue: unknown, passwordValue: unknown, nameValue: unknown): Promise<string> {
+export async function register(
+  emailValue: unknown,
+  passwordValue: unknown,
+  nameValue: unknown,
+): Promise<string> {
   const email = normalizeEmail(emailValue);
   const password = readText(passwordValue);
   const name = readText(nameValue).trim();
@@ -87,7 +90,11 @@ export async function logout(token: string): Promise<void> {
   log("INFO", "Выход из системы");
 }
 
-export async function changePassword(userId: number, currentValue: unknown, newValue: unknown): Promise<string> {
+export async function changePassword(
+  userId: number,
+  currentValue: unknown,
+  newValue: unknown,
+): Promise<string> {
   const newPassword = readText(newValue);
   const user = await repository.findUserById(userId);
 

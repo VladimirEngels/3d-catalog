@@ -1,4 +1,3 @@
-
 import { db } from "../../db";
 import type { PoolClient } from "pg";
 
@@ -107,7 +106,9 @@ export async function listModels(teamId: number, filters: CatalogFilters): Promi
     conditions.push(`m.author_id = ${param(filters.authorId)}`);
   }
   if (filters.collectionId !== null) {
-    conditions.push(`EXISTS (SELECT 1 FROM collection_models cm WHERE cm.model_id = m.id AND cm.collection_id = ${param(filters.collectionId)})`);
+    conditions.push(
+      `EXISTS (SELECT 1 FROM collection_models cm WHERE cm.model_id = m.id AND cm.collection_id = ${param(filters.collectionId)})`,
+    );
   }
   if (filters.days !== null) {
     conditions.push(`m.created_at >= now() - ${param(filters.days)} * interval '1 day'`);
@@ -185,7 +186,10 @@ export interface StoredTextureRow {
   storage_path: string;
 }
 
-export async function findCurrentVersion(teamId: number, modelId: number): Promise<{ id: number; preview_path: string | null } | undefined> {
+export async function findCurrentVersion(
+  teamId: number,
+  modelId: number,
+): Promise<{ id: number; preview_path: string | null } | undefined> {
   const result = await db.query<{ id: number; preview_path: string | null }>(
     `SELECT v.id, v.preview_path
      FROM models m ${CURRENT_VERSION}
@@ -211,7 +215,11 @@ export async function listVersionTextures(versionId: number): Promise<StoredText
   return result.rows;
 }
 
-export async function findTeamFile(teamId: number, modelId: number, fileId: number): Promise<string | undefined> {
+export async function findTeamFile(
+  teamId: number,
+  modelId: number,
+  fileId: number,
+): Promise<string | undefined> {
   const result = await db.query<{ storage_path: string }>(
     `SELECT f.storage_path
      FROM files f
@@ -224,7 +232,11 @@ export async function findTeamFile(teamId: number, modelId: number, fileId: numb
   return result.rows[0]?.storage_path;
 }
 
-export async function findTeamTexture(teamId: number, modelId: number, textureId: number): Promise<string | undefined> {
+export async function findTeamTexture(
+  teamId: number,
+  modelId: number,
+  textureId: number,
+): Promise<string | undefined> {
   const result = await db.query<{ storage_path: string }>(
     `SELECT tx.storage_path
      FROM textures tx
@@ -237,7 +249,10 @@ export async function findTeamTexture(teamId: number, modelId: number, textureId
   return result.rows[0]?.storage_path;
 }
 
-export async function listTeamStoragePaths(teamId: number, client: PoolClient | typeof db = db): Promise<string[]> {
+export async function listTeamStoragePaths(
+  teamId: number,
+  client: PoolClient | typeof db = db,
+): Promise<string[]> {
   const result = await client.query<{ path: string }>(
     `SELECT f.storage_path AS path
      FROM files f

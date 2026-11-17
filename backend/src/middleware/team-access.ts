@@ -1,4 +1,3 @@
-
 import type { NextFunction, Request, Response } from "express";
 import { db } from "../db";
 import { AppError } from "../errors";

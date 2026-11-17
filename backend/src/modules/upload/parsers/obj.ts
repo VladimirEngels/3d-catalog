@@ -1,6 +1,12 @@
-
 import { readFileSync } from "node:fs";
-import { BoundingBox, ModelFileError, type FindFile, type FoundFile, type ParsedModel, type TextureSource } from "./types";
+import {
+  BoundingBox,
+  ModelFileError,
+  type FindFile,
+  type FoundFile,
+  type ParsedModel,
+  type TextureSource,
+} from "./types";
 
 export function parseObj(data: Buffer, findFile: FindFile): ParsedModel {
   const box = new BoundingBox();
@@ -28,7 +34,12 @@ export function parseObj(data: Buffer, findFile: FindFile): ParsedModel {
       for (const corner of corners) {
         const reference = corner.split("/")[0];
         const index = Number(reference);
-        if (!/^[+-]?\d+$/.test(reference) || !Number.isSafeInteger(index) || index === 0 || index < -vertices) {
+        if (
+          !/^[+-]?\d+$/.test(reference) ||
+          !Number.isSafeInteger(index) ||
+          index === 0 ||
+          index < -vertices
+        ) {
           throw new ModelFileError("В файле OBJ грань ссылается на несуществующую вершину");
         }
         maxVertexIndex = Math.max(maxVertexIndex, index);
@@ -66,7 +77,12 @@ export function parseObj(data: Buffer, findFile: FindFile): ParsedModel {
   };
 }
 
-function readMaterialFile(file: FoundFile, findFile: FindFile, names: Set<string>, textures: TextureSource[]): void {
+function readMaterialFile(
+  file: FoundFile,
+  findFile: FindFile,
+  names: Set<string>,
+  textures: TextureSource[],
+): void {
   for (const rawLine of readFileSync(file.path, "utf8").split("\n")) {
     const line = rawLine.trim();
     if (line.startsWith("newmtl ")) {

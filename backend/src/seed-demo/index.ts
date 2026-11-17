@@ -1,4 +1,3 @@
-
 import { createHash } from "node:crypto";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -11,16 +10,29 @@ import { createUser, type UserRow } from "../modules/accounts/repository";
 import { listTeamStoragePaths } from "../modules/catalog/catalog-repository";
 import { addModel } from "../modules/upload/service";
 import { absolutePath, removeFoldersOfFiles } from "../storage";
-import { addBox, addCylinder, addSphere, addTorus, createMesh, createPng, toGlb, toObj, toPly, toStl, type Mesh } from "./geometry";
+import {
+  addBox,
+  addCylinder,
+  addSphere,
+  addTorus,
+  createMesh,
+  createPng,
+  toGlb,
+  toObj,
+  toPly,
+  toStl,
+  type Mesh,
+} from "./geometry";
 
 const DEMO_DOMAIN = "demo.3d-katalog.local";
 const DEMO_PASSWORD = "demo12345";
 const TEAM_NAME = "Студия «Север» (демо)";
 
-
 async function removeOldDemo(): Promise<void> {
   const users = `SELECT id FROM users WHERE email LIKE '%@${DEMO_DOMAIN}'`;
-  const teams = await db.query<{ id: number }>(`SELECT DISTINCT team_id AS id FROM team_members WHERE user_id IN (${users})`);
+  const teams = await db.query<{ id: number }>(
+    `SELECT DISTINCT team_id AS id FROM team_members WHERE user_id IN (${users})`,
+  );
   for (const team of teams.rows) {
     const paths = await listTeamStoragePaths(team.id);
     await db.query("DELETE FROM teams WHERE id = $1", [team.id]);
@@ -33,7 +45,6 @@ async function removeOldDemo(): Promise<void> {
 async function createDemoUser(name: string, login: string): Promise<UserRow> {
   return createUser(`${login}@${DEMO_DOMAIN}`, await hashPassword(DEMO_PASSWORD), name);
 }
-
 
 function buildFigure(heavyArmor: boolean): Mesh {
   const mesh = createMesh();
@@ -78,7 +89,11 @@ function buildWheel(): Mesh {
   addTorus(mesh, [0, 0, 0], 0.8, 0.08);
   for (let i = 0; i < 6; i++) {
     const angle = (i / 6) * Math.PI * 2;
-    addBox(mesh, [Math.cos(angle) * 0.4, Math.sin(angle) * 0.4, 0], [0.08 + Math.abs(Math.cos(angle)) * 0.62, 0.08 + Math.abs(Math.sin(angle)) * 0.62, 0.06]);
+    addBox(
+      mesh,
+      [Math.cos(angle) * 0.4, Math.sin(angle) * 0.4, 0],
+      [0.08 + Math.abs(Math.cos(angle)) * 0.62, 0.08 + Math.abs(Math.sin(angle)) * 0.62, 0.06],
+    );
   }
   return mesh;
 }
@@ -109,7 +124,6 @@ const metalPattern: Pattern = (x, y) => {
   return [Math.round(150 + wave * 60), Math.round(156 + wave * 60), Math.round(170 + wave * 60)];
 };
 
-
 interface JobPlan {
   model: string;
   by: UserRow;
@@ -125,10 +139,14 @@ interface JobPlan {
 
 function formatFile(mesh: Mesh, format: string): Buffer {
   switch (format) {
-    case "OBJ": return toObj(mesh);
-    case "STL": return toStl(mesh);
-    case "PLY": return toPly(mesh);
-    default: return toGlb(mesh, {});
+    case "OBJ":
+      return toObj(mesh);
+    case "STL":
+      return toStl(mesh);
+    case "PLY":
+      return toPly(mesh);
+    default:
+      return toGlb(mesh, {});
   }
 }
 
@@ -146,10 +164,18 @@ function zipFiles(files: Record<string, Buffer>): Promise<Buffer> {
   });
 }
 
-async function objArchive(mesh: Mesh, baseName: string, material: string, pattern: Pattern, size: number): Promise<Buffer> {
+async function objArchive(
+  mesh: Mesh,
+  baseName: string,
+  material: string,
+  pattern: Pattern,
+  size: number,
+): Promise<Buffer> {
   return zipFiles({
     [`${baseName}.obj`]: toObj(mesh, `${baseName}.mtl`, material),
-    [`${baseName}.mtl`]: Buffer.from(`newmtl ${material}\nKd 1 1 1\nmap_Kd textures/${baseName}.png\n`),
+    [`${baseName}.mtl`]: Buffer.from(
+      `newmtl ${material}\nKd 1 1 1\nmap_Kd textures/${baseName}.png\n`,
+    ),
     [`textures/${baseName}.png`]: createPng(size, pattern),
   });
 }
@@ -165,11 +191,22 @@ async function main(): Promise<void> {
   const admin = await createDemoUser("Администратор", "admin");
   await db.query("UPDATE users SET is_system_admin = true WHERE id = $1", [admin.id]);
 
-  const team = await db.query<{ id: number }>("INSERT INTO teams (name) VALUES ($1) RETURNING id", [TEAM_NAME]);
+  const team = await db.query<{ id: number }>("INSERT INTO teams (name) VALUES ($1) RETURNING id", [
+    TEAM_NAME,
+  ]);
   const teamId = team.rows[0].id;
-  const members: [UserRow, string][] = [[owner, "owner"], [anna, "member"], [ivan, "member"], [viewer, "viewer"]];
+  const members: [UserRow, string][] = [
+    [owner, "owner"],
+    [anna, "member"],
+    [ivan, "member"],
+    [viewer, "viewer"],
+  ];
   for (const [user, role] of members) {
-    await db.query("INSERT INTO team_members (team_id, user_id, role) VALUES ($1, $2, $3)", [teamId, user.id, role]);
+    await db.query("INSERT INTO team_members (team_id, user_id, role) VALUES ($1, $2, $3)", [
+      teamId,
+      user.id,
+      role,
+    ]);
   }
 
   const figure = buildFigure(false);
@@ -180,15 +217,108 @@ async function main(): Promise<void> {
   const wheel = buildWheel();
   const orb = buildOrb();
 
-  const plans: { name: string; file: string; data: Buffer; by: UserRow; description: string; tags: string; mesh: Mesh; daysAgo: number }[] = [
-    { name: "Сундук деревянный", file: "chest.zip", data: await objArchive(chest, "chest", "Дерево", woodPattern, 64), by: ivan, description: "Реквизит для таверны и подземелий.", tags: "реквизит, дерево", mesh: chest, daysAgo: 12 },
-    { name: "Бочка с обручами", file: "barrel.zip", data: await objArchive(barrel, "barrel", "Дерево", woodPattern, 128), by: ivan, description: "Простая бочка для рынка.", tags: "реквизит, рынок", mesh: barrel, daysAgo: 11 },
-    { name: "Шатёр торговца", file: "tent.stl", data: toStl(tent), by: anna, description: "Шатёр без текстур: заготовка для печати.", tags: "окружение, рынок", mesh: tent, daysAgo: 10 },
-    { name: "Магическая сфера", file: "orb.ply", data: toPly(orb), by: anna, description: "", tags: "эффекты", mesh: orb, daysAgo: 8 },
-    { name: "Колесо телеги", file: "wheel.obj", data: toObj(wheel), by: ivan, description: "Колесо для телеги торговца.", tags: "реквизит", mesh: wheel, daysAgo: 6 },
-    { name: "Скелет-страж", file: "guard.glb", data: toGlb(figure, { skeleton: true, texture: createPng(128, bonePattern), materialName: "Кость" }), by: anna, description: "Страж подземелья.", tags: "враг", mesh: figure, daysAgo: 5 },
-    { name: "Гоблин-лучник", file: "goblin_archer.glb", data: toGlb(figure, { skeleton: true, texture: createPng(128, leatherPattern), materialName: "Кожа" }), by: anna, description: "Враг дальнего боя для первого уровня. Анимации: ходьба, выстрел.", tags: "враг, фэнтези", mesh: figure, daysAgo: 3 },
-    { name: "Рыцарь, базовый", file: "knight_base.glb", data: toGlb(armored, { skeleton: true, texture: createPng(128, metalPattern), materialName: "Броня" }), by: owner, description: "Главный герой, базовая версия.", tags: "средневековье, герой", mesh: armored, daysAgo: 1 },
+  const plans: {
+    name: string;
+    file: string;
+    data: Buffer;
+    by: UserRow;
+    description: string;
+    tags: string;
+    mesh: Mesh;
+    daysAgo: number;
+  }[] = [
+    {
+      name: "Сундук деревянный",
+      file: "chest.zip",
+      data: await objArchive(chest, "chest", "Дерево", woodPattern, 64),
+      by: ivan,
+      description: "Реквизит для таверны и подземелий.",
+      tags: "реквизит, дерево",
+      mesh: chest,
+      daysAgo: 12,
+    },
+    {
+      name: "Бочка с обручами",
+      file: "barrel.zip",
+      data: await objArchive(barrel, "barrel", "Дерево", woodPattern, 128),
+      by: ivan,
+      description: "Простая бочка для рынка.",
+      tags: "реквизит, рынок",
+      mesh: barrel,
+      daysAgo: 11,
+    },
+    {
+      name: "Шатёр торговца",
+      file: "tent.stl",
+      data: toStl(tent),
+      by: anna,
+      description: "Шатёр без текстур: заготовка для печати.",
+      tags: "окружение, рынок",
+      mesh: tent,
+      daysAgo: 10,
+    },
+    {
+      name: "Магическая сфера",
+      file: "orb.ply",
+      data: toPly(orb),
+      by: anna,
+      description: "",
+      tags: "эффекты",
+      mesh: orb,
+      daysAgo: 8,
+    },
+    {
+      name: "Колесо телеги",
+      file: "wheel.obj",
+      data: toObj(wheel),
+      by: ivan,
+      description: "Колесо для телеги торговца.",
+      tags: "реквизит",
+      mesh: wheel,
+      daysAgo: 6,
+    },
+    {
+      name: "Скелет-страж",
+      file: "guard.glb",
+      data: toGlb(figure, {
+        skeleton: true,
+        texture: createPng(128, bonePattern),
+        materialName: "Кость",
+      }),
+      by: anna,
+      description: "Страж подземелья.",
+      tags: "враг",
+      mesh: figure,
+      daysAgo: 5,
+    },
+    {
+      name: "Гоблин-лучник",
+      file: "goblin_archer.glb",
+      data: toGlb(figure, {
+        skeleton: true,
+        texture: createPng(128, leatherPattern),
+        materialName: "Кожа",
+      }),
+      by: anna,
+      description: "Враг дальнего боя для первого уровня. Анимации: ходьба, выстрел.",
+      tags: "враг, фэнтези",
+      mesh: figure,
+      daysAgo: 3,
+    },
+    {
+      name: "Рыцарь, базовый",
+      file: "knight_base.glb",
+      data: toGlb(armored, {
+        skeleton: true,
+        texture: createPng(128, metalPattern),
+        materialName: "Броня",
+      }),
+      by: owner,
+      description: "Главный герой, базовая версия.",
+      tags: "средневековье, герой",
+      mesh: armored,
+      daysAgo: 1,
+    },
   ];
 
   const modelIds = new Map<string, number>();
@@ -220,29 +350,132 @@ async function main(): Promise<void> {
     ["Рынок", ["Шатёр торговца", "Бочка с обручами", "Колесо телеги"]],
     ["Персонажи", ["Рыцарь, базовый", "Гоблин-лучник", "Скелет-страж"]],
   ] as [string, string[]][]) {
-    const collection = await db.query<{ id: number }>("INSERT INTO collections (team_id, name) VALUES ($1, $2) RETURNING id", [teamId, name]);
+    const collection = await db.query<{ id: number }>(
+      "INSERT INTO collections (team_id, name) VALUES ($1, $2) RETURNING id",
+      [teamId, name],
+    );
     for (const model of models) {
-      await db.query("INSERT INTO collection_models (collection_id, model_id) VALUES ($1, $2)", [collection.rows[0].id, modelIds.get(model)]);
+      await db.query("INSERT INTO collection_models (collection_id, model_id) VALUES ($1, $2)", [
+        collection.rows[0].id,
+        modelIds.get(model),
+      ]);
     }
   }
 
   const SKELETON_OBJ = "Скелет не сохранён: формат OBJ его не поддерживает";
   const ANIMATION_OBJ = "Анимации не сохранены: формат OBJ их не поддерживает";
   const jobs: JobPlan[] = [
-    { model: "Рыцарь, базовый", by: owner, target: "OBJ", status: "running", hoursAgo: 0.2, upscale: true },
+    {
+      model: "Рыцарь, базовый",
+      by: owner,
+      target: "OBJ",
+      status: "running",
+      hoursAgo: 0.2,
+      upscale: true,
+    },
     { model: "Скелет-страж", by: owner, target: "PLY", status: "queued", hoursAgo: 0.1 },
-    { model: "Колесо телеги", by: owner, target: "STL", status: "failed", hoursAgo: 3, error: "Файл повреждён: в строке 1204 треугольник ссылается на несуществующую вершину. Исправьте файл и загрузите заново." },
-    { model: "Колесо телеги", by: ivan, target: "GLB", status: "done", hoursAgo: 8, similarity: 41, losses: ["Часть геометрии не сохранена: спицы потеряны при переводе"], defects: ["Вывернутые грани: 36", "Отсутствуют текстурные координаты"] },
-    { model: "Гоблин-лучник", by: owner, target: "OBJ", status: "done", hoursAgo: 26, similarity: 72, losses: [SKELETON_OBJ, ANIMATION_OBJ, "Материалы упрощены: свойства «металличность» и «шероховатость» в MTL не переносятся"], defects: ["Дыры в поверхности: 2", "Пустые треугольники: 14"] },
-    { model: "Сундук деревянный", by: owner, target: "GLB", status: "done", hoursAgo: 50, similarity: 94, upscale: true, losses: [], defects: [] },
-    { model: "Магическая сфера", by: owner, target: "OBJ", status: "done", hoursAgo: 74, similarity: 91, losses: [], defects: ["Пустые треугольники: 3"] },
-    { model: "Скелет-страж", by: anna, target: "OBJ", status: "done", hoursAgo: 96, similarity: 99, losses: [SKELETON_OBJ], defects: [] },
-    { model: "Бочка с обручами", by: ivan, target: "STL", status: "failed", hoursAgo: 120, error: "Не найдена текстура: файл barrel.png отсутствует в архиве" },
-    { model: "Шатёр торговца", by: anna, target: "GLB", status: "failed", hoursAgo: 200, error: "Файл повреждён: в строке 1204 треугольник ссылается на несуществующую вершину. Исправьте файл и загрузите заново." },
+    {
+      model: "Колесо телеги",
+      by: owner,
+      target: "STL",
+      status: "failed",
+      hoursAgo: 3,
+      error:
+        "Файл повреждён: в строке 1204 треугольник ссылается на несуществующую вершину. Исправьте файл и загрузите заново.",
+    },
+    {
+      model: "Колесо телеги",
+      by: ivan,
+      target: "GLB",
+      status: "done",
+      hoursAgo: 8,
+      similarity: 41,
+      losses: ["Часть геометрии не сохранена: спицы потеряны при переводе"],
+      defects: ["Вывернутые грани: 36", "Отсутствуют текстурные координаты"],
+    },
+    {
+      model: "Гоблин-лучник",
+      by: owner,
+      target: "OBJ",
+      status: "done",
+      hoursAgo: 26,
+      similarity: 72,
+      losses: [
+        SKELETON_OBJ,
+        ANIMATION_OBJ,
+        "Материалы упрощены: свойства «металличность» и «шероховатость» в MTL не переносятся",
+      ],
+      defects: ["Дыры в поверхности: 2", "Пустые треугольники: 14"],
+    },
+    {
+      model: "Сундук деревянный",
+      by: owner,
+      target: "GLB",
+      status: "done",
+      hoursAgo: 50,
+      similarity: 94,
+      upscale: true,
+      losses: [],
+      defects: [],
+    },
+    {
+      model: "Магическая сфера",
+      by: owner,
+      target: "OBJ",
+      status: "done",
+      hoursAgo: 74,
+      similarity: 91,
+      losses: [],
+      defects: ["Пустые треугольники: 3"],
+    },
+    {
+      model: "Скелет-страж",
+      by: anna,
+      target: "OBJ",
+      status: "done",
+      hoursAgo: 96,
+      similarity: 99,
+      losses: [SKELETON_OBJ],
+      defects: [],
+    },
+    {
+      model: "Бочка с обручами",
+      by: ivan,
+      target: "STL",
+      status: "failed",
+      hoursAgo: 120,
+      error: "Не найдена текстура: файл barrel.png отсутствует в архиве",
+    },
+    {
+      model: "Шатёр торговца",
+      by: anna,
+      target: "GLB",
+      status: "failed",
+      hoursAgo: 200,
+      error:
+        "Файл повреждён: в строке 1204 треугольник ссылается на несуществующую вершину. Исправьте файл и загрузите заново.",
+    },
   ];
 
-  const extraTargets: JobPlan["target"][] = ["OBJ", "GLB", "OBJ", "STL", "OBJ", "GLB", "PLY", "OBJ", "GLB", "OBJ"];
-  const extraModels = ["Сундук деревянный", "Гоблин-лучник", "Бочка с обручами", "Шатёр торговца", "Скелет-страж"];
+  const extraTargets: JobPlan["target"][] = [
+    "OBJ",
+    "GLB",
+    "OBJ",
+    "STL",
+    "OBJ",
+    "GLB",
+    "PLY",
+    "OBJ",
+    "GLB",
+    "OBJ",
+  ];
+  const extraModels = [
+    "Сундук деревянный",
+    "Гоблин-лучник",
+    "Бочка с обручами",
+    "Шатёр торговца",
+    "Скелет-страж",
+  ];
   const authors = [owner, anna, ivan];
   for (let i = 0; i < 24; i++) {
     jobs.push({
@@ -250,7 +483,7 @@ async function main(): Promise<void> {
       by: authors[i % authors.length],
       target: extraTargets[i % extraTargets.length],
       status: "done",
-      hoursAgo: 30 + (i * 13) % 300,
+      hoursAgo: 30 + ((i * 13) % 300),
     });
   }
 
@@ -275,18 +508,38 @@ async function main(): Promise<void> {
                CASE WHEN $5::varchar = 'queued' THEN NULL ELSE now() - $7 * interval '1 hour' END,
                CASE WHEN $8::boolean THEN now() - $7 * interval '1 hour' + interval '40 seconds' END)
        RETURNING id`,
-      [versionId, job.by.id, job.target, job.upscale === true, job.status, job.error ?? null, job.hoursAgo, finished],
+      [
+        versionId,
+        job.by.id,
+        job.target,
+        job.upscale === true,
+        job.status,
+        job.error ?? null,
+        job.hoursAgo,
+        finished,
+      ],
     );
     const jobId = created.rows[0].id;
 
     if (job.status === "done" && job.similarity !== undefined) {
       const data = formatFile(meshes.get(job.model)!, job.target);
-      const storagePath = posix.join(dirname(filePath).replace(/\\/g, "/"), `job-${jobId}.${job.target.toLowerCase()}`);
+      const storagePath = posix.join(
+        dirname(filePath).replace(/\\/g, "/"),
+        `job-${jobId}.${job.target.toLowerCase()}`,
+      );
       await writeFile(absolutePath(storagePath), data);
       await db.query(
         `INSERT INTO files (job_id, format, file_name, storage_path, size_bytes, checksum, created_at)
          VALUES ($1, $2, $3, $4, $5, $6, now() - $7 * interval '1 hour')`,
-        [jobId, job.target, `${job.model}.${job.target.toLowerCase()}`, storagePath, data.length, createHash("sha256").update(data).digest("hex"), job.hoursAgo],
+        [
+          jobId,
+          job.target,
+          `${job.model}.${job.target.toLowerCase()}`,
+          storagePath,
+          data.length,
+          createHash("sha256").update(data).digest("hex"),
+          job.hoursAgo,
+        ],
       );
 
       const check = await db.query<{ id: number }>(
@@ -295,10 +548,16 @@ async function main(): Promise<void> {
         [jobId, job.similarity, job.similarity < 80, job.hoursAgo],
       );
       for (const message of job.losses ?? []) {
-        await db.query("INSERT INTO quality_issues (check_id, kind, message) VALUES ($1, 'loss', $2)", [check.rows[0].id, message]);
+        await db.query(
+          "INSERT INTO quality_issues (check_id, kind, message) VALUES ($1, 'loss', $2)",
+          [check.rows[0].id, message],
+        );
       }
       for (const message of job.defects ?? []) {
-        await db.query("INSERT INTO quality_issues (check_id, kind, message) VALUES ($1, 'defect', $2)", [check.rows[0].id, message]);
+        await db.query(
+          "INSERT INTO quality_issues (check_id, kind, message) VALUES ($1, 'defect', $2)",
+          [check.rows[0].id, message],
+        );
       }
 
       if (job.upscale) {
@@ -309,20 +568,37 @@ async function main(): Promise<void> {
         if (texture.rows[0]) {
           const size = 256;
           const image = createPng(size, woodPattern);
-          const improvedPath = posix.join(dirname(filePath).replace(/\\/g, "/"), `improved-${texture.rows[0].id}.png`);
+          const improvedPath = posix.join(
+            dirname(filePath).replace(/\\/g, "/"),
+            `improved-${texture.rows[0].id}.png`,
+          );
           await writeFile(absolutePath(improvedPath), image);
           await db.query(
             `INSERT INTO textures (source_texture_id, file_name, storage_path, width, height, size_bytes)
              VALUES ($1, $2, $3, $4, $4, $5)`,
-            [texture.rows[0].id, `improved-${texture.rows[0].file_name.split("/").pop()}`, improvedPath, size, image.length],
+            [
+              texture.rows[0].id,
+              `improved-${texture.rows[0].file_name.split("/").pop()}`,
+              improvedPath,
+              size,
+              image.length,
+            ],
           );
         }
       }
     }
   }
 
-  for (const [user, hours] of [[owner, 1], [anna, 5], [ivan, 9], [viewer, 28]] as [UserRow, number][]) {
-    await db.query("INSERT INTO action_log (user_id, action, created_at) VALUES ($1, 'login', now() - $2 * interval '1 hour')", [user.id, hours]);
+  for (const [user, hours] of [
+    [owner, 1],
+    [anna, 5],
+    [ivan, 9],
+    [viewer, 28],
+  ] as [UserRow, number][]) {
+    await db.query(
+      "INSERT INTO action_log (user_id, action, created_at) VALUES ($1, 'login', now() - $2 * interval '1 hour')",
+      [user.id, hours],
+    );
   }
   await db.query(
     "INSERT INTO action_log (user_id, team_id, action, details, created_at) VALUES ($1, $2, 'download', $3, now() - interval '4 hours')",
@@ -338,7 +614,9 @@ async function main(): Promise<void> {
   console.log(`  наблюдатель:   viewer@${DEMO_DOMAIN}`);
   console.log(`  администратор: admin@${DEMO_DOMAIN}`);
   console.log("");
-  console.log("Войдите сначала как владелец и откройте каталог: браузер нарисует превью всех моделей.");
+  console.log(
+    "Войдите сначала как владелец и откройте каталог: браузер нарисует превью всех моделей.",
+  );
 }
 
 try {

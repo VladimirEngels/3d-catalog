@@ -1,4 +1,3 @@
-
 import { h } from "@shared/ui/dom";
 import type { Material, Mesh, Object3D } from "three";
 import type { ModelView } from "../api";
@@ -24,7 +23,8 @@ export async function showViewer(container: HTMLElement, view: ModelView): Promi
     model = await loadModel(view);
   } catch (error) {
     console.warn("Не удалось загрузить модель:", error);
-    message.textContent = "Не удалось показать модель. Файл можно скачать и открыть в другой программе.";
+    message.textContent =
+      "Не удалось показать модель. Файл можно скачать и открыть в другой программе.";
     renderer.dispose();
     return () => message.remove();
   }
@@ -62,7 +62,11 @@ export async function showViewer(container: HTMLElement, view: ModelView): Promi
     }
   }
 
-  const modes: [ViewMode, string][] = [["normal", "Обычный"], ["wireframe", "Каркас"], ["plain", "Без текстур"]];
+  const modes: [ViewMode, string][] = [
+    ["normal", "Обычный"],
+    ["wireframe", "Каркас"],
+    ["plain", "Без текстур"],
+  ];
   const toolbar = h("div", { class: "viewer-tools" });
   const buttons: HTMLElement[] = [];
   for (const [mode, label] of modes) {
@@ -77,7 +81,11 @@ export async function showViewer(container: HTMLElement, view: ModelView): Promi
     toolbar.append(button);
   }
   buttons[0].classList.add("on");
-  const hint = h("div", { class: "viewer-hint" }, "Вращать — левая кнопка мыши · Приблизить — колёсико · Сбросить вид — двойной щелчок");
+  const hint = h(
+    "div",
+    { class: "viewer-hint" },
+    "Вращать — левая кнопка мыши · Приблизить — колёсико · Сбросить вид — двойной щелчок",
+  );
   container.append(toolbar, hint);
 
   function resize(): void {

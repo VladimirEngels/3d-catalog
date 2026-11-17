@@ -1,4 +1,3 @@
-
 import { readFile } from "node:fs/promises";
 import { AppError } from "../../errors";
 import type { ModelSource } from "./archive";
@@ -19,7 +18,10 @@ export async function parseModel(source: ModelSource): Promise<ParsedModel> {
     if (error instanceof ModelFileError) {
       throw new AppError(400, error.message);
     }
-    throw new AppError(400, `Не удалось прочитать файл ${source.format}: он повреждён или имеет неверный формат`);
+    throw new AppError(
+      400,
+      `Не удалось прочитать файл ${source.format}: он повреждён или имеет неверный формат`,
+    );
   }
 
   checkResult(parsed);
@@ -28,11 +30,16 @@ export async function parseModel(source: ModelSource): Promise<ParsedModel> {
 
 function parseByFormat(data: Buffer, source: ModelSource): ParsedModel {
   switch (source.format) {
-    case "STL": return parseStl(data);
-    case "OBJ": return parseObj(data, source.findFile);
-    case "PLY": return parsePly(data);
-    case "GLTF": return parseGltf(data, false, source.findFile);
-    case "GLB": return parseGltf(data, true, source.findFile);
+    case "STL":
+      return parseStl(data);
+    case "OBJ":
+      return parseObj(data, source.findFile);
+    case "PLY":
+      return parsePly(data);
+    case "GLTF":
+      return parseGltf(data, false, source.findFile);
+    case "GLB":
+      return parseGltf(data, true, source.findFile);
   }
 }
 
@@ -41,7 +48,11 @@ function checkResult(parsed: ParsedModel): void {
     throw new AppError(400, "В файле нет геометрии: не найдено ни одной вершины");
   }
   const sizeIsValid = parsed.size.every((value) => Number.isFinite(value) && value >= 0);
-  if (!sizeIsValid || parsed.triangles > MAX_DATABASE_INTEGER || parsed.vertices > MAX_DATABASE_INTEGER) {
+  if (
+    !sizeIsValid ||
+    parsed.triangles > MAX_DATABASE_INTEGER ||
+    parsed.vertices > MAX_DATABASE_INTEGER
+  ) {
     throw new AppError(400, "Файл содержит неверные данные: не удалось определить размеры модели");
   }
 }

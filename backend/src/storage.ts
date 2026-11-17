@@ -1,4 +1,3 @@
-
 import { createHash, randomUUID } from "node:crypto";
 import { createReadStream } from "node:fs";
 import { mkdir, rm } from "node:fs/promises";
@@ -30,7 +29,10 @@ export async function verifyStoredFile(relativePath: string, checksum: string): 
     hash.update(chunk);
   }
   if (hash.digest("hex") !== checksum) {
-    throw new AppError(409, "Файл в хранилище повреждён. Восстановите исходный файл перед скачиванием");
+    throw new AppError(
+      409,
+      "Файл в хранилище повреждён. Восстановите исходный файл перед скачиванием",
+    );
   }
 }
 

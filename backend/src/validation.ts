@@ -1,4 +1,3 @@
-
 import { AppError } from "./errors";
 
 export function readText(value: unknown): string {

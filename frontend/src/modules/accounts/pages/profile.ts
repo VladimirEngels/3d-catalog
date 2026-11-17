@@ -13,21 +13,35 @@ import "../accounts.css";
 const main = await mountLayout("");
 const session = await getSession();
 
-
-const currentInput = createInput({ type: "password", required: "", autocomplete: "current-password" });
-const newInput = createInput({ type: "password", required: "", minlength: "8", autocomplete: "new-password" });
+const currentInput = createInput({
+  type: "password",
+  required: "",
+  autocomplete: "current-password",
+});
+const newInput = createInput({
+  type: "password",
+  required: "",
+  minlength: "8",
+  autocomplete: "new-password",
+});
 const repeatInput = createInput({ type: "password", required: "", autocomplete: "new-password" });
 const errorBox = h("div", { class: "err-text", role: "alert" });
 const successBox = h("div", { class: "success-text", role: "status" });
 
-const passwordForm = h("form", { class: "profile-section" },
+const passwordForm = h(
+  "form",
+  { class: "profile-section" },
   h("h3", { class: "chart-title" }, "Смена пароля"),
   field("Текущий пароль", currentInput),
   field("Новый пароль", newInput, "Не короче 8 символов"),
   field("Новый пароль ещё раз", repeatInput),
   errorBox,
   successBox,
-  h("div", { class: "form-actions" }, h("button", { class: "btn primary", type: "submit" }, "Сохранить")),
+  h(
+    "div",
+    { class: "form-actions" },
+    h("button", { class: "btn primary", type: "submit" }, "Сохранить"),
+  ),
 );
 
 passwordForm.addEventListener("submit", async (event) => {
@@ -46,11 +60,14 @@ passwordForm.addEventListener("submit", async (event) => {
   }
 });
 
-
 function buildTeamRow(team: TeamMembership): HTMLElement {
   const leaveButton = h("button", { class: "btn link", type: "button" }, "Выйти из команды");
   leaveButton.addEventListener("click", async () => {
-    const agreed = await confirmAction(`Выйти из команды «${team.teamName}»?`, "Вернуться можно будет только по новому приглашению.", "Выйти");
+    const agreed = await confirmAction(
+      `Выйти из команды «${team.teamName}»?`,
+      "Вернуться можно будет только по новому приглашению.",
+      "Выйти",
+    );
     if (!agreed) {
       return;
     }
@@ -62,7 +79,9 @@ function buildTeamRow(team: TeamMembership): HTMLElement {
     }
   });
 
-  return h("li", {},
+  return h(
+    "li",
+    {},
     h("div", { class: "invite-info" }, team.teamName, h("small", {}, roleName[team.role])),
     leaveButton,
   );
@@ -81,18 +100,31 @@ invitationsPanel.hidden = true;
 
 main.append(
   pageHead("Профиль"),
-  h("div", { class: "cols-even profile-grid" },
-    h("div", { class: "panel" },
+  h(
+    "div",
+    { class: "cols-even profile-grid" },
+    h(
+      "div",
+      { class: "panel" },
       h("h3", { class: "chart-title" }, "Учётная запись"),
       field("Имя", createInput({ type: "text", readonly: "", value: session.user.name })),
-      field("Электронная почта", createInput({ type: "email", readonly: "", value: session.user.email })),
+      field(
+        "Электронная почта",
+        createInput({ type: "email", readonly: "", value: session.user.email }),
+      ),
       passwordForm,
     ),
-    h("div", {},
+    h(
+      "div",
+      {},
       invitationsPanel,
-      h("div", { class: "panel" },
+      h(
+        "div",
+        { class: "panel" },
         h("h3", { class: "chart-title" }, "Мои команды"),
-        session.teams.length > 0 ? teamList : h("div", { class: "hint" }, "Вы пока не состоите ни в одной команде"),
+        session.teams.length > 0
+          ? teamList
+          : h("div", { class: "hint" }, "Вы пока не состоите ни в одной команде"),
         newTeamButton,
       ),
     ),

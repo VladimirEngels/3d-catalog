@@ -1,4 +1,3 @@
-
 import type { NextFunction, Request, Response } from "express";
 import { AppError } from "../errors";
 import { findUserBySession, type UserRow } from "../modules/accounts/repository";

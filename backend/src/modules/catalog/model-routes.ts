@@ -1,4 +1,3 @@
-
 import { Router, type Response } from "express";
 import { access } from "node:fs/promises";
 import type { Readable } from "node:stream";
@@ -56,59 +55,66 @@ function texturesForClient(textures: TextureRow[]) {
         width: texture.width,
         height: texture.height,
         sizeBytes: Number(texture.size_bytes),
-        improved: improved ? { id: improved.id, width: improved.width, height: improved.height } : null,
+        improved: improved
+          ? { id: improved.id, width: improved.width, height: improved.height }
+          : null,
       };
     });
 }
 
-modelRouter.get("/teams/:teamId/models/:modelId", requireAuth, requireTeamRole("viewer"), async (req, res) => {
-  const model = await requireModel(res, req.params.modelId);
-  const versions = await repository.listVersions(model.id);
-  const current = versions[0];
+modelRouter.get(
+  "/teams/:teamId/models/:modelId",
+  requireAuth,
+  requireTeamRole("viewer"),
+  async (req, res) => {
+    const model = await requireModel(res, req.params.modelId);
+    const versions = await repository.listVersions(model.id);
+    const current = versions[0];
 
-  const [tags, collections, materials, files, textures] = await Promise.all([
-    repository.listTags(model.id),
-    repository.listModelCollections(model.id),
-    repository.listMaterials(current.id),
-    repository.listAllVersionFiles(current.id),
-    repository.listAllVersionTextures(current.id),
-  ]);
+    const [tags, collections, materials, files, textures] = await Promise.all([
+      repository.listTags(model.id),
+      repository.listModelCollections(model.id),
+      repository.listMaterials(current.id),
+      repository.listAllVersionFiles(current.id),
+      repository.listAllVersionTextures(current.id),
+    ]);
 
-  res.json({
-    id: model.id,
-    name: model.name,
-    description: model.description,
-    authorName: model.author_name,
-    createdAt: model.created_at,
-    updatedAt: model.updated_at,
-    canEdit: canEdit(res, model),
-    canDelete: res.locals.team.role === "owner",
-    tags: tags.map((tag) => ({ name: tag.name, isAuto: tag.is_auto })),
-    collections,
-    current: {
-      versionId: current.id,
-      versionNumber: current.version_number,
-      format: files[0].format,
-      triangles: current.triangles_count,
-      vertices: current.vertices_count,
-      hasSkeleton: current.has_skeleton,
-      size: [current.size_x, current.size_y, current.size_z],
-      sizeBytes: Number(current.size_bytes),
-      hasPreview: current.preview_path !== null,
-      materials,
-    },
-    files: files.map(fileForClient),
-    textures: texturesForClient(textures),
-    versions: versions.map((version) => ({
-      id: version.id,
-      number: version.version_number,
-      comment: version.comment,
-      triangles: version.triangles_count,
-      sizeBytes: Number(version.size_bytes),
-      createdAt: version.created_at,
-    })),
-  });
-});
+    res.json({
+      id: model.id,
+      name: model.name,
+      description: model.description,
+      authorName: model.author_name,
+      createdAt: model.created_at,
+      updatedAt: model.updated_at,
+      canEdit: canEdit(res, model),
+      canDelete: res.locals.team.role === "owner",
+      tags: tags.map((tag) => ({ name: tag.name, isAuto: tag.is_auto })),
+      collections,
+      current: {
+        versionId: current.id,
+        versionNumber: current.version_number,
+        format: files[0].format,
+        triangles: current.triangles_count,
+        vertices: current.vertices_count,
+        hasSkeleton: current.has_skeleton,
+        size: [current.size_x, current.size_y, current.size_z],
+        sizeBytes: Number(current.size_bytes),
+        hasPreview: current.preview_path !== null,
+        materials,
+      },
+      files: files.map(fileForClient),
+      textures: texturesForClient(textures),
+      versions: versions.map((version) => ({
+        id: version.id,
+        number: version.version_number,
+        comment: version.comment,
+        triangles: version.triangles_count,
+        sizeBytes: Number(version.size_bytes),
+        createdAt: version.created_at,
+      })),
+    });
+  },
+);
 
 function readTags(value: unknown): string[] {
   if (!Array.isArray(value)) {
@@ -130,65 +136,95 @@ function readTags(value: unknown): string[] {
   return [...tags];
 }
 
-modelRouter.patch("/teams/:teamId/models/:modelId", requireAuth, requireTeamRole("member"), async (req, res) => {
-  const model = await requireModel(res, req.params.modelId);
-  if (!canEdit(res, model)) {
-    throw new AppError(403, "Изменять описание и теги может автор модели или владелец команды");
-  }
-
-  const description = readText(req.body?.description).trim();
-  if (description.length > MAX_DESCRIPTION_LENGTH) {
-    throw new AppError(400, `Описание должно быть не длиннее ${MAX_DESCRIPTION_LENGTH} символов`);
-  }
-  const tags = readTags(req.body?.tags);
-
-  await repository.updateDescription(model.id, description || null);
-  await repository.replaceManualTags(res.locals.team.id, model.id, tags);
-  await repository.logModelAction(res.locals.user.id, res.locals.team.id, "update", `Изменены описание и теги модели «${model.name}»`);
-  log("INFO", `Модель изменена: ${model.id}`);
-  res.status(204).end();
-});
-
-modelRouter.delete("/teams/:teamId/models/:modelId", requireAuth, requireTeamRole("owner"), async (req, res) => {
-  const model = await requireModel(res, req.params.modelId);
-  const paths = await transaction(async client => {
-    await lockTeam(client, res.locals.team.id);
-    const paths = await repository.listModelStoragePaths(model.id, client);
-    await repository.deleteModel(model.id, client);
-    return paths;
-  });
-  await removeFoldersOfFiles(paths);
-
-  await repository.logModelAction(res.locals.user.id, res.locals.team.id, "delete", `Удалена модель «${model.name}»`);
-  log("INFO", `Модель удалена: ${model.id}`);
-  res.status(204).end();
-});
-
-modelRouter.get("/teams/:teamId/models/:modelId/files/:fileId/download", requireAuth, requireTeamRole("viewer"), async (req, res) => {
-  const model = await requireModel(res, req.params.modelId);
-  const fileId = readId(req.params.fileId);
-
-  const versions = await repository.listVersions(model.id);
-  let file: FileRow | undefined;
-  for (const version of versions) {
-    file = (await repository.listAllVersionFiles(version.id)).find((item) => item.id === fileId);
-    if (file) {
-      break;
+modelRouter.patch(
+  "/teams/:teamId/models/:modelId",
+  requireAuth,
+  requireTeamRole("member"),
+  async (req, res) => {
+    const model = await requireModel(res, req.params.modelId);
+    if (!canEdit(res, model)) {
+      throw new AppError(403, "Изменять описание и теги может автор модели или владелец команды");
     }
-  }
-  if (!file) {
-    throw new AppError(404, "Файл не найден");
-  }
 
-  await verifyStoredFile(file.storage_path, file.checksum);
-  const fileName = posix.basename(file.file_name);
-  await repository.logModelAction(res.locals.user.id, res.locals.team.id, "download", `Скачан файл ${fileName} модели «${model.name}»`);
+    const description = readText(req.body?.description).trim();
+    if (description.length > MAX_DESCRIPTION_LENGTH) {
+      throw new AppError(400, `Описание должно быть не длиннее ${MAX_DESCRIPTION_LENGTH} символов`);
+    }
+    const tags = readTags(req.body?.tags);
 
-  res.setHeader("X-Content-Type-Options", "nosniff");
-  res.attachment(fileName);
-  res.type("application/octet-stream");
-  res.sendFile(absolutePath(file.storage_path), { dotfiles: "allow" });
-});
+    await repository.updateDescription(model.id, description || null);
+    await repository.replaceManualTags(res.locals.team.id, model.id, tags);
+    await repository.logModelAction(
+      res.locals.user.id,
+      res.locals.team.id,
+      "update",
+      `Изменены описание и теги модели «${model.name}»`,
+    );
+    log("INFO", `Модель изменена: ${model.id}`);
+    res.status(204).end();
+  },
+);
+
+modelRouter.delete(
+  "/teams/:teamId/models/:modelId",
+  requireAuth,
+  requireTeamRole("owner"),
+  async (req, res) => {
+    const model = await requireModel(res, req.params.modelId);
+    const paths = await transaction(async (client) => {
+      await lockTeam(client, res.locals.team.id);
+      const paths = await repository.listModelStoragePaths(model.id, client);
+      await repository.deleteModel(model.id, client);
+      return paths;
+    });
+    await removeFoldersOfFiles(paths);
+
+    await repository.logModelAction(
+      res.locals.user.id,
+      res.locals.team.id,
+      "delete",
+      `Удалена модель «${model.name}»`,
+    );
+    log("INFO", `Модель удалена: ${model.id}`);
+    res.status(204).end();
+  },
+);
+
+modelRouter.get(
+  "/teams/:teamId/models/:modelId/files/:fileId/download",
+  requireAuth,
+  requireTeamRole("viewer"),
+  async (req, res) => {
+    const model = await requireModel(res, req.params.modelId);
+    const fileId = readId(req.params.fileId);
+
+    const versions = await repository.listVersions(model.id);
+    let file: FileRow | undefined;
+    for (const version of versions) {
+      file = (await repository.listAllVersionFiles(version.id)).find((item) => item.id === fileId);
+      if (file) {
+        break;
+      }
+    }
+    if (!file) {
+      throw new AppError(404, "Файл не найден");
+    }
+
+    await verifyStoredFile(file.storage_path, file.checksum);
+    const fileName = posix.basename(file.file_name);
+    await repository.logModelAction(
+      res.locals.user.id,
+      res.locals.team.id,
+      "download",
+      `Скачан файл ${fileName} модели «${model.name}»`,
+    );
+
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.attachment(fileName);
+    res.type("application/octet-stream");
+    res.sendFile(absolutePath(file.storage_path), { dotfiles: "allow" });
+  },
+);
 
 function uniqueName(name: string, used: Set<string>): string {
   let result = name;
@@ -202,54 +238,73 @@ function uniqueName(name: string, used: Set<string>): string {
   return result;
 }
 
-modelRouter.get("/teams/:teamId/models/:modelId/versions/:versionId/download", requireAuth, requireTeamRole("viewer"), async (req, res, next) => {
-  const model = await requireModel(res, req.params.modelId);
-  const version = await repository.findVersion(res.locals.team.id, model.id, readId(req.params.versionId));
-  if (!version) {
-    throw new AppError(404, "Версия не найдена");
-  }
+modelRouter.get(
+  "/teams/:teamId/models/:modelId/versions/:versionId/download",
+  requireAuth,
+  requireTeamRole("viewer"),
+  async (req, res, next) => {
+    const model = await requireModel(res, req.params.modelId);
+    const version = await repository.findVersion(
+      res.locals.team.id,
+      model.id,
+      readId(req.params.versionId),
+    );
+    if (!version) {
+      throw new AppError(404, "Версия не найдена");
+    }
 
-  const allFiles = await repository.listAllVersionFiles(version.id);
-  const uploaded = allFiles.filter((file) => file.job_id === null);
-  const textures = uploaded[0].format === "GLB"
-    ? []
-    : (await repository.listAllVersionTextures(version.id)).filter((texture) => texture.source_texture_id === null);
+    const allFiles = await repository.listAllVersionFiles(version.id);
+    const uploaded = allFiles.filter((file) => file.job_id === null);
+    const textures =
+      uploaded[0].format === "GLB"
+        ? []
+        : (await repository.listAllVersionTextures(version.id)).filter(
+            (texture) => texture.source_texture_id === null,
+          );
 
-  for (const file of uploaded) {
-    await verifyStoredFile(file.storage_path, file.checksum);
-  }
+    for (const file of uploaded) {
+      await verifyStoredFile(file.storage_path, file.checksum);
+    }
 
-  await repository.logModelAction(res.locals.user.id, res.locals.team.id, "download", `Скачана версия ${version.version_number} модели «${model.name}»`);
-  res.setHeader("X-Content-Type-Options", "nosniff");
+    await repository.logModelAction(
+      res.locals.user.id,
+      res.locals.team.id,
+      "download",
+      `Скачана версия ${version.version_number} модели «${model.name}»`,
+    );
+    res.setHeader("X-Content-Type-Options", "nosniff");
 
-  if (uploaded.length === 1 && textures.length === 0) {
-    res.attachment(posix.basename(uploaded[0].file_name));
-    res.type("application/octet-stream");
-    res.sendFile(absolutePath(uploaded[0].storage_path), { dotfiles: "allow" });
-    return;
-  }
+    if (uploaded.length === 1 && textures.length === 0) {
+      res.attachment(posix.basename(uploaded[0].file_name));
+      res.type("application/octet-stream");
+      res.sendFile(absolutePath(uploaded[0].storage_path), { dotfiles: "allow" });
+      return;
+    }
 
-  await Promise.all([...uploaded, ...textures].map((item) => access(absolutePath(item.storage_path))));
-  const archive = new yazl.ZipFile();
-  const output = archive.outputStream as Readable;
-  let failed = false;
-  const failArchive = (error: Error) => {
-    if (failed) return;
-    failed = true;
-    output.unpipe(res);
-    output.destroy();
-    next(error);
-  };
-  archive.on("error", failArchive);
-  output.on("error", failArchive);
-  res.on("close", () => output.destroy());
-  const used = new Set<string>();
-  for (const item of [...uploaded, ...textures]) {
-    archive.addFile(absolutePath(item.storage_path), uniqueName(item.file_name, used));
-  }
-  archive.end();
+    await Promise.all(
+      [...uploaded, ...textures].map((item) => access(absolutePath(item.storage_path))),
+    );
+    const archive = new yazl.ZipFile();
+    const output = archive.outputStream as Readable;
+    let failed = false;
+    const failArchive = (error: Error) => {
+      if (failed) return;
+      failed = true;
+      output.unpipe(res);
+      output.destroy();
+      next(error);
+    };
+    archive.on("error", failArchive);
+    output.on("error", failArchive);
+    res.on("close", () => output.destroy());
+    const used = new Set<string>();
+    for (const item of [...uploaded, ...textures]) {
+      archive.addFile(absolutePath(item.storage_path), uniqueName(item.file_name, used));
+    }
+    archive.end();
 
-  res.attachment(`${model.name.replace(/[\\/:*?"<>|]/g, "_")}-v${version.version_number}.zip`);
-  res.type("application/zip");
-  archive.outputStream.pipe(res);
-});
+    res.attachment(`${model.name.replace(/[\\/:*?"<>|]/g, "_")}-v${version.version_number}.zip`);
+    res.type("application/zip");
+    archive.outputStream.pipe(res);
+  },
+);

@@ -1,4 +1,3 @@
-
 export interface FoundFile {
   name: string;
   path: string;
@@ -6,9 +5,7 @@ export interface FoundFile {
 
 export type FindFile = (reference: string) => FoundFile | undefined;
 
-export type TextureSource =
-  | { name: string; path: string }
-  | { name: string; bytes: Buffer };
+export type TextureSource = { name: string; path: string } | { name: string; bytes: Buffer };
 
 export interface ParsedModel {
   triangles: number;

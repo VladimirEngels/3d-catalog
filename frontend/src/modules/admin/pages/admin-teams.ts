@@ -16,10 +16,18 @@ if (!session.user.isAdmin) {
 }
 
 function buildRow(team: AdminTeam, reload: () => void): HTMLElement {
-  const action = h("button", { class: "btn small", type: "button" }, team.isBlocked ? "Разблокировать" : "Заблокировать");
+  const action = h(
+    "button",
+    { class: "btn small", type: "button" },
+    team.isBlocked ? "Разблокировать" : "Заблокировать",
+  );
   action.addEventListener("click", async () => {
     if (!team.isBlocked) {
-      const agreed = await confirmAction(`Заблокировать команду «${team.name}»?`, "Её участники потеряют доступ к каталогу. Данные сохранятся, команду можно разблокировать.", "Заблокировать");
+      const agreed = await confirmAction(
+        `Заблокировать команду «${team.name}»?`,
+        "Её участники потеряют доступ к каталогу. Данные сохранятся, команду можно разблокировать.",
+        "Заблокировать",
+      );
       if (!agreed) {
         return;
       }
@@ -32,13 +40,23 @@ function buildRow(team: AdminTeam, reload: () => void): HTMLElement {
     }
   });
 
-  return h("tr", {},
+  return h(
+    "tr",
+    {},
     h("td", {}, team.name),
     h("td", {}, team.ownerEmails.join(", ") || "—"),
     h("td", {}, formatNumber(team.memberCount)),
     h("td", {}, formatNumber(team.modelCount)),
     h("td", {}, formatBytes(team.diskBytes)),
-    h("td", {}, h("span", { class: team.isBlocked ? "status blocked" : "status done" }, team.isBlocked ? "Заблокирована" : "Активна")),
+    h(
+      "td",
+      {},
+      h(
+        "span",
+        { class: team.isBlocked ? "status blocked" : "status done" },
+        team.isBlocked ? "Заблокирована" : "Активна",
+      ),
+    ),
     h("td", {}, action),
   );
 }

@@ -1,4 +1,3 @@
-
 import { Router, type Request } from "express";
 import { AppError } from "../../errors";
 import { log } from "../../logger";
@@ -34,7 +33,6 @@ function readSmallNumber(value: unknown): number | null {
   return /^\d{1,9}$/.test(text) ? Number(text) : null;
 }
 
-
 adminRouter.get("/teams/:teamId/log", requireAuth, requireTeamRole("owner"), async (req, res) => {
   const action = readText(req.query.action);
   const page = readPage(req);
@@ -62,10 +60,14 @@ adminRouter.get("/teams/:teamId/log", requireAuth, requireTeamRole("owner"), asy
   });
 });
 
-adminRouter.get("/teams/:teamId/summary", requireAuth, requireTeamRole("owner"), async (req, res) => {
-  res.json(await repository.getTeamSummary(res.locals.team.id, readPeriod(req)));
-});
-
+adminRouter.get(
+  "/teams/:teamId/summary",
+  requireAuth,
+  requireTeamRole("owner"),
+  async (req, res) => {
+    res.json(await repository.getTeamSummary(res.locals.team.id, readPeriod(req)));
+  },
+);
 
 adminRouter.get("/admin/stats", requireAuth, requireSystemAdmin, async (req, res) => {
   res.json(await repository.getSystemStats(readPeriod(req)));
@@ -73,7 +75,12 @@ adminRouter.get("/admin/stats", requireAuth, requireSystemAdmin, async (req, res
 
 adminRouter.get("/admin/users", requireAuth, requireSystemAdmin, async (req, res) => {
   const page = readPage(req);
-  const rows = await repository.listUsers(readText(req.query.q).trim().slice(0, 200), readStatus(req), PAGE_SIZE, page * PAGE_SIZE);
+  const rows = await repository.listUsers(
+    readText(req.query.q).trim().slice(0, 200),
+    readStatus(req),
+    PAGE_SIZE,
+    page * PAGE_SIZE,
+  );
   res.json({
     items: rows.map((row) => ({
       id: row.id,
@@ -93,7 +100,12 @@ adminRouter.get("/admin/users", requireAuth, requireSystemAdmin, async (req, res
 
 adminRouter.get("/admin/teams", requireAuth, requireSystemAdmin, async (req, res) => {
   const page = readPage(req);
-  const rows = await repository.listTeams(readText(req.query.q).trim().slice(0, 200), readStatus(req), PAGE_SIZE, page * PAGE_SIZE);
+  const rows = await repository.listTeams(
+    readText(req.query.q).trim().slice(0, 200),
+    readStatus(req),
+    PAGE_SIZE,
+    page * PAGE_SIZE,
+  );
   res.json({
     items: rows.map((row) => ({
       id: row.id,
@@ -127,7 +139,10 @@ adminRouter.patch("/admin/users/:userId", requireAuth, requireSystemAdmin, async
   if (!(await repository.setUserBlocked(userId, blocked))) {
     throw new AppError(404, "Пользователь не найден");
   }
-  log("INFO", `Пользователь ${userId}: ${blocked ? "заблокирован" : "разблокирован"}, администратор ${res.locals.user.email}`);
+  log(
+    "INFO",
+    `Пользователь ${userId}: ${blocked ? "заблокирован" : "разблокирован"}, администратор ${res.locals.user.email}`,
+  );
   res.status(204).end();
 });
 
@@ -137,6 +152,9 @@ adminRouter.patch("/admin/teams/:teamId", requireAuth, requireSystemAdmin, async
   if (!(await repository.setTeamBlocked(teamId, blocked))) {
     throw new AppError(404, "Команда не найдена");
   }
-  log("INFO", `Команда ${teamId}: ${blocked ? "заблокирована" : "разблокирована"}, администратор ${res.locals.user.email}`);
+  log(
+    "INFO",
+    `Команда ${teamId}: ${blocked ? "заблокирована" : "разблокирована"}, администратор ${res.locals.user.email}`,
+  );
   res.status(204).end();
 });

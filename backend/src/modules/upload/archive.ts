@@ -1,4 +1,3 @@
-
 import { createWriteStream } from "node:fs";
 import { posix, join } from "node:path";
 import { pipeline } from "node:stream/promises";
@@ -8,7 +7,13 @@ import type { FindFile, FoundFile } from "./parsers/types";
 
 export type ModelFormat = "OBJ" | "STL" | "PLY" | "GLTF" | "GLB";
 
-const FORMATS: Record<string, ModelFormat> = { obj: "OBJ", stl: "STL", ply: "PLY", gltf: "GLTF", glb: "GLB" };
+const FORMATS: Record<string, ModelFormat> = {
+  obj: "OBJ",
+  stl: "STL",
+  ply: "PLY",
+  gltf: "GLTF",
+  glb: "GLB",
+};
 
 const MAX_ARCHIVE_FILES = 1000;
 const MAX_UNPACKED_BYTES = 500 * 1024 * 1024;
@@ -25,7 +30,11 @@ export function getExtension(fileName: string): string {
   return dot === -1 ? "" : fileName.slice(dot + 1).toLowerCase();
 }
 
-export async function prepareSource(fileName: string, filePath: string, workFolder: string): Promise<ModelSource> {
+export async function prepareSource(
+  fileName: string,
+  filePath: string,
+  workFolder: string,
+): Promise<ModelSource> {
   const extension = getExtension(fileName);
 
   if (extension === "zip") {
@@ -34,7 +43,10 @@ export async function prepareSource(fileName: string, filePath: string, workFold
   if (FORMATS[extension]) {
     return { fileName, path: filePath, format: FORMATS[extension], findFile: () => undefined };
   }
-  throw new AppError(400, "Этот формат не поддерживается. Подойдут OBJ, STL, PLY, glTF, GLB или ZIP");
+  throw new AppError(
+    400,
+    "Этот формат не поддерживается. Подойдут OBJ, STL, PLY, glTF, GLB или ZIP",
+  );
 }
 
 async function prepareArchive(archivePath: string, workFolder: string): Promise<ModelSource> {
@@ -118,8 +130,7 @@ function createFileFinder(files: FoundFile[], mainFolder: string): FindFile {
     let clean = reference;
     try {
       clean = decodeURIComponent(reference);
-    } catch {
-    }
+    } catch {}
     const normalized = normalize(clean);
     const baseName = posix.basename(normalized);
     return (

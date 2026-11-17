@@ -1,8 +1,13 @@
-
 import { h } from "./dom";
 
-export function openDialog(title: string, content: HTMLElement, buttons: HTMLElement[]): () => void {
-  const dialog = h("div", { class: "dialog", role: "dialog", "aria-modal": "true" },
+export function openDialog(
+  title: string,
+  content: HTMLElement,
+  buttons: HTMLElement[],
+): () => void {
+  const dialog = h(
+    "div",
+    { class: "dialog", role: "dialog", "aria-modal": "true" },
     h("h2", {}, title),
     content,
     h("div", { class: "form-actions" }, ...buttons),

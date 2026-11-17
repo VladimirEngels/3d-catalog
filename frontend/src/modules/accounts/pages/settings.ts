@@ -1,5 +1,11 @@
 import { getSession } from "@shared/session";
-import { changeSetting, readSettings, resetSettings, type Colors, type SiteSettings } from "@shared/settings";
+import {
+  changeSetting,
+  readSettings,
+  resetSettings,
+  type Colors,
+  type SiteSettings,
+} from "@shared/settings";
 import { h } from "@shared/ui/dom";
 import { mountLayout, pageHead } from "@shared/ui/layout";
 import "../accounts.css";
@@ -13,14 +19,25 @@ interface Choice<T> {
   note?: string;
 }
 
-function buildChoices<K extends keyof SiteSettings>(name: K, title: string, hint: string, choices: Choice<SiteSettings[K]>[]): HTMLElement {
+function buildChoices<K extends keyof SiteSettings>(
+  name: K,
+  title: string,
+  hint: string,
+  choices: Choice<SiteSettings[K]>[],
+): HTMLElement {
   const labels: HTMLElement[] = [];
 
   const options = choices.map((choice) => {
-    const input = h("input", { type: "radio", name, value: String(choice.value) }) as HTMLInputElement;
+    const input = h("input", {
+      type: "radio",
+      name,
+      value: String(choice.value),
+    }) as HTMLInputElement;
     input.checked = readSettings()[name] === choice.value;
 
-    const label = h("label", { class: input.checked ? "choice on" : "choice" },
+    const label = h(
+      "label",
+      { class: input.checked ? "choice on" : "choice" },
       input,
       h("span", {}, choice.label, choice.note ? h("small", {}, choice.note) : null),
     );
@@ -35,7 +52,9 @@ function buildChoices<K extends keyof SiteSettings>(name: K, title: string, hint
     return label;
   });
 
-  return h("fieldset", { class: "setting" },
+  return h(
+    "fieldset",
+    { class: "setting" },
     h("legend", {}, title),
     h("div", { class: "hint" }, hint),
     h("div", { class: "choices" }, ...options),
@@ -51,8 +70,12 @@ const paletteNames: Record<string, string> = {
 };
 
 function swatches(colors: Colors): HTMLElement {
-  return h("span", { class: "swatches" },
-    ...[colors.menu, colors.accent, colors.highlight].map((color) => h("i", { style: `background:${color}` })),
+  return h(
+    "span",
+    { class: "swatches" },
+    ...[colors.menu, colors.accent, colors.highlight].map((color) =>
+      h("i", { style: `background:${color}` }),
+    ),
   );
 }
 
@@ -79,15 +102,29 @@ function buildPalette(): HTMLElement {
   });
 
   const variants = [
-    ...Object.entries(window.siteSettings.palettes).map(([name, colors]) => ({ name, label: paletteNames[name] ?? name, mark: swatches(colors) })),
+    ...Object.entries(window.siteSettings.palettes).map(([name, colors]) => ({
+      name,
+      label: paletteNames[name] ?? name,
+      mark: swatches(colors),
+    })),
     { name: "custom", label: "Свои", mark: customSwatches },
   ];
 
   const options = variants.map((variant) => {
-    const input = h("input", { type: "radio", name: "palette", value: variant.name }) as HTMLInputElement;
+    const input = h("input", {
+      type: "radio",
+      name: "palette",
+      value: variant.name,
+    }) as HTMLInputElement;
     input.checked = readSettings().palette === variant.name;
 
-    const label = h("label", { class: input.checked ? "choice on" : "choice" }, input, variant.mark, h("span", {}, variant.label));
+    const label = h(
+      "label",
+      { class: input.checked ? "choice on" : "choice" },
+      input,
+      variant.mark,
+      h("span", {}, variant.label),
+    );
     labels.push(label);
 
     input.addEventListener("change", () => {
@@ -100,9 +137,15 @@ function buildPalette(): HTMLElement {
 
   pickers.hidden = readSettings().palette !== "custom";
 
-  return h("fieldset", { class: "setting" },
+  return h(
+    "fieldset",
+    { class: "setting" },
     h("legend", {}, "Цвета"),
-    h("div", { class: "hint" }, "Готовый набор или свои цвета. Цвета состояний (готово, ошибка) не меняются."),
+    h(
+      "div",
+      { class: "hint" },
+      "Готовый набор или свои цвета. Цвета состояний (готово, ошибка) не меняются.",
+    ),
     h("div", { class: "choices" }, ...options),
     pickers,
   );
@@ -116,12 +159,19 @@ resetButton.addEventListener("click", () => {
 
 main.append(
   pageHead("Настройки", "внешний вид сайта в этом браузере"),
-  h("div", { class: "panel settings-panel" },
-    buildChoices("theme", "Тема", "3D-окно и превью моделей остаются на тёмном фоне при любой теме.", [
-      { value: "light", label: "Светлая" },
-      { value: "dark", label: "Тёмная" },
-      { value: "system", label: "Как в системе" },
-    ]),
+  h(
+    "div",
+    { class: "panel settings-panel" },
+    buildChoices(
+      "theme",
+      "Тема",
+      "3D-окно и превью моделей остаются на тёмном фоне при любой теме.",
+      [
+        { value: "light", label: "Светлая" },
+        { value: "dark", label: "Тёмная" },
+        { value: "system", label: "Как в системе" },
+      ],
+    ),
     buildPalette(),
     buildChoices("scale", "Масштаб", "Размер всего на странице.", [
       { value: 90, label: "90 %" },
@@ -129,26 +179,52 @@ main.append(
       { value: 110, label: "110 %" },
       { value: 125, label: "125 %" },
     ]),
-    buildChoices("menu", "Положение меню", "С какой стороны экрана находятся меню и фильтры каталога.", [
-      { value: "right", label: "Справа" },
-      { value: "left", label: "Слева" },
-    ]),
-    buildChoices("tiles", "Размер плиток каталога", "Мелкие плитки помещают больше моделей на экран, крупные лучше показывают превью.", [
-      { value: "small", label: "Мелкие" },
-      { value: "medium", label: "Средние" },
-      { value: "large", label: "Крупные" },
-    ]),
-    buildChoices("catalogView", "Вид каталога", "Как открывается каталог. Этот выбор запоминается и при переключении в самом каталоге.", [
-      { value: "grid", label: "Плитки" },
-      { value: "table", label: "Таблица" },
-    ]),
-    buildChoices("motion", "Анимация", "Без анимации интерфейс спокойнее, например полоска обработки модели не движется.", [
-      { value: "on", label: "Включена" },
-      { value: "off", label: "Выключена" },
-    ]),
-    h("div", { class: "settings-footer" },
+    buildChoices(
+      "menu",
+      "Положение меню",
+      "С какой стороны экрана находятся меню и фильтры каталога.",
+      [
+        { value: "right", label: "Справа" },
+        { value: "left", label: "Слева" },
+      ],
+    ),
+    buildChoices(
+      "tiles",
+      "Размер плиток каталога",
+      "Мелкие плитки помещают больше моделей на экран, крупные лучше показывают превью.",
+      [
+        { value: "small", label: "Мелкие" },
+        { value: "medium", label: "Средние" },
+        { value: "large", label: "Крупные" },
+      ],
+    ),
+    buildChoices(
+      "catalogView",
+      "Вид каталога",
+      "Как открывается каталог. Этот выбор запоминается и при переключении в самом каталоге.",
+      [
+        { value: "grid", label: "Плитки" },
+        { value: "table", label: "Таблица" },
+      ],
+    ),
+    buildChoices(
+      "motion",
+      "Анимация",
+      "Без анимации интерфейс спокойнее, например полоска обработки модели не движется.",
+      [
+        { value: "on", label: "Включена" },
+        { value: "off", label: "Выключена" },
+      ],
+    ),
+    h(
+      "div",
+      { class: "settings-footer" },
       resetButton,
-      h("div", { class: "hint" }, "Настройки хранятся только в этом браузере: на другом компьютере они будут обычными."),
+      h(
+        "div",
+        { class: "hint" },
+        "Настройки хранятся только в этом браузере: на другом компьютере они будут обычными.",
+      ),
     ),
   ),
 );

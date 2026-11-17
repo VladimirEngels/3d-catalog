@@ -1,4 +1,3 @@
-
 import pg from "pg";
 import { log } from "./logger";
 

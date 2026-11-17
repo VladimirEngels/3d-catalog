@@ -1,4 +1,3 @@
-
 import type { PagedList } from "../api";
 import { h } from "@shared/ui/dom";
 import { errorText } from "@shared/ui/form";
@@ -33,8 +32,12 @@ export function buildAdminList<T>(options: AdminListOptions<T>): HTMLElement {
         body.append(options.buildRow(item, load));
       }
       content.replaceChildren(
-        h("div", { class: "table-wrap" },
-          h("table", { class: "table" },
+        h(
+          "div",
+          { class: "table-wrap" },
+          h(
+            "table",
+            { class: "table" },
             h("thead", {}, h("tr", {}, ...options.columns.map((title) => h("th", {}, title)))),
             body,
           ),
@@ -45,11 +48,22 @@ export function buildAdminList<T>(options: AdminListOptions<T>): HTMLElement {
         }),
       );
     } catch (error) {
-      content.replaceChildren(h("div", { class: "empty-box" }, h("b", {}, "Не удалось загрузить список"), errorText(error)));
+      content.replaceChildren(
+        h(
+          "div",
+          { class: "empty-box" },
+          h("b", {}, "Не удалось загрузить список"),
+          errorText(error),
+        ),
+      );
     }
   }
 
-  const searchInput = h("input", { type: "text", placeholder: options.searchPlaceholder, "aria-label": options.searchPlaceholder }) as HTMLInputElement;
+  const searchInput = h("input", {
+    type: "text",
+    placeholder: options.searchPlaceholder,
+    "aria-label": options.searchPlaceholder,
+  }) as HTMLInputElement;
   let searchTimer: number | undefined;
   searchInput.addEventListener("input", () => {
     clearTimeout(searchTimer);
@@ -60,7 +74,9 @@ export function buildAdminList<T>(options: AdminListOptions<T>): HTMLElement {
     }, 300);
   });
 
-  const statusSelect = h("select", { "aria-label": "Состояние" },
+  const statusSelect = h(
+    "select",
+    { "aria-label": "Состояние" },
     h("option", { value: "" }, "Все"),
     h("option", { value: "active" }, options.statusLabels[0]),
     h("option", { value: "blocked" }, options.statusLabels[1]),
@@ -72,8 +88,15 @@ export function buildAdminList<T>(options: AdminListOptions<T>): HTMLElement {
   });
 
   load();
-  return h("div", {},
-    h("div", { class: "filters-row" }, h("label", { class: "search log-search" }, icon("search"), searchInput), statusSelect),
+  return h(
+    "div",
+    {},
+    h(
+      "div",
+      { class: "filters-row" },
+      h("label", { class: "search log-search" }, icon("search"), searchInput),
+      statusSelect,
+    ),
     content,
   );
 }

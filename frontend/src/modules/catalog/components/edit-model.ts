@@ -1,4 +1,3 @@
-
 import { dialogButton, openDialog } from "@shared/ui/dialog";
 import { h } from "@shared/ui/dom";
 import { createInput, errorText, field } from "@shared/ui/form";
@@ -22,9 +21,16 @@ export function openEditDialog(teamId: number, model: ModelCard): void {
     }
   }
 
-  const content = h("div", {},
+  const content = h(
+    "div",
+    {},
     field("Описание", description),
-    field("Теги", tagsInput, "Теги с пунктирной рамкой система ставит и убирает сама.", "через запятую"),
+    field(
+      "Теги",
+      tagsInput,
+      "Теги с пунктирной рамкой система ставит и убирает сама.",
+      "через запятую",
+    ),
     errorBox,
   );
   const close = openDialog("Изменить модель", content, [

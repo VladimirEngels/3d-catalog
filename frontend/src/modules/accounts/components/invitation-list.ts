@@ -1,4 +1,3 @@
-
 import { roleName, switchTeam } from "@shared/session";
 import { showMessage } from "@shared/ui/dialog";
 import { h } from "@shared/ui/dom";
@@ -38,8 +37,12 @@ function buildRow(invitation: MyInvitation): HTMLElement {
     }
   });
 
-  return h("li", {},
-    h("div", { class: "invite-info" },
+  return h(
+    "li",
+    {},
+    h(
+      "div",
+      { class: "invite-info" },
       invitation.teamName,
       h("small", {}, `${roleName[invitation.role]} · пригласил(а) ${invitation.invitedBy}`),
     ),

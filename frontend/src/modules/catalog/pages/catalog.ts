@@ -6,7 +6,15 @@ import { h } from "@shared/ui/dom";
 import { errorText } from "@shared/ui/form";
 import { icon } from "@shared/ui/icons";
 import { mountLayout } from "@shared/ui/layout";
-import { getCollections, getModels, type CatalogFilters, type CatalogItem, type CatalogResponse, type CatalogSort, type Collection } from "../api";
+import {
+  getCollections,
+  getModels,
+  type CatalogFilters,
+  type CatalogItem,
+  type CatalogResponse,
+  type CatalogSort,
+  type Collection,
+} from "../api";
 import { openAddToCollectionDialog } from "../components/collection-dialogs";
 import { createAndSavePreview } from "../components/preview";
 import { buildFilters, FORMATS, PERIOD_LABELS, QUALITY_LABELS } from "../components/filters";
@@ -18,11 +26,19 @@ const session = await getSession();
 
 function emptyFilters(): CatalogFilters {
   return {
-    query: "", formats: [], skeleton: false, textures: false, minTriangles: "", maxTriangles: "",
-    quality: "", author: "", collection: "", days: "", sort: "new",
+    query: "",
+    formats: [],
+    skeleton: false,
+    textures: false,
+    minTriangles: "",
+    maxTriangles: "",
+    quality: "",
+    author: "",
+    collection: "",
+    days: "",
+    sort: "new",
   };
 }
-
 
 function showNoTeam(): void {
   const newTeamButton = h("button", { class: "btn primary", type: "button" }, "Создать команду");
@@ -32,16 +48,21 @@ function showNoTeam(): void {
 
   main.append(
     h("div", { class: "page-head" }, h("h1", {}, "Каталог")),
-    h("div", { class: "panel" },
+    h(
+      "div",
+      { class: "panel" },
       h("h3", { class: "chart-title" }, "Вы пока не состоите ни в одной команде"),
-      h("div", { class: "chart-sub" }, "Модели хранятся в командах. Создайте свою команду или примите приглашение."),
+      h(
+        "div",
+        { class: "chart-sub" },
+        "Модели хранятся в командах. Создайте свою команду или примите приглашение.",
+      ),
       newTeamButton,
     ),
     invitationsPanel,
   );
   showInvitationList(invitationsPanel);
 }
-
 
 function showCatalog(teamId: number): void {
   let filters = emptyFilters();
@@ -55,7 +76,6 @@ function showCatalog(teamId: number): void {
   let requestNumber = 0;
   let panelIsStale = true;
 
-
   const countText = h("span", { class: "sub" });
   const chips = h("div", { class: "chips" });
   const results = h("div");
@@ -65,12 +85,24 @@ function showCatalog(teamId: number): void {
 
   const head = h("div", { class: "page-head" }, h("h1", {}, "Каталог"), countText);
   if (can(session, "upload")) {
-    head.append(h("div", { class: "actions" },
-      h("a", { class: "btn primary", href: "/pages/upload.html" }, icon("plus"), "Добавить модель"),
-    ));
+    head.append(
+      h(
+        "div",
+        { class: "actions" },
+        h(
+          "a",
+          { class: "btn primary", href: "/pages/upload.html" },
+          icon("plus"),
+          "Добавить модель",
+        ),
+      ),
+    );
   }
 
-  const searchInput = h("input", { type: "text", placeholder: "Поиск по названию, описанию и тегам" }) as HTMLInputElement;
+  const searchInput = h("input", {
+    type: "text",
+    placeholder: "Поиск по названию, описанию и тегам",
+  }) as HTMLInputElement;
   let searchTimer: number | undefined;
   searchInput.addEventListener("input", () => {
     clearTimeout(searchTimer);
@@ -81,7 +113,12 @@ function showCatalog(teamId: number): void {
   });
 
   const sortSelect = h("select", { class: "sort-select" }) as HTMLSelectElement;
-  const sortOptions: [CatalogSort, string][] = [["new", "Сначала новые"], ["name", "По названию"], ["size", "По размеру"], ["quality", "По оценке качества"]];
+  const sortOptions: [CatalogSort, string][] = [
+    ["new", "Сначала новые"],
+    ["name", "По названию"],
+    ["size", "По размеру"],
+    ["quality", "По оценке качества"],
+  ];
   for (const [value, label] of sortOptions) {
     sortSelect.append(h("option", { value }, label));
   }
@@ -90,8 +127,26 @@ function showCatalog(teamId: number): void {
     reload();
   });
 
-  const gridButton = h("button", { class: viewMode === "grid" ? "on" : "view", type: "button", title: "Плитки", "aria-label": "Плитки" }, icon("grid"));
-  const tableButton = h("button", { class: viewMode === "table" ? "on" : "view", type: "button", title: "Таблица", "aria-label": "Таблица" }, icon("list"));
+  const gridButton = h(
+    "button",
+    {
+      class: viewMode === "grid" ? "on" : "view",
+      type: "button",
+      title: "Плитки",
+      "aria-label": "Плитки",
+    },
+    icon("grid"),
+  );
+  const tableButton = h(
+    "button",
+    {
+      class: viewMode === "table" ? "on" : "view",
+      type: "button",
+      title: "Таблица",
+      "aria-label": "Таблица",
+    },
+    icon("list"),
+  );
   function setViewMode(mode: "grid" | "table"): void {
     viewMode = mode;
     changeSetting("catalogView", mode);
@@ -104,7 +159,9 @@ function showCatalog(teamId: number): void {
 
   main.append(
     head,
-    h("div", { class: "toolbar" },
+    h(
+      "div",
+      { class: "toolbar" },
       h("label", { class: "search" }, icon("search"), searchInput),
       sortSelect,
       h("div", { class: "segmented" }, gridButton, tableButton),
@@ -124,7 +181,11 @@ function showCatalog(teamId: number): void {
   }
 
   function buildChip(label: string, onRemove: () => void): HTMLElement {
-    const remove = h("button", { class: "x", type: "button", "aria-label": `Убрать: ${label}` }, "✕");
+    const remove = h(
+      "button",
+      { class: "x", type: "button", "aria-label": `Убрать: ${label}` },
+      "✕",
+    );
     remove.addEventListener("click", () => {
       onRemove();
       panelIsStale = true;
@@ -137,22 +198,64 @@ function showCatalog(teamId: number): void {
     const list: HTMLElement[] = [];
     for (const format of filters.formats) {
       const label = FORMATS.find((item) => item.value === format)?.label ?? format;
-      list.push(buildChip(label, () => { filters.formats = filters.formats.filter((item) => item !== format); }));
+      list.push(
+        buildChip(label, () => {
+          filters.formats = filters.formats.filter((item) => item !== format);
+        }),
+      );
     }
-    if (filters.skeleton) list.push(buildChip("Есть скелет", () => { filters.skeleton = false; }));
-    if (filters.textures) list.push(buildChip("Есть текстуры", () => { filters.textures = false; }));
-    if (filters.minTriangles !== "") list.push(buildChip(`от ${filters.minTriangles} треуг.`, () => { filters.minTriangles = ""; }));
-    if (filters.maxTriangles !== "") list.push(buildChip(`до ${filters.maxTriangles} треуг.`, () => { filters.maxTriangles = ""; }));
-    if (filters.quality !== "") list.push(buildChip(QUALITY_LABELS[filters.quality], () => { filters.quality = ""; }));
+    if (filters.skeleton)
+      list.push(
+        buildChip("Есть скелет", () => {
+          filters.skeleton = false;
+        }),
+      );
+    if (filters.textures)
+      list.push(
+        buildChip("Есть текстуры", () => {
+          filters.textures = false;
+        }),
+      );
+    if (filters.minTriangles !== "")
+      list.push(
+        buildChip(`от ${filters.minTriangles} треуг.`, () => {
+          filters.minTriangles = "";
+        }),
+      );
+    if (filters.maxTriangles !== "")
+      list.push(
+        buildChip(`до ${filters.maxTriangles} треуг.`, () => {
+          filters.maxTriangles = "";
+        }),
+      );
+    if (filters.quality !== "")
+      list.push(
+        buildChip(QUALITY_LABELS[filters.quality], () => {
+          filters.quality = "";
+        }),
+      );
     if (filters.collection !== "") {
       const collection = collections.find((item) => String(item.id) === filters.collection);
-      list.push(buildChip(`Коллекция: ${collection?.name ?? filters.collection}`, () => { filters.collection = ""; }));
+      list.push(
+        buildChip(`Коллекция: ${collection?.name ?? filters.collection}`, () => {
+          filters.collection = "";
+        }),
+      );
     }
     if (filters.author !== "") {
       const author = data.facets.authors.find((item) => String(item.id) === filters.author);
-      list.push(buildChip(author?.name ?? "Автор", () => { filters.author = ""; }));
+      list.push(
+        buildChip(author?.name ?? "Автор", () => {
+          filters.author = "";
+        }),
+      );
     }
-    if (filters.days !== "") list.push(buildChip(PERIOD_LABELS[filters.days], () => { filters.days = ""; }));
+    if (filters.days !== "")
+      list.push(
+        buildChip(PERIOD_LABELS[filters.days], () => {
+          filters.days = "";
+        }),
+      );
 
     chips.replaceChildren(...list);
     chips.hidden = list.length === 0;
@@ -163,21 +266,39 @@ function showCatalog(teamId: number): void {
       return;
     }
     if (lastData.teamTotal === 0) {
-      const text = can(session, "upload") ? "Добавьте первую модель, и она появится здесь." : "Когда участники добавят модели, они появятся здесь.";
-      results.replaceChildren(h("div", { class: "empty-box" }, h("b", {}, "В каталоге пока нет моделей"), text));
+      const text = can(session, "upload")
+        ? "Добавьте первую модель, и она появится здесь."
+        : "Когда участники добавят модели, они появятся здесь.";
+      results.replaceChildren(
+        h("div", { class: "empty-box" }, h("b", {}, "В каталоге пока нет моделей"), text),
+      );
     } else if (items.length === 0) {
       const clear = h("button", { class: "btn", type: "button" }, "Сбросить фильтры");
       clear.addEventListener("click", resetFilters);
-      results.replaceChildren(h("div", { class: "empty-box" }, h("b", {}, "Ничего не найдено"), "Измените условия поиска или сбросьте фильтры.", h("div", {}, clear)));
+      results.replaceChildren(
+        h(
+          "div",
+          { class: "empty-box" },
+          h("b", {}, "Ничего не найдено"),
+          "Измените условия поиска или сбросьте фильтры.",
+          h("div", {}, clear),
+        ),
+      );
     } else if (viewMode === "grid") {
-      results.replaceChildren(h("div", { class: "grid" }, ...items.map((item) => buildTile(teamId, item, selection))));
+      results.replaceChildren(
+        h("div", { class: "grid" }, ...items.map((item) => buildTile(teamId, item, selection))),
+      );
     } else {
       results.replaceChildren(buildTable(items));
     }
 
     footer.replaceChildren();
     if (items.length < lastData.found) {
-      const more = h("button", { class: "btn", type: "button" }, `Показать ещё (осталось ${lastData.found - items.length})`);
+      const more = h(
+        "button",
+        { class: "btn", type: "button" },
+        `Показать ещё (осталось ${lastData.found - items.length})`,
+      );
       more.addEventListener("click", loadNextPage);
       footer.append(more);
     }
@@ -217,26 +338,45 @@ function showCatalog(teamId: number): void {
         collections = await getCollections(teamId);
       });
     });
-    const closeButton = h("button", { class: "btn small", type: "button", "aria-label": "Снять выбор" }, "✕");
+    const closeButton = h(
+      "button",
+      { class: "btn small", type: "button", "aria-label": "Снять выбор" },
+      "✕",
+    );
     closeButton.addEventListener("click", clearSelection);
-    const convertButton = h("button", { class: "btn small primary", type: "button" }, "Сменить формат…");
+    const convertButton = h(
+      "button",
+      { class: "btn small primary", type: "button" },
+      "Сменить формат…",
+    );
     convertButton.addEventListener("click", () => {
       const models = items.filter((item) => selected.has(item.id));
-      openConvertDialog(teamId, models.map((item) => ({
-        id: item.id,
-        name: item.name,
-        format: item.format,
-        hasSkeleton: item.hasSkeleton,
-        hasTextures: item.hasTextures,
-      })));
+      openConvertDialog(
+        teamId,
+        models.map((item) => ({
+          id: item.id,
+          name: item.name,
+          format: item.format,
+          hasSkeleton: item.hasSkeleton,
+          hasTextures: item.hasTextures,
+        })),
+      );
     });
     addButton.className = "btn small";
-    bulkBar.replaceChildren(h("span", {}, `Выбрано: ${selected.size}`), convertButton, addButton, closeButton);
+    bulkBar.replaceChildren(
+      h("span", {}, `Выбрано: ${selected.size}`),
+      convertButton,
+      addButton,
+      closeButton,
+    );
   }
 
   function render(data: CatalogResponse): void {
     lastData = data;
-    countText.textContent = data.found === data.teamTotal ? `моделей: ${data.teamTotal}` : `найдено ${data.found} из ${data.teamTotal}`;
+    countText.textContent =
+      data.found === data.teamTotal
+        ? `моделей: ${data.teamTotal}`
+        : `найдено ${data.found} из ${data.teamTotal}`;
     if (panelIsStale) {
       filtersHolder.replaceChildren(buildFilters(filters, data, reload, resetFilters));
       panelIsStale = false;
@@ -246,7 +386,14 @@ function showCatalog(teamId: number): void {
   }
 
   function showError(error: unknown): void {
-    results.replaceChildren(h("div", { class: "empty-box" }, h("b", {}, "Не удалось загрузить каталог"), errorText(error)));
+    results.replaceChildren(
+      h(
+        "div",
+        { class: "empty-box" },
+        h("b", {}, "Не удалось загрузить каталог"),
+        errorText(error),
+      ),
+    );
     footer.replaceChildren();
   }
 
@@ -301,7 +448,9 @@ function showCatalog(teamId: number): void {
   }
 
   getCollections(teamId)
-    .then((list) => { collections = list; })
+    .then((list) => {
+      collections = list;
+    })
     .catch(() => {})
     .finally(reload);
 }

@@ -1,4 +1,3 @@
-
 import { BoundingBox, ModelFileError, type ParsedModel } from "./types";
 
 const HEADER_SIZE = 84;
@@ -24,7 +23,11 @@ function parseBinary(data: Buffer): ParsedModel {
     const start = HEADER_SIZE + i * TRIANGLE_SIZE + 12;
     for (let corner = 0; corner < 3; corner++) {
       const position = start + corner * 12;
-      const [x, y, z] = [data.readFloatLE(position), data.readFloatLE(position + 4), data.readFloatLE(position + 8)];
+      const [x, y, z] = [
+        data.readFloatLE(position),
+        data.readFloatLE(position + 4),
+        data.readFloatLE(position + 8),
+      ];
       if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(z)) {
         throw new ModelFileError("В файле STL неверные координаты вершины");
       }
@@ -56,5 +59,13 @@ function parseText(data: Buffer): ParsedModel {
 }
 
 function buildResult(triangles: number, vertices: number, box: BoundingBox): ParsedModel {
-  return { triangles, vertices, hasSkeleton: false, size: box.getSize(), materials: [], textures: [], companions: [] };
+  return {
+    triangles,
+    vertices,
+    hasSkeleton: false,
+    size: box.getSize(),
+    materials: [],
+    textures: [],
+    companions: [],
+  };
 }

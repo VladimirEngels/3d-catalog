@@ -1,4 +1,3 @@
-
 import { Router } from "express";
 import { requireAuth } from "../../middleware/auth";
 import { requireTeamRole } from "../../middleware/team-access";
@@ -30,7 +29,6 @@ function invitationForUser(invitation: InvitationDetailsRow) {
   };
 }
 
-
 teamsRouter.post("/teams", requireAuth, async (req, res) => {
   const teamId = await service.createTeam(res.locals.user, req.body?.name);
   res.status(201).json({ teamId });
@@ -41,43 +39,97 @@ teamsRouter.delete("/teams/:teamId", requireAuth, requireTeamRole("owner"), asyn
   res.status(204).end();
 });
 
-teamsRouter.post("/teams/:teamId/leave", requireAuth, requireTeamRole("viewer"), async (_req, res) => {
-  await service.leaveTeam(res.locals.user, res.locals.team.id);
-  res.status(204).end();
-});
+teamsRouter.post(
+  "/teams/:teamId/leave",
+  requireAuth,
+  requireTeamRole("viewer"),
+  async (_req, res) => {
+    await service.leaveTeam(res.locals.user, res.locals.team.id);
+    res.status(204).end();
+  },
+);
 
+teamsRouter.get(
+  "/teams/:teamId/members",
+  requireAuth,
+  requireTeamRole("owner"),
+  async (_req, res) => {
+    const members = await repository.listMembers(res.locals.team.id);
+    res.json(
+      members.map((m) => ({
+        userId: m.user_id,
+        name: m.name,
+        email: m.email,
+        role: m.role,
+        joinedAt: m.joined_at,
+      })),
+    );
+  },
+);
 
-teamsRouter.get("/teams/:teamId/members", requireAuth, requireTeamRole("owner"), async (_req, res) => {
-  const members = await repository.listMembers(res.locals.team.id);
-  res.json(members.map((m) => ({ userId: m.user_id, name: m.name, email: m.email, role: m.role, joinedAt: m.joined_at })));
-});
+teamsRouter.patch(
+  "/teams/:teamId/members/:userId",
+  requireAuth,
+  requireTeamRole("owner"),
+  async (req, res) => {
+    await service.changeRole(
+      res.locals.user,
+      res.locals.team.id,
+      readId(req.params.userId),
+      req.body?.role,
+    );
+    res.status(204).end();
+  },
+);
 
-teamsRouter.patch("/teams/:teamId/members/:userId", requireAuth, requireTeamRole("owner"), async (req, res) => {
-  await service.changeRole(res.locals.user, res.locals.team.id, readId(req.params.userId), req.body?.role);
-  res.status(204).end();
-});
+teamsRouter.delete(
+  "/teams/:teamId/members/:userId",
+  requireAuth,
+  requireTeamRole("owner"),
+  async (req, res) => {
+    await service.excludeMember(res.locals.user, res.locals.team.id, readId(req.params.userId));
+    res.status(204).end();
+  },
+);
 
-teamsRouter.delete("/teams/:teamId/members/:userId", requireAuth, requireTeamRole("owner"), async (req, res) => {
-  await service.excludeMember(res.locals.user, res.locals.team.id, readId(req.params.userId));
-  res.status(204).end();
-});
+teamsRouter.get(
+  "/teams/:teamId/invitations",
+  requireAuth,
+  requireTeamRole("owner"),
+  async (_req, res) => {
+    const invitations = await repository.listTeamInvitations(res.locals.team.id);
+    res.json(invitations.map(invitationForOwner));
+  },
+);
 
+teamsRouter.post(
+  "/teams/:teamId/invitations",
+  requireAuth,
+  requireTeamRole("owner"),
+  async (req, res) => {
+    const invitation = await service.invite(
+      res.locals.user,
+      res.locals.team.id,
+      req.body?.email,
+      req.body?.role,
+    );
+    res.status(201).json(invitationForOwner(invitation));
+  },
+);
 
-teamsRouter.get("/teams/:teamId/invitations", requireAuth, requireTeamRole("owner"), async (_req, res) => {
-  const invitations = await repository.listTeamInvitations(res.locals.team.id);
-  res.json(invitations.map(invitationForOwner));
-});
-
-teamsRouter.post("/teams/:teamId/invitations", requireAuth, requireTeamRole("owner"), async (req, res) => {
-  const invitation = await service.invite(res.locals.user, res.locals.team.id, req.body?.email, req.body?.role);
-  res.status(201).json(invitationForOwner(invitation));
-});
-
-teamsRouter.delete("/teams/:teamId/invitations/:invitationId", requireAuth, requireTeamRole("owner"), async (req, res) => {
-  await service.revokeInvitation(res.locals.user, res.locals.team.id, readId(req.params.invitationId));
-  res.status(204).end();
-});
-
+teamsRouter.delete(
+  "/teams/:teamId/invitations/:invitationId",
+  requireAuth,
+  requireTeamRole("owner"),
+  async (req, res) => {
+    await service.revokeInvitation(
+      res.locals.user,
+      res.locals.team.id,
+      readId(req.params.invitationId),
+    );
+    res.status(204).end();
+  },
+);
 
 teamsRouter.get("/invitations/preview", async (req, res) => {
   res.json(await service.previewInvitation(req.query.token));

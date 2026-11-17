@@ -1,6 +1,4 @@
-
 import { db } from "../../db";
-
 
 export interface LogFilters {
   userId: number | null;
@@ -71,7 +69,6 @@ export async function listLogAuthors(teamId: number): Promise<{ id: number; name
   return result.rows;
 }
 
-
 export interface DayCount {
   day: string;
   count: number;
@@ -96,7 +93,12 @@ async function countJobsByDay(teamId: number | null, days: number): Promise<DayC
 }
 
 export async function getTeamSummary(teamId: number, days: number) {
-  const totals = await db.query<{ models: string; members: string; new_models: string; new_members: string }>(
+  const totals = await db.query<{
+    models: string;
+    members: string;
+    new_models: string;
+    new_members: string;
+  }>(
     `SELECT (SELECT count(*) FROM models WHERE team_id = $1) AS models,
             (SELECT count(*) FROM team_members WHERE team_id = $1) AS members,
             (SELECT count(*) FROM models WHERE team_id = $1 AND created_at >= now() - $2::int * interval '1 day') AS new_models,
@@ -129,7 +131,13 @@ export async function getTeamSummary(teamId: number, days: number) {
      ORDER BY count(*) DESC, j.target_format`,
     [teamId, days],
   );
-  const largest = await db.query<{ id: number; name: string; author_name: string; triangles_count: number; size_bytes: string }>(
+  const largest = await db.query<{
+    id: number;
+    name: string;
+    author_name: string;
+    triangles_count: number;
+    size_bytes: string;
+  }>(
     `SELECT m.id, m.name, u.name AS author_name, v.triangles_count,
             (SELECT COALESCE(sum(f.size_bytes), 0) FROM files f WHERE f.version_id = v.id) AS size_bytes
      FROM models m
@@ -163,10 +171,15 @@ export async function getTeamSummary(teamId: number, days: number) {
   };
 }
 
-
 export async function getSystemStats(days: number) {
   const result = await db.query<{
-    users: string; new_users: string; teams: string; new_teams: string; disk_bytes: string; jobs: string; failed_jobs: string;
+    users: string;
+    new_users: string;
+    teams: string;
+    new_teams: string;
+    disk_bytes: string;
+    jobs: string;
+    failed_jobs: string;
   }>(
     `SELECT (SELECT count(*) FROM users) AS users,
             (SELECT count(*) FROM users WHERE created_at >= now() - $1::int * interval '1 day') AS new_users,
@@ -190,15 +203,21 @@ export async function getSystemStats(days: number) {
   };
 }
 
-
 function likePattern(text: string): string {
   return `%${text.replace(/[\\%_]/g, "\\$&")}%`;
 }
 
 export async function listUsers(query: string, status: string, limit: number, offset: number) {
   const result = await db.query<{
-    id: number; name: string; email: string; is_system_admin: boolean; is_blocked: boolean;
-    created_at: Date; team_count: string; last_login: Date | null; total: string;
+    id: number;
+    name: string;
+    email: string;
+    is_system_admin: boolean;
+    is_blocked: boolean;
+    created_at: Date;
+    team_count: string;
+    last_login: Date | null;
+    total: string;
   }>(
     `SELECT u.id, u.name, u.email, u.is_system_admin, u.is_blocked, u.created_at,
             (SELECT count(*) FROM team_members m WHERE m.user_id = u.id) AS team_count,
@@ -216,8 +235,15 @@ export async function listUsers(query: string, status: string, limit: number, of
 
 export async function listTeams(query: string, status: string, limit: number, offset: number) {
   const result = await db.query<{
-    id: number; name: string; is_blocked: boolean; created_at: Date; owner_emails: string[];
-    member_count: string; model_count: string; disk_bytes: string; total: string;
+    id: number;
+    name: string;
+    is_blocked: boolean;
+    created_at: Date;
+    owner_emails: string[];
+    member_count: string;
+    model_count: string;
+    disk_bytes: string;
+    total: string;
   }>(
     `SELECT t.id, t.name, t.is_blocked, t.created_at,
             ARRAY(
@@ -252,7 +278,10 @@ export async function listTeams(query: string, status: string, limit: number, of
 }
 
 export async function setUserBlocked(userId: number, blocked: boolean): Promise<boolean> {
-  const result = await db.query("UPDATE users SET is_blocked = $1 WHERE id = $2", [blocked, userId]);
+  const result = await db.query("UPDATE users SET is_blocked = $1 WHERE id = $2", [
+    blocked,
+    userId,
+  ]);
   if (blocked) {
     await db.query("DELETE FROM sessions WHERE user_id = $1", [userId]);
   }
@@ -260,6 +289,9 @@ export async function setUserBlocked(userId: number, blocked: boolean): Promise<
 }
 
 export async function setTeamBlocked(teamId: number, blocked: boolean): Promise<boolean> {
-  const result = await db.query("UPDATE teams SET is_blocked = $1 WHERE id = $2", [blocked, teamId]);
+  const result = await db.query("UPDATE teams SET is_blocked = $1 WHERE id = $2", [
+    blocked,
+    teamId,
+  ]);
   return result.rowCount === 1;
 }

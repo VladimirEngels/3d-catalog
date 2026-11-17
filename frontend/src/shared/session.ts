@@ -1,4 +1,3 @@
-
 import { request } from "./api/http";
 import type { Me, Role, TeamMembership, User } from "./api/types";
 
@@ -23,7 +22,11 @@ const minRole: Record<Action, Role> = {
 
 const roleRank: Record<Role, number> = { viewer: 1, member: 2, owner: 3 };
 
-export const roleName: Record<Role, string> = { viewer: "Наблюдатель", member: "Участник", owner: "Владелец" };
+export const roleName: Record<Role, string> = {
+  viewer: "Наблюдатель",
+  member: "Участник",
+  owner: "Владелец",
+};
 
 export interface Session {
   user: User;
@@ -47,7 +50,12 @@ export async function getSession(): Promise<Session> {
   const savedTeam = me.teams.find((team) => team.teamId === savedTeamId);
   const firstTeam = me.teams.length > 0 ? me.teams[0] : null;
 
-  savedSession = { user: me.user, teams: me.teams, team: savedTeam ?? firstTeam, invitationCount: me.invitationCount };
+  savedSession = {
+    user: me.user,
+    teams: me.teams,
+    team: savedTeam ?? firstTeam,
+    invitationCount: me.invitationCount,
+  };
   return savedSession;
 }
 

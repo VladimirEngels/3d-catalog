@@ -1,4 +1,3 @@
-
 import { getScale } from "@shared/settings";
 import { h } from "./dom";
 
@@ -57,7 +56,12 @@ function barPath(x: number, y: number, width: number, height: number): string {
   return `M${x},${y}H${x + width - r}Q${x + width},${y} ${x + width},${y + r}V${y + height - r}Q${x + width},${y + height} ${x + width - r},${y + height}H${x}Z`;
 }
 
-export function drawColumns(container: HTMLElement, labels: string[], values: number[], unit: string): void {
+export function drawColumns(
+  container: HTMLElement,
+  labels: string[],
+  values: number[],
+  unit: string,
+): void {
   const width = container.clientWidth;
   const height = 200;
   const left = 32;
@@ -84,7 +88,13 @@ export function drawColumns(container: HTMLElement, labels: string[], values: nu
     const x = left + index * slot + (slot - barWidth) / 2;
     const y = top + plotHeight - barHeight;
 
-    const hit = svgElement("rect", { class: "hit", x: left + index * slot, y: top, width: slot, height: plotHeight });
+    const hit = svgElement("rect", {
+      class: "hit",
+      x: left + index * slot,
+      y: top,
+      width: slot,
+      height: plotHeight,
+    });
     addTooltip(hit, `${labels[index]} · ${unit}: ${value}`);
     svg.append(hit);
 
@@ -92,14 +102,26 @@ export function drawColumns(container: HTMLElement, labels: string[], values: nu
       svg.append(svgElement("path", { class: "bar", d: columnPath(x, y, barWidth, barHeight) }));
     }
     if (index % labelStep === 0) {
-      svg.append(svgText(labels[index], { class: "axis-text", x: x + barWidth / 2, y: height - 6, "text-anchor": "middle" }));
+      svg.append(
+        svgText(labels[index], {
+          class: "axis-text",
+          x: x + barWidth / 2,
+          y: height - 6,
+          "text-anchor": "middle",
+        }),
+      );
     }
   });
 
   container.replaceChildren(svg);
 }
 
-export function drawBars(container: HTMLElement, labels: string[], values: number[], unit: string): void {
+export function drawBars(
+  container: HTMLElement,
+  labels: string[],
+  values: number[],
+  unit: string,
+): void {
   const width = container.clientWidth;
   const rowHeight = 34;
   const barHeight = 14;
@@ -114,7 +136,10 @@ export function drawBars(container: HTMLElement, labels: string[], values: numbe
   values.forEach((value, index) => {
     const y = index * rowHeight;
     const barWidth = Math.max(2, (value / maximum) * (width - labelWidth - valueWidth));
-    const label = labels[index].length > maxLetters ? `${labels[index].slice(0, maxLetters - 1)}…` : labels[index];
+    const label =
+      labels[index].length > maxLetters
+        ? `${labels[index].slice(0, maxLetters - 1)}…`
+        : labels[index];
 
     svg.append(svgText(label, { class: "axis-text", x: 0, y: y + rowHeight / 2 + 4 }));
 
@@ -122,8 +147,15 @@ export function drawBars(container: HTMLElement, labels: string[], values: numbe
     addTooltip(hit, `${labels[index]} · ${unit}: ${value}`);
     svg.append(
       hit,
-      svgElement("path", { class: "bar", d: barPath(labelWidth, y + (rowHeight - barHeight) / 2, barWidth, barHeight) }),
-      svgText(String(value), { class: "value-text", x: labelWidth + barWidth + 8, y: y + rowHeight / 2 + 4 }),
+      svgElement("path", {
+        class: "bar",
+        d: barPath(labelWidth, y + (rowHeight - barHeight) / 2, barWidth, barHeight),
+      }),
+      svgText(String(value), {
+        class: "value-text",
+        x: labelWidth + barWidth + 8,
+        y: y + rowHeight / 2 + 4,
+      }),
     );
   });
 

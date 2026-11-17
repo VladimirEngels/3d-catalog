@@ -1,4 +1,3 @@
-
 import "@shared/styles/index.css";
 import { getSession, can, roleName, switchTeam, type Action, type Session } from "@shared/session";
 import { h } from "./dom";
@@ -19,7 +18,13 @@ const teamNav: NavItem[] = [
 ];
 
 const ownerNav: NavItem[] = [
-  { id: "members", label: "Участники", icon: "users", href: "/pages/members.html", needs: "manageTeam" },
+  {
+    id: "members",
+    label: "Участники",
+    icon: "users",
+    href: "/pages/members.html",
+    needs: "manageTeam",
+  },
   { id: "log", label: "Журнал", icon: "log", href: "/pages/log.html", needs: "viewLog" },
   { id: "summary", label: "Сводка", icon: "chart", href: "/pages/summary.html", needs: "viewLog" },
 ];
@@ -30,7 +35,10 @@ const adminNav: NavItem[] = [
   { id: "admin-teams", label: "Команды", icon: "team", href: "/pages/admin-teams.html" },
 ];
 
-export async function mountLayout(active: string, area: "team" | "admin" = "team"): Promise<HTMLElement> {
+export async function mountLayout(
+  active: string,
+  area: "team" | "admin" = "team",
+): Promise<HTMLElement> {
   const session = await getSession();
   const main = h("main", { class: "main" });
   const sidebar = buildSidebar(session, active, area);
@@ -39,7 +47,11 @@ export async function mountLayout(active: string, area: "team" | "admin" = "team
   return main;
 }
 
-export function pageHead(title: string, subtitle?: string, actions: HTMLElement[] = []): HTMLElement {
+export function pageHead(
+  title: string,
+  subtitle?: string,
+  actions: HTMLElement[] = [],
+): HTMLElement {
   const head = h("div", { class: "page-head" }, h("h1", {}, title));
 
   if (subtitle) {
@@ -107,12 +119,20 @@ function buildLink(item: NavItem, active: string): HTMLElement {
 }
 
 function buildUserBlock(session: Session): HTMLElement {
-  return h("div", { class: "sidebar-footer" },
+  return h(
+    "div",
+    { class: "sidebar-footer" },
     h("div", { class: "avatar" }, getInitials(session.user.name)),
-    h("div", {},
+    h(
+      "div",
+      {},
       h("a", { href: "/pages/profile.html", class: "user-link" }, session.user.name),
       session.invitationCount > 0
-        ? h("a", { href: "/pages/profile.html", class: "invitation-link" }, `Приглашения: ${session.invitationCount}`)
+        ? h(
+            "a",
+            { href: "/pages/profile.html", class: "invitation-link" },
+            `Приглашения: ${session.invitationCount}`,
+          )
         : null,
       h("a", { href: "/pages/settings.html", class: "settings-link" }, "Настройки"),
       h("a", { href: "/pages/login.html?logout", class: "tag logout-link" }, "Выйти"),
@@ -132,12 +152,11 @@ function buildTeamSwitch(session: Session): HTMLElement {
     initials = getInitials(teamName);
   }
 
-  const box = h("div", { class: "team-switch" },
+  const box = h(
+    "div",
+    { class: "team-switch" },
     h("div", { class: "avatar" }, initials),
-    h("div", {},
-      h("div", { class: "name" }, teamName),
-      h("div", { class: "role" }, roleText),
-    ),
+    h("div", {}, h("div", { class: "name" }, teamName), h("div", { class: "role" }, roleText)),
     h("span", { class: "chevron" }, icon("down")),
     menu,
   );

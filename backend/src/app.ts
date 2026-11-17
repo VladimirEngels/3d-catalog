@@ -1,4 +1,3 @@
-
 import cookieParser from "cookie-parser";
 import express, { type NextFunction, type Request, type Response } from "express";
 import multer from "multer";
@@ -56,7 +55,13 @@ app.use((error: unknown, _req: Request, res: Response, next: NextFunction) => {
   }
   if (error instanceof multer.MulterError) {
     const tooBig = error.code === "LIMIT_FILE_SIZE";
-    res.status(tooBig ? 413 : 400).json({ error: tooBig ? "Файл слишком большой: можно загрузить до 100 МБ" : "Не удалось принять файл" });
+    res
+      .status(tooBig ? 413 : 400)
+      .json({
+        error: tooBig
+          ? "Файл слишком большой: можно загрузить до 100 МБ"
+          : "Не удалось принять файл",
+      });
     return;
   }
   if (error instanceof SyntaxError) {

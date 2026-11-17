@@ -1,6 +1,8 @@
-
 export class ApiError extends Error {
-  constructor(public status: number, message: string) {
+  constructor(
+    public status: number,
+    message: string,
+  ) {
     super(message);
   }
 }
@@ -19,7 +21,9 @@ export async function request<T>(method: string, url: string, body?: object): Pr
 
   if (import.meta.env.DEV) {
     const address = url.split("?")[0];
-    console.log(`[запрос] ${method} /api${address} → ${response.status}, ${Date.now() - startedAt} мс`);
+    console.log(
+      `[запрос] ${method} /api${address} → ${response.status}, ${Date.now() - startedAt} мс`,
+    );
   }
 
   if (response.status === 401 && !location.pathname.endsWith("/login.html")) {

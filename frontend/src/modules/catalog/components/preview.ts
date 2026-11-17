@@ -1,4 +1,3 @@
-
 import { getModelView, savePreview } from "../api";
 
 const WIDTH = 640;
@@ -10,7 +9,11 @@ export async function createAndSavePreview(teamId: number, modelId: number): Pro
     const THREE = await import("three");
     const { addLights, frameCamera, loadModel } = await import("./load-model");
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true })
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true,
+      preserveDrawingBuffer: true,
+    });
     renderer.setSize(WIDTH, HEIGHT);
     try {
       const scene = new THREE.Scene();
@@ -23,7 +26,9 @@ export async function createAndSavePreview(teamId: number, modelId: number): Pro
       frameCamera(camera, model);
       renderer.render(scene, camera);
 
-      const image = await new Promise<Blob | null>((resolve) => renderer.domElement.toBlob(resolve, "image/png"));
+      const image = await new Promise<Blob | null>((resolve) =>
+        renderer.domElement.toBlob(resolve, "image/png"),
+      );
       if (image === null) {
         return false;
       }

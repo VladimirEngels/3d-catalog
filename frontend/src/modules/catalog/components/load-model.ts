@@ -1,4 +1,3 @@
-
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { MTLLoader } from "three/addons/loaders/MTLLoader.js";
@@ -38,7 +37,8 @@ function meshFromGeometry(geometry: THREE.BufferGeometry): THREE.Mesh {
 
 function createManager(view: ModelView): THREE.LoadingManager {
   const manager = new THREE.LoadingManager();
-  const lastPart = (name: string) => decodeURIComponent(name).replace(/\\/g, "/").split("/").pop()?.toLowerCase() ?? "";
+  const lastPart = (name: string) =>
+    decodeURIComponent(name).replace(/\\/g, "/").split("/").pop()?.toLowerCase() ?? "";
 
   const urlByName = new Map<string, string>();
   for (const asset of view.assets) {
@@ -66,7 +66,10 @@ function waitForAllFiles(manager: THREE.LoadingManager, isFinished: () => boolea
   });
 }
 
-async function loadObjMaterials(view: ModelView, manager: THREE.LoadingManager): Promise<OBJLoader> {
+async function loadObjMaterials(
+  view: ModelView,
+  manager: THREE.LoadingManager,
+): Promise<OBJLoader> {
   const loader = new OBJLoader(manager);
   const materialFile = view.assets.find((asset) => asset.name.toLowerCase().endsWith(".mtl"));
   if (materialFile) {
@@ -86,7 +89,10 @@ export async function loadModel(view: ModelView): Promise<THREE.Object3D> {
     case "PLY": {
       const geometry = await new PLYLoader(manager).loadAsync(view.mainUrl);
       if (geometry.index === null && geometry.getAttribute("position").count % 3 !== 0) {
-        return new THREE.Points(geometry, new THREE.PointsMaterial({ color: 0xb8c0cc, size: 0.01 }));
+        return new THREE.Points(
+          geometry,
+          new THREE.PointsMaterial({ color: 0xb8c0cc, size: 0.01 }),
+        );
       }
       return meshFromGeometry(geometry);
     }

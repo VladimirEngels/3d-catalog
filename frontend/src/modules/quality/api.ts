@@ -1,4 +1,3 @@
-
 import { request } from "@shared/api/http";
 
 export interface QualityReport {

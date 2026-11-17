@@ -1,4 +1,3 @@
-
 import { request } from "@shared/api/http";
 
 export type ModelFormat = "OBJ" | "STL" | "PLY" | "GLTF" | "GLB";
@@ -52,7 +51,11 @@ export interface ModelView {
   assets: { name: string; url: string }[];
 }
 
-export function getModels(teamId: number, filters: CatalogFilters, page: number): Promise<CatalogResponse> {
+export function getModels(
+  teamId: number,
+  filters: CatalogFilters,
+  page: number,
+): Promise<CatalogResponse> {
   const params = new URLSearchParams();
   params.set("sort", filters.sort);
   params.set("page", String(page));
@@ -73,7 +76,6 @@ export function getModelView(teamId: number, modelId: number): Promise<ModelView
   return request("GET", `/teams/${teamId}/models/${modelId}/view`);
 }
 
-
 export interface Collection {
   id: number;
   name: string;
@@ -85,11 +87,18 @@ export function getCollections(teamId: number): Promise<Collection[]> {
   return request("GET", `/teams/${teamId}/collections`);
 }
 
-export function createCollection(teamId: number, name: string): Promise<{ id: number; name: string }> {
+export function createCollection(
+  teamId: number,
+  name: string,
+): Promise<{ id: number; name: string }> {
   return request("POST", `/teams/${teamId}/collections`, { name });
 }
 
-export function renameCollection(teamId: number, collectionId: number, name: string): Promise<void> {
+export function renameCollection(
+  teamId: number,
+  collectionId: number,
+  name: string,
+): Promise<void> {
   return request("PATCH", `/teams/${teamId}/collections/${collectionId}`, { name });
 }
 
@@ -97,11 +106,19 @@ export function deleteCollection(teamId: number, collectionId: number): Promise<
   return request("DELETE", `/teams/${teamId}/collections/${collectionId}`);
 }
 
-export function addModelsToCollection(teamId: number, collectionId: number, modelIds: number[]): Promise<void> {
+export function addModelsToCollection(
+  teamId: number,
+  collectionId: number,
+  modelIds: number[],
+): Promise<void> {
   return request("POST", `/teams/${teamId}/collections/${collectionId}/models`, { modelIds });
 }
 
-export function removeModelFromCollection(teamId: number, collectionId: number, modelId: number): Promise<void> {
+export function removeModelFromCollection(
+  teamId: number,
+  collectionId: number,
+  modelId: number,
+): Promise<void> {
   return request("DELETE", `/teams/${teamId}/collections/${collectionId}/models/${modelId}`);
 }
 
@@ -114,7 +131,6 @@ export function savePreview(teamId: number, modelId: number, image: Blob): Promi
   form.append("preview", image, "preview.png");
   return request("POST", `/teams/${teamId}/models/${modelId}/preview`, form);
 }
-
 
 export interface ModelFile {
   id: number;
@@ -175,7 +191,12 @@ export function getModel(teamId: number, modelId: number): Promise<ModelCard> {
   return request("GET", `/teams/${teamId}/models/${modelId}`);
 }
 
-export function updateModel(teamId: number, modelId: number, description: string, tags: string[]): Promise<void> {
+export function updateModel(
+  teamId: number,
+  modelId: number,
+  description: string,
+  tags: string[],
+): Promise<void> {
   return request("PATCH", `/teams/${teamId}/models/${modelId}`, { description, tags });
 }
 
@@ -190,4 +211,3 @@ export function fileDownloadUrl(teamId: number, modelId: number, fileId: number)
 export function versionDownloadUrl(teamId: number, modelId: number, versionId: number): string {
   return `/api/teams/${teamId}/models/${modelId}/versions/${versionId}/download`;
 }
-

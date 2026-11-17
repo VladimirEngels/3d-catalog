@@ -1,4 +1,3 @@
-
 import { crc32, deflateSync } from "node:zlib";
 
 export interface Mesh {
@@ -24,24 +23,88 @@ export function addBox(mesh: Mesh, center: Vector, size: Vector): void {
   const [cx, cy, cz] = center;
   const [hx, hy, hz] = [size[0] / 2, size[1] / 2, size[2] / 2];
   const faces: { normal: Vector; corners: Vector[] }[] = [
-    { normal: [0, 0, 1], corners: [[-hx, -hy, hz], [hx, -hy, hz], [hx, hy, hz], [-hx, hy, hz]] },
-    { normal: [0, 0, -1], corners: [[hx, -hy, -hz], [-hx, -hy, -hz], [-hx, hy, -hz], [hx, hy, -hz]] },
-    { normal: [1, 0, 0], corners: [[hx, -hy, hz], [hx, -hy, -hz], [hx, hy, -hz], [hx, hy, hz]] },
-    { normal: [-1, 0, 0], corners: [[-hx, -hy, -hz], [-hx, -hy, hz], [-hx, hy, hz], [-hx, hy, -hz]] },
-    { normal: [0, 1, 0], corners: [[-hx, hy, hz], [hx, hy, hz], [hx, hy, -hz], [-hx, hy, -hz]] },
-    { normal: [0, -1, 0], corners: [[-hx, -hy, -hz], [hx, -hy, -hz], [hx, -hy, hz], [-hx, -hy, hz]] },
+    {
+      normal: [0, 0, 1],
+      corners: [
+        [-hx, -hy, hz],
+        [hx, -hy, hz],
+        [hx, hy, hz],
+        [-hx, hy, hz],
+      ],
+    },
+    {
+      normal: [0, 0, -1],
+      corners: [
+        [hx, -hy, -hz],
+        [-hx, -hy, -hz],
+        [-hx, hy, -hz],
+        [hx, hy, -hz],
+      ],
+    },
+    {
+      normal: [1, 0, 0],
+      corners: [
+        [hx, -hy, hz],
+        [hx, -hy, -hz],
+        [hx, hy, -hz],
+        [hx, hy, hz],
+      ],
+    },
+    {
+      normal: [-1, 0, 0],
+      corners: [
+        [-hx, -hy, -hz],
+        [-hx, -hy, hz],
+        [-hx, hy, hz],
+        [-hx, hy, -hz],
+      ],
+    },
+    {
+      normal: [0, 1, 0],
+      corners: [
+        [-hx, hy, hz],
+        [hx, hy, hz],
+        [hx, hy, -hz],
+        [-hx, hy, -hz],
+      ],
+    },
+    {
+      normal: [0, -1, 0],
+      corners: [
+        [-hx, -hy, -hz],
+        [hx, -hy, -hz],
+        [hx, -hy, hz],
+        [-hx, -hy, hz],
+      ],
+    },
   ];
-  const uv = [[0, 0], [1, 0], [1, 1], [0, 1]];
+  const uv = [
+    [0, 0],
+    [1, 0],
+    [1, 1],
+    [0, 1],
+  ];
   for (const face of faces) {
     const start = mesh.positions.length / 3;
     face.corners.forEach((corner, i) => {
-      addVertex(mesh, [cx + corner[0], cy + corner[1], cz + corner[2]], face.normal, uv[i][0], uv[i][1]);
+      addVertex(
+        mesh,
+        [cx + corner[0], cy + corner[1], cz + corner[2]],
+        face.normal,
+        uv[i][0],
+        uv[i][1],
+      );
     });
     mesh.indices.push(start, start + 1, start + 2, start, start + 2, start + 3);
   }
 }
 
-function addSurface(mesh: Mesh, columns: number, rows: number, point: (u: number, v: number) => Vector): void {
+function addSurface(
+  mesh: Mesh,
+  columns: number,
+  rows: number,
+  point: (u: number, v: number) => Vector,
+): void {
   const start = mesh.positions.length / 3;
   const step = 0.001;
   for (let row = 0; row <= rows; row++) {
@@ -53,7 +116,11 @@ function addSurface(mesh: Mesh, columns: number, rows: number, point: (u: number
       const pv = point(u, v + step);
       const a: Vector = [pu[0] - p[0], pu[1] - p[1], pu[2] - p[2]];
       const b: Vector = [pv[0] - p[0], pv[1] - p[1], pv[2] - p[2]];
-      const n: Vector = [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+      const n: Vector = [
+        a[1] * b[2] - a[2] * b[1],
+        a[2] * b[0] - a[0] * b[2],
+        a[0] * b[1] - a[1] * b[0],
+      ];
       const length = Math.hypot(n[0], n[1], n[2]) || 1;
       addVertex(mesh, p, [n[0] / length, n[1] / length, n[2] / length], u, v);
     }
@@ -81,15 +148,32 @@ export function addSphere(mesh: Mesh, center: Vector, radius: number, segments =
   });
 }
 
-export function addCylinder(mesh: Mesh, center: Vector, radiusTop: number, radiusBottom: number, height: number, segments = 32): void {
+export function addCylinder(
+  mesh: Mesh,
+  center: Vector,
+  radiusTop: number,
+  radiusBottom: number,
+  height: number,
+  segments = 32,
+): void {
   addSurface(mesh, segments, 8, (u, v) => {
     const around = u * Math.PI * 2;
     const radius = radiusTop + (radiusBottom - radiusTop) * v;
-    return [center[0] + radius * Math.cos(around), center[1] + height / 2 - height * v, center[2] + radius * Math.sin(around)];
+    return [
+      center[0] + radius * Math.cos(around),
+      center[1] + height / 2 - height * v,
+      center[2] + radius * Math.sin(around),
+    ];
   });
 }
 
-export function addTorus(mesh: Mesh, center: Vector, radius: number, tube: number, segments = 40): void {
+export function addTorus(
+  mesh: Mesh,
+  center: Vector,
+  radius: number,
+  tube: number,
+  segments = 40,
+): void {
   addSurface(mesh, segments, 16, (u, v) => {
     const around = u * Math.PI * 2;
     const inner = v * Math.PI * 2;
@@ -100,7 +184,6 @@ export function addTorus(mesh: Mesh, center: Vector, radius: number, tube: numbe
     ];
   });
 }
-
 
 export function toObj(mesh: Mesh, materialFile?: string, materialName?: string): Buffer {
   const lines: string[] = [];
@@ -146,10 +229,18 @@ export function toPly(mesh: Mesh): Buffer {
   const vertexCount = mesh.positions.length / 3;
   const faceCount = mesh.indices.length / 3;
   const lines = [
-    "ply", "format ascii 1.0", `element vertex ${vertexCount}`,
-    "property float x", "property float y", "property float z",
-    "property float nx", "property float ny", "property float nz",
-    `element face ${faceCount}`, "property list uchar int vertex_indices", "end_header",
+    "ply",
+    "format ascii 1.0",
+    `element vertex ${vertexCount}`,
+    "property float x",
+    "property float y",
+    "property float z",
+    "property float nx",
+    "property float ny",
+    "property float nz",
+    `element face ${faceCount}`,
+    "property list uchar int vertex_indices",
+    "end_header",
   ];
   for (let i = 0; i < vertexCount; i++) {
     const p = mesh.positions.slice(i * 3, i * 3 + 3);
@@ -162,7 +253,10 @@ export function toPly(mesh: Mesh): Buffer {
   return Buffer.from(lines.join("\n") + "\n");
 }
 
-export function toGlb(mesh: Mesh, options: { texture?: Buffer; skeleton?: boolean; materialName?: string }): Buffer {
+export function toGlb(
+  mesh: Mesh,
+  options: { texture?: Buffer; skeleton?: boolean; materialName?: string },
+): Buffer {
   const vertexCount = mesh.positions.length / 3;
   const chunks: Buffer[] = [];
   const bufferViews: object[] = [];
@@ -171,7 +265,12 @@ export function toGlb(mesh: Mesh, options: { texture?: Buffer; skeleton?: boolea
   function addView(data: Buffer, target?: number): number {
     const padding = (4 - (data.length % 4)) % 4;
     chunks.push(data, Buffer.alloc(padding));
-    bufferViews.push({ buffer: 0, byteOffset: offset, byteLength: data.length, ...(target ? { target } : {}) });
+    bufferViews.push({
+      buffer: 0,
+      byteOffset: offset,
+      byteLength: data.length,
+      ...(target ? { target } : {}),
+    });
     offset += data.length + padding;
     return bufferViews.length - 1;
   }
@@ -185,10 +284,35 @@ export function toGlb(mesh: Mesh, options: { texture?: Buffer; skeleton?: boolea
   }
 
   const accessors: object[] = [
-    { bufferView: addView(floats(mesh.positions), 34962), componentType: 5126, count: vertexCount, type: "VEC3", min, max },
-    { bufferView: addView(floats(mesh.normals), 34962), componentType: 5126, count: vertexCount, type: "VEC3" },
-    { bufferView: addView(floats(mesh.uvs.map((value, i) => (i % 2 === 1 ? 1 - value : value))), 34962), componentType: 5126, count: vertexCount, type: "VEC2" },
-    { bufferView: addView(Buffer.from(new Uint32Array(mesh.indices).buffer), 34963), componentType: 5125, count: mesh.indices.length, type: "SCALAR" },
+    {
+      bufferView: addView(floats(mesh.positions), 34962),
+      componentType: 5126,
+      count: vertexCount,
+      type: "VEC3",
+      min,
+      max,
+    },
+    {
+      bufferView: addView(floats(mesh.normals), 34962),
+      componentType: 5126,
+      count: vertexCount,
+      type: "VEC3",
+    },
+    {
+      bufferView: addView(
+        floats(mesh.uvs.map((value, i) => (i % 2 === 1 ? 1 - value : value))),
+        34962,
+      ),
+      componentType: 5126,
+      count: vertexCount,
+      type: "VEC2",
+    },
+    {
+      bufferView: addView(Buffer.from(new Uint32Array(mesh.indices).buffer), 34963),
+      componentType: 5125,
+      count: mesh.indices.length,
+      type: "SCALAR",
+    },
   ];
   const attributes: Record<string, number> = { POSITION: 0, NORMAL: 1, TEXCOORD_0: 2 };
 
@@ -198,7 +322,12 @@ export function toGlb(mesh: Mesh, options: { texture?: Buffer; skeleton?: boolea
     scenes: [{ nodes: [0] }],
     nodes: [{ mesh: 0, name: "Модель" }],
     meshes: [{ primitives: [{ attributes, indices: 3, material: 0 }] }],
-    materials: [{ name: options.materialName ?? "Материал", pbrMetallicRoughness: { metallicFactor: 0, roughnessFactor: 0.8 } }],
+    materials: [
+      {
+        name: options.materialName ?? "Материал",
+        pbrMetallicRoughness: { metallicFactor: 0, roughnessFactor: 0.8 },
+      },
+    ],
   };
 
   if (options.skeleton) {
@@ -207,10 +336,28 @@ export function toGlb(mesh: Mesh, options: { texture?: Buffer; skeleton?: boolea
     for (let i = 0; i < vertexCount; i++) {
       weights[i * 4] = 1;
     }
-    attributes.JOINTS_0 = accessors.push({ bufferView: addView(joints, 34962), componentType: 5121, count: vertexCount, type: "VEC4" }) - 1;
-    attributes.WEIGHTS_0 = accessors.push({ bufferView: addView(Buffer.from(weights.buffer), 34962), componentType: 5126, count: vertexCount, type: "VEC4" }) - 1;
+    attributes.JOINTS_0 =
+      accessors.push({
+        bufferView: addView(joints, 34962),
+        componentType: 5121,
+        count: vertexCount,
+        type: "VEC4",
+      }) - 1;
+    attributes.WEIGHTS_0 =
+      accessors.push({
+        bufferView: addView(Buffer.from(weights.buffer), 34962),
+        componentType: 5126,
+        count: vertexCount,
+        type: "VEC4",
+      }) - 1;
     const identity = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
-    const inverseBind = accessors.push({ bufferView: addView(floats(identity)), componentType: 5126, count: 1, type: "MAT4" }) - 1;
+    const inverseBind =
+      accessors.push({
+        bufferView: addView(floats(identity)),
+        componentType: 5126,
+        count: 1,
+        type: "MAT4",
+      }) - 1;
     json.nodes = [{ mesh: 0, skin: 0, name: "Модель" }, { name: "Кость" }];
     json.scenes = [{ nodes: [0, 1] }];
     json.skins = [{ joints: [1], inverseBindMatrices: inverseBind }];
@@ -221,7 +368,9 @@ export function toGlb(mesh: Mesh, options: { texture?: Buffer; skeleton?: boolea
     json.images = [{ name: "текстура", bufferView: imageView, mimeType: "image/png" }];
     json.textures = [{ source: 0 }];
     (json.materials as { pbrMetallicRoughness: object }[])[0].pbrMetallicRoughness = {
-      baseColorTexture: { index: 0 }, metallicFactor: 0, roughnessFactor: 0.8,
+      baseColorTexture: { index: 0 },
+      metallicFactor: 0,
+      roughnessFactor: 0.8,
     };
   }
 
@@ -246,8 +395,10 @@ export function toGlb(mesh: Mesh, options: { texture?: Buffer; skeleton?: boolea
   return Buffer.concat([header, jsonHeader, jsonBytes, binaryHeader, binary]);
 }
 
-
-export function createPng(size: number, color: (x: number, y: number) => [number, number, number]): Buffer {
+export function createPng(
+  size: number,
+  color: (x: number, y: number) => [number, number, number],
+): Buffer {
   const raw = Buffer.alloc((size * 3 + 1) * size);
   for (let y = 0; y < size; y++) {
     const line = y * (size * 3 + 1);

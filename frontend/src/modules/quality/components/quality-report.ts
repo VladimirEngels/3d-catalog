@@ -1,4 +1,3 @@
-
 import { h } from "@shared/ui/dom";
 import { errorText } from "@shared/ui/form";
 import { formatDate } from "@shared/ui/format";
@@ -20,10 +19,14 @@ function buildPanels(report: QualityReport): HTMLElement {
     level = "warn";
   }
 
-  const scorePanel = h("div", { class: "panel" },
+  const scorePanel = h(
+    "div",
+    { class: "panel" },
     h("h3", {}, "Оценка похожести"),
     h("div", { class: `big-score ${level}` }, `${Math.round(report.similarity)} %`),
-    report.needsReview ? h("div", { class: "note warn" }, `Ниже порога ${GOOD_SCORE} % — нужна проверка человеком`) : null,
+    report.needsReview
+      ? h("div", { class: "note warn" }, `Ниже порога ${GOOD_SCORE} % — нужна проверка человеком`)
+      : null,
   );
 
   const losses = h("ul", { class: "issues" });
@@ -42,24 +45,39 @@ function buildPanels(report: QualityReport): HTMLElement {
     defects.append(buildIssue("ok", "✓", "Ошибок не найдено"));
   }
 
-  return h("div", { class: "qc" },
+  return h(
+    "div",
+    { class: "qc" },
     scorePanel,
     h("div", { class: "panel" }, h("h3", {}, "Что не сохранилось"), losses),
     h("div", { class: "panel" }, h("h3", {}, "Ошибки в модели"), defects),
   );
 }
 
-export async function showQualityReport(container: HTMLElement, teamId: number, modelId: number): Promise<void> {
+export async function showQualityReport(
+  container: HTMLElement,
+  teamId: number,
+  modelId: number,
+): Promise<void> {
   let reports: QualityReport[];
   try {
     reports = await getQualityReports(teamId, modelId);
   } catch (error) {
-    container.replaceChildren(h("div", { class: "empty-box" }, h("b", {}, "Не удалось загрузить отчёт"), errorText(error)));
+    container.replaceChildren(
+      h("div", { class: "empty-box" }, h("b", {}, "Не удалось загрузить отчёт"), errorText(error)),
+    );
     return;
   }
 
   if (reports.length === 0) {
-    container.replaceChildren(h("div", { class: "empty-box" }, h("b", {}, "Результатов пока нет"), "После смены формата модели здесь появится отчёт о качестве."));
+    container.replaceChildren(
+      h(
+        "div",
+        { class: "empty-box" },
+        h("b", {}, "Результатов пока нет"),
+        "После смены формата модели здесь появится отчёт о качестве.",
+      ),
+    );
     return;
   }
 
@@ -67,13 +85,25 @@ export async function showQualityReport(container: HTMLElement, teamId: number, 
   const select = h("select") as HTMLSelectElement;
   reports.forEach((report, index) => {
     const date = report.finishedAt ? ` · ${formatDate(report.finishedAt)}` : "";
-    select.append(h("option", { value: String(index) }, `${report.sourceFormat} → ${report.targetFormat}${date}`));
+    select.append(
+      h(
+        "option",
+        { value: String(index) },
+        `${report.sourceFormat} → ${report.targetFormat}${date}`,
+      ),
+    );
   });
-  select.addEventListener("change", () => panels.replaceChildren(buildPanels(reports[Number(select.value)])));
+  select.addEventListener("change", () =>
+    panels.replaceChildren(buildPanels(reports[Number(select.value)])),
+  );
   panels.append(buildPanels(reports[0]));
 
   container.replaceChildren(
-    h("div", { class: "demo-note" }, "Проверка качества пока не подключена: это заготовленный пример отчёта."),
+    h(
+      "div",
+      { class: "demo-note" },
+      "Проверка качества пока не подключена: это заготовленный пример отчёта.",
+    ),
     h("div", { class: "qc-toolbar" }, h("span", {}, "Результат:"), select),
     panels,
   );

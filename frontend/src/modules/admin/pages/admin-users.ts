@@ -18,10 +18,18 @@ if (!session.user.isAdmin) {
 function buildRow(user: AdminUser, reload: () => void): HTMLElement {
   let action: HTMLElement | null = null;
   if (user.id !== session.user.id) {
-    action = h("button", { class: "btn small", type: "button" }, user.isBlocked ? "Разблокировать" : "Заблокировать");
+    action = h(
+      "button",
+      { class: "btn small", type: "button" },
+      user.isBlocked ? "Разблокировать" : "Заблокировать",
+    );
     action.addEventListener("click", async () => {
       if (!user.isBlocked) {
-        const agreed = await confirmAction(`Заблокировать ${user.name}?`, "Человек сразу выйдет из системы и не сможет войти снова. Его модели останутся в командах.", "Заблокировать");
+        const agreed = await confirmAction(
+          `Заблокировать ${user.name}?`,
+          "Человек сразу выйдет из системы и не сможет войти снова. Его модели останутся в командах.",
+          "Заблокировать",
+        );
         if (!agreed) {
           return;
         }
@@ -35,12 +43,30 @@ function buildRow(user: AdminUser, reload: () => void): HTMLElement {
     });
   }
 
-  return h("tr", {},
-    h("td", {}, h("div", { class: "person" }, h("div", {}, user.name, user.isAdmin ? " (администратор)" : "", h("small", {}, user.email)))),
+  return h(
+    "tr",
+    {},
+    h(
+      "td",
+      {},
+      h(
+        "div",
+        { class: "person" },
+        h("div", {}, user.name, user.isAdmin ? " (администратор)" : "", h("small", {}, user.email)),
+      ),
+    ),
     h("td", {}, String(user.teamCount)),
     h("td", { class: "muted" }, formatDate(user.createdAt)),
     h("td", { class: "muted" }, user.lastLogin ? formatDate(user.lastLogin) : "—"),
-    h("td", {}, h("span", { class: user.isBlocked ? "status blocked" : "status done" }, user.isBlocked ? "Заблокирован" : "Активен")),
+    h(
+      "td",
+      {},
+      h(
+        "span",
+        { class: user.isBlocked ? "status blocked" : "status done" },
+        user.isBlocked ? "Заблокирован" : "Активен",
+      ),
+    ),
     h("td", {}, action),
   );
 }
