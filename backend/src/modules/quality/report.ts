@@ -20,7 +20,18 @@ export interface StructuralReport {
   losses: string[];
   defects: string[];
   needsReview: boolean;
+  visual?: VisualReport;
 }
+
+export type VisualReport =
+  | {
+      status: "done";
+      method: string;
+      score: number;
+      threshold: number;
+      views: { name: string; score: number | null; index: number }[];
+    }
+  | { status: "unavailable"; message: string };
 
 export async function readStructuralReport(storagePath: string): Promise<StructuralReport | null> {
   let text: string;
@@ -55,5 +66,30 @@ export async function readStructuralReport(storagePath: string): Promise<Structu
     typeof report.needsReview !== "boolean"
   )
     throw new Error("Повреждён отчёт структурной проверки модели");
+  if (report.visual !== undefined) {
+    const visual = report.visual;
+    const score = (value: unknown) =>
+      typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 100;
+    if (visual.status === "done") {
+      if (
+        !score(visual.score) ||
+        visual.threshold !== 80 ||
+        typeof visual.method !== "string" ||
+        !Array.isArray(visual.views) ||
+        visual.views.length !== 6 ||
+        !visual.views.every(
+          (view: { name: string; score: number | null; index: number }, index: number) =>
+            view &&
+            typeof view.name === "string" &&
+            view.index === index &&
+            (view.score === null || score(view.score)),
+        )
+      ) {
+        throw new Error("Повреждён отчёт визуального сравнения");
+      }
+    } else if (visual.status !== "unavailable" || typeof visual.message !== "string") {
+      throw new Error("Неверное состояние визуального сравнения");
+    }
+  }
   return report;
 }

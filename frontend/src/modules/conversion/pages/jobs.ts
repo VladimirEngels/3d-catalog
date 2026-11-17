@@ -91,7 +91,7 @@ function buildAction(job: Job): HTMLElement | null {
   if (job.status === "failed") {
     return h("a", { class: "btn small", href: modelPage }, "Открыть модель");
   }
-  if (job.status === "done" && job.quality !== null) {
+  if (job.status === "done" && job.quality !== null && job.resultFileId === null) {
     return h("a", { class: "btn small", href: `${modelPage}#quality` }, "Отчёт");
   }
   if (job.status === "done" && job.resultFileId !== null) {
@@ -224,7 +224,7 @@ main.append(
   h(
     "div",
     { class: "demo-note" },
-    "После конвертации доступен отчёт по геометрии и сохранности данных. Визуальная похожесть и улучшение текстур пока не рассчитываются; демонстрационные оценки подготовлены заранее.",
+    "После конвертации доступен отчёт по геометрии и визуальной похожести с шести ракурсов. Улучшение текстур пока недоступно; демонстрационные оценки обозначены отдельно.",
   ),
   tabBar,
   content,

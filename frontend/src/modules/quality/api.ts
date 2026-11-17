@@ -6,7 +6,16 @@ export interface QualityReport {
   targetFormat: string;
   finishedAt: string | null;
   similarity: number | null;
-  method: "demo" | "structure";
+  method: "demo" | "structure" | "visual";
+  visual?:
+    | {
+        status: "done";
+        method: string;
+        score: number;
+        threshold: number;
+        views: { name: string; score: number | null; index: number }[];
+      }
+    | { status: "unavailable"; message: string };
   before?: GeometrySummary;
   after?: GeometrySummary;
   needsReview: boolean;

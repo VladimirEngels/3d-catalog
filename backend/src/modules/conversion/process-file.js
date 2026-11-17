@@ -4,11 +4,20 @@ import { createWriteStream } from "node:fs";
 import { dirname, join } from "node:path";
 import { pipeline } from "node:stream/promises";
 import yazl from "yazl";
+import { compareModelImages } from "../quality/render.js";
 
 process.on("disconnect", () => process.exit(1));
 process.once("message", async ({ inputPath, targetFormat, outputDirectory, resourceRoot }) => {
   try {
     const result = await convertFile(inputPath, targetFormat, outputDirectory, resourceRoot);
+    result.quality.visual = await compareModelImages(
+      inputPath,
+      result.path,
+      resourceRoot,
+      join(dirname(outputDirectory), "images"),
+    );
+    result.quality.needsReview ||=
+      result.quality.visual.status !== "done" || result.quality.visual.score < 80;
     const names = await readdir(outputDirectory);
     if (targetFormat === "OBJ" && names.length > 1) {
       const archive = new yazl.ZipFile();

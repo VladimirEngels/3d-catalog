@@ -1,7 +1,7 @@
 import { fork, type ChildProcess } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
 import { createReadStream } from "node:fs";
-import { copyFile, mkdir, mkdtemp, readdir, rm, stat, writeFile } from "node:fs/promises";
+import { copyFile, cp, mkdir, mkdtemp, readdir, rm, stat, writeFile } from "node:fs/promises";
 import { extname, join, posix, resolve, sep } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import type { PoolClient } from "pg";
@@ -10,6 +10,7 @@ import { log } from "../../logger";
 import { absolutePath, removeFolder, verifyStoredFile } from "../../storage";
 import { lockTeam } from "../accounts/team-repository";
 import { uploadTempFolder } from "../upload/temporary-files";
+import type { StructuralReport } from "../quality/report";
 
 interface Job {
   id: number;
@@ -27,7 +28,7 @@ interface InputFile {
 interface Result {
   path: string;
   losses: string[];
-  quality: object;
+  quality: StructuralReport;
 }
 
 export function startConversionQueue() {
@@ -171,6 +172,12 @@ export function startConversionQueue() {
         const fileName = "model" + extname(result.path);
         const stored = posix.join(outputFolder, fileName);
         await copyFile(result.path, absolutePath(stored));
+        const imagePath = join(work, "images");
+        if (result.quality.visual?.status === "done") {
+          await cp(imagePath, absolutePath(posix.join(outputFolder, "images")), {
+            recursive: true,
+          });
+        }
         const hash = createHash("sha256");
         for await (const chunk of createReadStream(absolutePath(stored))) hash.update(chunk);
         const checksum = hash.digest("hex");
@@ -193,6 +200,23 @@ export function startConversionQueue() {
           `UPDATE conversion_jobs SET status='done',finished_at=now(),error_message=NULL WHERE id=$1`,
           [job.id],
         );
+        if (result.quality.visual?.status === "done") {
+          const check = await client.query<{ id: number }>(
+            `INSERT INTO quality_checks(job_id,similarity_percent,needs_review) VALUES($1,$2,$3) RETURNING id`,
+            [job.id, result.quality.visual.score, result.quality.needsReview],
+          );
+          for (const [kind, messages] of [
+            ["loss", result.quality.losses],
+            ["defect", result.quality.defects],
+          ] as const) {
+            for (const message of messages) {
+              await client.query(
+                `INSERT INTO quality_issues(check_id,kind,message) VALUES($1,$2,$3)`,
+                [check.rows[0].id, kind, message.slice(0, 500)],
+              );
+            }
+          }
+        }
         await client.query(
           `INSERT INTO action_log(user_id,team_id,action,details) VALUES($1,$2,'convert',$3)`,
           [

@@ -15,6 +15,7 @@
     "express": "^5.3.0",
     "multer": "^2.5.0",
     "pg": "^8.23.1",
+    "playwright": "^1.65.1",
     "yauzl": "^3.4.0"
   },
   "devDependencies": {

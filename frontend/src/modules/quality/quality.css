@@ -50,3 +50,27 @@
 .all-textures {
   margin: 20px 0 10px;
 }
+
+.visual-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.visual-pair figure {
+  margin: 0;
+}
+.visual-pair img {
+  display: block;
+  width: 100%;
+  max-width: 384px;
+  background: #202020;
+}
+.visual-pair figcaption {
+  margin-bottom: 8px;
+}
+@media (max-width: 600px) {
+  .visual-pair {
+    grid-template-columns: 1fr;
+  }
+}

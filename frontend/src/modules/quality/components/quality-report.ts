@@ -11,7 +11,7 @@ function buildIssue(level: "ok" | "warn" | "err", mark: string, text: string): H
   return h("li", { class: level }, h("span", { class: "mark" }, mark), h("div", {}, text));
 }
 
-function buildPanels(report: QualityReport): HTMLElement {
+function buildPanels(report: QualityReport, teamId: number, modelId: number): HTMLElement {
   let level = "err";
   if (report.similarity !== null && report.similarity >= GOOD_SCORE) {
     level = "ok";
@@ -20,7 +20,7 @@ function buildPanels(report: QualityReport): HTMLElement {
   }
 
   const scorePanel =
-    report.method === "structure" && report.before && report.after
+    report.method !== "demo" && report.before && report.after
       ? buildMetrics(report.before, report.after, report.needsReview)
       : h(
           "div",
@@ -51,13 +51,74 @@ function buildPanels(report: QualityReport): HTMLElement {
     defects.append(buildIssue("ok", "✓", "Проверенные показатели не выявили расхождений"));
   }
 
-  return h(
+  const panels = h(
     "div",
     { class: "qc" },
     scorePanel,
     h("div", { class: "panel" }, h("h3", {}, "Что не сохранилось"), losses),
     h("div", { class: "panel" }, h("h3", {}, "Ошибки в модели"), defects),
   );
+  return h("div", {}, buildVisual(report, teamId, modelId), panels);
+}
+
+function buildVisual(report: QualityReport, teamId: number, modelId: number): HTMLElement | null {
+  const visual = report.visual;
+  if (!visual) return null;
+  if (visual.status === "unavailable") return h("div", { class: "note warn" }, visual.message);
+  const names: Record<string, string> = {
+    front: "Спереди",
+    back: "Сзади",
+    left: "Слева",
+    right: "Справа",
+    top: "Сверху",
+    bottom: "Снизу",
+  };
+  const panel = h(
+    "div",
+    { class: "panel" },
+    h("h3", {}, "Визуальная похожесть"),
+    h(
+      "div",
+      { class: `big-score ${visual.score >= GOOD_SCORE ? "ok" : "warn"}` },
+      `${visual.score.toFixed(2)} %`,
+    ),
+    h("p", {}, `${visual.method}. Порог проверки человеком — ${visual.threshold} %.`),
+    h(
+      "p",
+      { class: "muted" },
+      "Одинаковые камера, масштаб и освещение; неподвижная поза. Полностью пустые окна фона исключены. Оценка изображений не гарантирует сохранность всех данных модели.",
+    ),
+    visual.score < visual.threshold
+      ? h("div", { class: "note warn" }, "Оценка ниже порога — проверьте модель вручную")
+      : null,
+  );
+  for (const view of visual.views) {
+    const image = (side: string, title: string) =>
+      h(
+        "figure",
+        {},
+        h("figcaption", {}, title),
+        h("img", {
+          src: `/api/teams/${teamId}/models/${modelId}/quality/${report.jobId}/images/${side}/${view.index}`,
+          alt: `${title}: ${names[view.name] ?? view.name}`,
+          loading: "lazy",
+        }),
+      );
+    panel.append(
+      h(
+        "h4",
+        {},
+        `${names[view.name] ?? view.name}: ${view.score === null ? "нет видимой поверхности" : view.score.toFixed(2) + " %"}`,
+      ),
+      h(
+        "div",
+        { class: "visual-pair" },
+        image("before", "Исходная модель"),
+        image("after", "Результат"),
+      ),
+    );
+  }
+  return panel;
 }
 
 function buildMetrics(
@@ -118,7 +179,7 @@ function buildMetrics(
     h(
       "p",
       { class: "muted" },
-      "Проверка не сравнивает изображения, форму каждой поверхности и внешний вид материалов. Процент визуальной похожести не рассчитан.",
+      "Структурная проверка оценивает перечисленные показатели, а не форму каждой поверхности и сохранность всех данных.",
     ),
   );
 }
@@ -163,9 +224,9 @@ export async function showQualityReport(
     );
   });
   select.addEventListener("change", () =>
-    panels.replaceChildren(buildPanels(reports[Number(select.value)])),
+    panels.replaceChildren(buildPanels(reports[Number(select.value)], teamId, modelId)),
   );
-  panels.append(buildPanels(reports[0]));
+  panels.append(buildPanels(reports[0], teamId, modelId));
 
   container.replaceChildren(
     h("div", { class: "qc-toolbar" }, h("span", {}, "Результат:"), select),

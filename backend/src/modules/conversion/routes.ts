@@ -9,6 +9,7 @@ import { requireTeamRole } from "../../middleware/team-access";
 import { readId, readText } from "../../validation";
 import { lockTeam } from "../accounts/team-repository";
 import { absolutePath } from "../../storage";
+import { readStructuralReport } from "../quality/report";
 
 export const conversionRouter = Router();
 
@@ -176,27 +177,35 @@ conversionRouter.get(
 
     res.json({
       items: await Promise.all(
-        rows.rows.map(async (row) => ({
-          id: row.id,
-          modelId: row.model_id,
-          modelName: row.model_name,
-          hasPreview: row.has_preview,
-          sourceFormat: row.source_format,
-          targetFormat: row.target_format,
-          upscaleTextures: row.upscale_textures,
-          status: row.status,
-          error: row.error_message,
-          createdAt: row.created_at,
-          finishedAt: row.finished_at,
-          quality: row.quality === null ? null : Number(row.quality),
-          needsReview: row.needs_review,
-          resultFileId: row.result_file_id,
-          warnings:
+        rows.rows.map(async (row) => {
+          const report =
             row.status === "done" && row.result_file_path
-              ? await readWarnings(row.result_file_path)
-              : [],
-          jobsBefore: Number(row.jobs_before),
-        })),
+              ? await readStructuralReport(row.result_file_path)
+              : null;
+          let quality = row.quality === null ? null : Number(row.quality);
+          if (report?.visual?.status === "done") quality = report.visual.score;
+          return {
+            id: row.id,
+            modelId: row.model_id,
+            modelName: row.model_name,
+            hasPreview: row.has_preview,
+            sourceFormat: row.source_format,
+            targetFormat: row.target_format,
+            upscaleTextures: row.upscale_textures,
+            status: row.status,
+            error: row.error_message,
+            createdAt: row.created_at,
+            finishedAt: row.finished_at,
+            quality,
+            needsReview: report?.needsReview ?? row.needs_review,
+            resultFileId: row.result_file_id,
+            warnings:
+              row.status === "done" && row.result_file_path
+                ? await readWarnings(row.result_file_path)
+                : [],
+            jobsBefore: Number(row.jobs_before),
+          };
+        }),
       ),
       page,
       pageSize: PAGE_SIZE,
