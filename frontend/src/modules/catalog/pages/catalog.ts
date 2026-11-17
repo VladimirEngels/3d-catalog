@@ -81,6 +81,20 @@ function showCatalog(teamId: number): void {
   const results = h("div");
   const footer = h("div", { class: "load-more" });
   const filtersHolder = h("div", { class: "filters-holder" });
+  const filterToggle = h(
+    "button",
+    {
+      type: "button",
+      class: "btn mobile-filter-toggle",
+      "aria-expanded": "false",
+      "aria-controls": "catalog-filters",
+    },
+    "Фильтры",
+  );
+  filterToggle.addEventListener("click", () => {
+    const expanded = filtersHolder.classList.toggle("filters-open");
+    filterToggle.setAttribute("aria-expanded", String(expanded));
+  });
   main.before(filtersHolder);
 
   const head = h("div", { class: "page-head" }, h("h1", {}, "Каталог"), countText);
@@ -378,7 +392,9 @@ function showCatalog(teamId: number): void {
         ? `моделей: ${data.teamTotal}`
         : `найдено ${data.found} из ${data.teamTotal}`;
     if (panelIsStale) {
-      filtersHolder.replaceChildren(buildFilters(filters, data, reload, resetFilters));
+      const panel = buildFilters(filters, data, reload, resetFilters);
+      panel.id = "catalog-filters";
+      filtersHolder.replaceChildren(filterToggle, panel);
       panelIsStale = false;
     }
     renderChips(data);

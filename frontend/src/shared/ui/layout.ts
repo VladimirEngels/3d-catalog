@@ -67,7 +67,21 @@ function buildSidebar(session: Session, active: string, area: "team" | "admin"):
   const sidebar = h("aside", { class: "sidebar" });
 
   const logo = h("div", { class: "logo" }, h("span", {}, "3D"), "-Каталог");
-  sidebar.append(logo);
+  const toggle = h(
+    "button",
+    {
+      type: "button",
+      class: "btn mobile-menu-toggle",
+      "aria-expanded": "false",
+      "aria-controls": "site-navigation",
+    },
+    "Меню",
+  );
+  toggle.addEventListener("click", () => {
+    const expanded = sidebar.classList.toggle("menu-open");
+    toggle.setAttribute("aria-expanded", String(expanded));
+  });
+  sidebar.append(logo, toggle);
 
   if (area === "admin") {
     logo.append(h("span", { class: "admin-mark" }, "админ"));
@@ -81,7 +95,7 @@ function buildSidebar(session: Session, active: string, area: "team" | "admin"):
 }
 
 function buildNav(session: Session, active: string, area: "team" | "admin"): HTMLElement {
-  const nav = h("nav", { class: "nav" });
+  const nav = h("nav", { class: "nav", id: "site-navigation" });
 
   if (area === "admin") {
     for (const item of adminNav) {

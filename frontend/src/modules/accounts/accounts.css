@@ -198,3 +198,17 @@
   border-top: 1px solid var(--border);
   padding-top: 16px;
 }
+
+@media (max-width: 600px) {
+  .auth {
+    padding: 16px;
+  }
+  .auth-card {
+    width: min(400px, 100%);
+    padding: 24px 18px;
+  }
+  .invite-actions,
+  .auth-actions {
+    flex-wrap: wrap;
+  }
+}

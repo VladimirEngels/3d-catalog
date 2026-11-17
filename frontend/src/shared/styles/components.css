@@ -673,3 +673,67 @@ textarea {
 .compare-grid .panel + .panel {
   margin-top: 0;
 }
+
+@media (max-width: 1100px) {
+  .toolbar,
+  .filters-row,
+  .form-actions {
+    flex-wrap: wrap;
+  }
+  .search {
+    min-width: 0;
+    flex-basis: 220px;
+  }
+  .search input[type="text"] {
+    min-width: 0;
+    width: 100%;
+  }
+  .toolbar select {
+    max-width: 100%;
+  }
+  .filters-row input,
+  .filters-row select,
+  .copy-row input {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .tabs {
+    overflow-x: auto;
+  }
+  .tabs a {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .dialog {
+    width: min(480px, calc(100% - 24px));
+    max-height: calc(100dvh / var(--site-scale, 1) - 24px);
+    overflow-y: auto;
+    overflow-wrap: anywhere;
+    padding: 18px;
+  }
+  .stats,
+  .stats.five {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .issues li,
+  .note,
+  .demo-note {
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 600px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  select,
+  textarea {
+    font-size: 16px;
+  }
+  .btn,
+  .btn.small,
+  .segmented button {
+    min-height: 40px;
+  }
+}

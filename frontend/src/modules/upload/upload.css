@@ -111,3 +111,17 @@
 .dup-error {
   margin-top: 12px;
 }
+
+@media (max-width: 600px) {
+  .method {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .file-row .checks {
+    flex-wrap: wrap;
+    gap: 4px 12px;
+  }
+  .file-row .fname,
+  .dup-info {
+    overflow-wrap: anywhere;
+  }
+}
