@@ -7,6 +7,7 @@ import { createResourceReader } from "./readers/files.js";
 import { loadObjMaterials } from "./readers/mtl.js";
 import { readGltf } from "./readers/gltf.js";
 import { bakeSkin } from "./core/matrix.js";
+import { summarizeGeometry, compareGeometry } from "./core/quality.js";
 
 export { readObj, writeObj, writeGlb };
 
@@ -49,6 +50,7 @@ export async function convertFile(
     );
   }
   const { losses } = source;
+  const before = summarizeGeometry(source.geometries);
   let { geometries } = source;
   if (format !== "GLB") {
     if (geometries.some((geo) => geo.skin))
@@ -81,5 +83,19 @@ export async function convertFile(
     format === "OBJ"
       ? await writeObj(geometries, outputDirectory)
       : await writers[format](geometries, join(outputDirectory, `model.${format.toLowerCase()}`));
-  return { format, path: result.objPath ?? result.path, losses: [...new Set(losses)] };
+  const path = result.objPath ?? result.path;
+  const written = await readFile(path);
+  let restored;
+  if (format === "GLB") {
+    restored = await readGltf(written, await createResourceReader(path, 0, outputDirectory), true);
+  } else {
+    restored = await loadObjMaterials(
+      readObj(written),
+      await createResourceReader(path, 500 * 1024 * 1024, outputDirectory),
+    );
+  }
+  const quality = compareGeometry(before, summarizeGeometry(restored.geometries), [
+    ...new Set(losses),
+  ]);
+  return { format, path, losses: quality.losses, quality };
 }

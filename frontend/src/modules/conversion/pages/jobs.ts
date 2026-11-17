@@ -96,12 +96,17 @@ function buildAction(job: Job): HTMLElement | null {
   }
   if (job.status === "done" && job.resultFileId !== null) {
     return h(
-      "a",
-      {
-        class: "btn small",
-        href: `/api/teams/${teamId}/models/${job.modelId}/files/${job.resultFileId}/download`,
-      },
-      "Скачать",
+      "div",
+      {},
+      h("a", { class: "btn small", href: `${modelPage}#quality` }, "Отчёт"),
+      h(
+        "a",
+        {
+          class: "btn small",
+          href: `/api/teams/${teamId}/models/${job.modelId}/files/${job.resultFileId}/download`,
+        },
+        "Скачать",
+      ),
     );
   }
   return null;
@@ -219,7 +224,7 @@ main.append(
   h(
     "div",
     { class: "demo-note" },
-    "Модели обрабатываются в фоне. Оценка качества и улучшение текстур пока недоступны; демонстрационные оценки подготовлены заранее.",
+    "После конвертации доступен отчёт по геометрии и сохранности данных. Визуальная похожесть и улучшение текстур пока не рассчитываются; демонстрационные оценки подготовлены заранее.",
   ),
   tabBar,
   content,

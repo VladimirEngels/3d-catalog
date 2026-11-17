@@ -27,6 +27,7 @@ interface InputFile {
 interface Result {
   path: string;
   losses: string[];
+  quality: object;
 }
 
 export function startConversionQueue() {
@@ -175,7 +176,7 @@ export function startConversionQueue() {
         const checksum = hash.digest("hex");
         await writeFile(
           absolutePath(posix.join(outputFolder, "report.json")),
-          JSON.stringify({ losses: result.losses }),
+          JSON.stringify({ losses: result.losses, quality: result.quality }),
         );
         await client.query(
           `INSERT INTO files(job_id,format,file_name,storage_path,size_bytes,checksum) VALUES($1,$2,$3,$4,$5,$6)`,
