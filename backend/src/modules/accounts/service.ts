@@ -10,6 +10,7 @@ const SESSION_DAYS = 7;
 const MIN_PASSWORD_LENGTH = 8;
 const MAX_PASSWORD_LENGTH = 200;
 const WRONG_LOGIN_TEXT = "Неверная почта или пароль";
+const DUMMY_PASSWORD_HASH = "0".repeat(32) + ":" + "0".repeat(128);
 
 export const SESSION_LIFETIME_MS = SESSION_DAYS * 24 * 60 * 60 * 1000;
 
@@ -67,12 +68,9 @@ export async function register(
 export async function login(emailValue: unknown, passwordValue: unknown): Promise<string> {
   const user = await repository.findUserByEmail(normalizeEmail(emailValue));
 
-  if (!user) {
-    log("WARN", "Вход не удался: неизвестная почта");
-    throw new AppError(401, WRONG_LOGIN_TEXT);
-  }
-  if (!(await verifyPassword(readText(passwordValue), user.password_hash))) {
-    log("WARN", `Вход не удался: неверный пароль для ${user.email}`);
+  const matches = await verifyPassword(readText(passwordValue), user?.password_hash ?? DUMMY_PASSWORD_HASH);
+  if (!user || !matches) {
+    log("WARN", "Вход не удался: неверная почта или пароль");
     throw new AppError(401, WRONG_LOGIN_TEXT);
   }
   if (user.is_blocked) {

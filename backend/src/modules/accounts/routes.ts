@@ -2,6 +2,7 @@ import { Router, type Response } from "express";
 import { requireAuth, SESSION_COOKIE } from "../../middleware/auth";
 import { findUserBySession } from "./repository";
 import * as service from "./service";
+import { limitLogin } from "./login-limit";
 
 export const accountsRouter = Router();
 
@@ -23,7 +24,7 @@ accountsRouter.post("/auth/register", async (req, res) => {
   await sendMe(res, token, 201);
 });
 
-accountsRouter.post("/auth/login", async (req, res) => {
+accountsRouter.post("/auth/login", limitLogin, async (req, res) => {
   const { email, password } = req.body ?? {};
   const token = await service.login(email, password);
   setSessionCookie(res, token);
