@@ -81,3 +81,6 @@ docker compose down
 - [Оформление и адаптация интерфейса](docs/DESIGN.md).
 - [Модуль конвертации](converter/README.md).
 - [Схема базы данных](backend/schema.sql).
+- [Концептуальная модель данных](docs/database/conceptual-model.png).
+- [Логическая модель данных](docs/database/logical-model.png).
+- [Физическая схема базы данных](docs/database/physical-schema.png).
