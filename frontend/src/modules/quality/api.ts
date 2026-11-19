@@ -2,6 +2,7 @@ import { request } from "@shared/api/http";
 
 export interface QualityReport {
   jobId: number;
+  sourceVersionNumber: number;
   sourceFormat: string;
   targetFormat: string;
   finishedAt: string | null;

@@ -12,7 +12,7 @@ import { requireTeamRole } from "../../middleware/team-access";
 import { absolutePath, removeFoldersOfFiles, verifyStoredFile } from "../../storage";
 import { readId, readText } from "../../validation";
 import * as repository from "./model-repository";
-import type { FileRow, ModelRow, TextureRow } from "./model-repository";
+import type { CardFileRow, FileRow, ModelRow, TextureRow } from "./model-repository";
 
 export const modelRouter = Router();
 
@@ -33,13 +33,16 @@ function canEdit(res: Response, model: ModelRow): boolean {
   return role === "owner" || (role === "member" && model.author_id === res.locals.user.id);
 }
 
-function fileForClient(file: FileRow) {
+function fileForClient(file: CardFileRow) {
   return {
     id: file.id,
     name: file.file_name,
     format: file.format,
     sizeBytes: Number(file.size_bytes),
     converted: file.job_id !== null,
+    jobId: file.job_id,
+    sourceVersionNumber: file.source_version_number,
+    sourceFormat: file.source_format,
     createdAt: file.created_at,
   };
 }
@@ -75,7 +78,7 @@ modelRouter.get(
       repository.listTags(model.id),
       repository.listModelCollections(model.id),
       repository.listMaterials(current.id),
-      repository.listAllVersionFiles(current.id),
+      repository.listCardFiles(model.id, current.id),
       repository.listAllVersionTextures(current.id),
     ]);
 

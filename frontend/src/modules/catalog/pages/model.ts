@@ -5,7 +5,7 @@ import { can, getSession } from "@shared/session";
 import { confirmAction, showMessage } from "@shared/ui/dialog";
 import { h } from "@shared/ui/dom";
 import { errorText } from "@shared/ui/form";
-import { formatBytes, formatDate, formatNumber } from "@shared/ui/format";
+import { formatBytes, formatDate, formatMoment, formatNumber } from "@shared/ui/format";
 import { mountLayout } from "@shared/ui/layout";
 import {
   deleteModel,
@@ -15,6 +15,7 @@ import {
   removeModelFromCollection,
   versionDownloadUrl,
   type ModelCard,
+  type ModelFile,
 } from "../api";
 import { openAddToCollectionDialog } from "../components/collection-dialogs";
 import { openEditDialog } from "../components/edit-model";
@@ -25,6 +26,7 @@ import "../catalog.css";
 const main = await mountLayout("catalog");
 const session = await getSession();
 const modelId = Number(new URLSearchParams(location.search).get("id"));
+const requestedJobId = Number(new URLSearchParams(location.search).get("result"));
 
 function showProblem(title: string, text: string): void {
   main.replaceChildren(
@@ -53,15 +55,20 @@ function prop(label: string, value: string): HTMLElement[] {
   return [h("dt", {}, label), h("dd", {}, value)];
 }
 
-function buildInfoPanel(teamId: number, card: ModelCard): HTMLElement {
+function buildInfoPanel(teamId: number, card: ModelCard, activeResult?: ModelFile): HTMLElement {
   const { current } = card;
   const actions = h(
     "div",
     { class: "btn-row" },
     h(
       "a",
-      { class: "btn primary", href: versionDownloadUrl(teamId, card.id, current.versionId) },
-      "Скачать",
+      {
+        class: "btn primary model-download",
+        href: activeResult
+          ? fileDownloadUrl(teamId, card.id, activeResult.id)
+          : versionDownloadUrl(teamId, card.id, current.versionId),
+      },
+      activeResult ? "Скачать результат" : "Скачать исходный",
     ),
   );
 
@@ -150,7 +157,7 @@ function buildInfoPanel(teamId: number, card: ModelCard): HTMLElement {
     h("h2", { class: "model-title" }, card.name),
     h("div", { class: "author" }, `${card.authorName} · добавлена ${formatDate(card.createdAt)}`),
     actions,
-    h("h3", {}, "Характеристики"),
+    h("h3", {}, `Исходная версия v${card.current.versionNumber}`),
     h(
       "dl",
       { class: "props" },
@@ -198,16 +205,23 @@ function buildInfoPanel(teamId: number, card: ModelCard): HTMLElement {
   return panel;
 }
 
-function buildFilesTab(teamId: number, card: ModelCard): HTMLElement {
+function buildFilesTab(
+  teamId: number,
+  card: ModelCard,
+  activeResult?: ModelFile,
+  resultNumber?: number,
+): HTMLElement {
   const body = h("tbody");
-  for (const file of card.files) {
+  const files = card.files.filter((file) => !file.converted);
+  if (activeResult) files.push(activeResult);
+  for (const file of files) {
     body.append(
       h(
         "tr",
         {},
         h("td", { class: "file-name" }, file.name),
         h("td", {}, h("span", { class: "badge" }, file.format)),
-        h("td", {}, file.converted ? "Результат" : "Исходный"),
+        h("td", {}, file.converted ? `Результат №${resultNumber}` : "Исходный"),
         h("td", {}, formatBytes(file.sizeBytes)),
         h("td", { class: "muted" }, formatDate(file.createdAt)),
         h(
@@ -235,7 +249,12 @@ function buildFilesTab(teamId: number, card: ModelCard): HTMLElement {
   );
 }
 
-function buildVersionsTab(teamId: number, card: ModelCard): HTMLElement {
+function buildVersionsTab(
+  teamId: number,
+  card: ModelCard,
+  converted: ModelFile[],
+  activeResult?: ModelFile,
+): HTMLElement {
   const body = h("tbody");
   for (const version of card.versions) {
     const isCurrent = version.id === card.current.versionId;
@@ -288,27 +307,104 @@ function buildVersionsTab(teamId: number, card: ModelCard): HTMLElement {
     addButton.addEventListener("click", () => openNewVersionDialog(teamId, card.id));
     content.append(h("div", { class: "tab-actions" }, addButton));
   }
-  content.append(table);
+  const history = h("tbody");
+  converted.forEach((file, index) => {
+    const number = converted.length - index;
+    history.append(
+      h(
+        "tr",
+        {},
+        h(
+          "td",
+          {},
+          h("b", {}, `№${number}`),
+          " ",
+          index === 0
+            ? h("span", { class: "status done" }, "последняя")
+            : file.id === activeResult?.id
+              ? h("span", { class: "status done" }, "открыта")
+              : null,
+        ),
+        h("td", {}, `v${file.sourceVersionNumber} · ${file.sourceFormat} → ${file.format}`),
+        h("td", { class: "muted" }, formatMoment(file.createdAt)),
+        h("td", {}, formatBytes(file.sizeBytes)),
+        h(
+          "td",
+          {},
+          h(
+            "a",
+            { class: "btn small", href: `/pages/model.html?id=${card.id}&result=${file.jobId}#quality` },
+            "Открыть",
+          ),
+        ),
+        h(
+          "td",
+          {},
+          h("a", { class: "btn small", href: fileDownloadUrl(teamId, card.id, file.id) }, "Скачать"),
+        ),
+      ),
+    );
+  });
+  content.append(
+    table,
+    h("h3", { class: "history-heading" }, "История конвертаций"),
+    converted.length
+      ? h(
+          "div",
+          { class: "table-wrap" },
+          h(
+            "table",
+            { class: "table" },
+            h(
+              "thead",
+              {},
+              h(
+                "tr",
+                {},
+                ...["Результат", "Исходная версия и формат", "Создан", "Размер", "", ""].map((title) =>
+                  h("th", {}, title),
+                ),
+              ),
+            ),
+            history,
+          ),
+        )
+      : h("p", { class: "muted" }, "Конвертаций пока нет."),
+  );
   return content;
 }
 
-function buildTabs(teamId: number, card: ModelCard): HTMLElement[] {
+function buildTabs(
+  teamId: number,
+  card: ModelCard,
+  converted: ModelFile[],
+  activeResult?: ModelFile,
+): HTMLElement[] {
   const panels = new Map<string, HTMLElement>();
 
   const qualityPanel = h("div", {});
   const texturesPanel = h("div", {});
-  showQualityReport(qualityPanel, teamId, card.id);
+  const resultNumber = activeResult ? converted.length - converted.indexOf(activeResult) : undefined;
+  const reportJobId = requestedJobId > 0 ? requestedJobId : activeResult?.jobId ?? null;
+  showQualityReport(
+    qualityPanel,
+    teamId,
+    card.id,
+    reportJobId,
+    card.current.versionNumber,
+    resultNumber,
+  );
   showTextureCompare(texturesPanel, teamId, card.id, card.textures);
 
   panels.set("quality", qualityPanel);
-  panels.set("files", buildFilesTab(teamId, card));
-  panels.set("versions", buildVersionsTab(teamId, card));
+  panels.set("files", buildFilesTab(teamId, card, activeResult, resultNumber));
+  panels.set("versions", buildVersionsTab(teamId, card, converted, activeResult));
   panels.set("textures", texturesPanel);
 
   const tabs: [string, string, number | null][] = [
     ["quality", "Контроль качества", null],
-    ["files", "Файлы", card.files.length],
-    ["versions", "Версии", card.versions.length],
+    ["files", "Файлы", card.files.filter((file) => !file.converted).length + Number(Boolean(activeResult))],
+    ["versions", "Версии", card.versions.length + converted.length],
     ["textures", "Текстуры", card.textures.length],
   ];
 
@@ -345,6 +441,14 @@ function buildTabs(teamId: number, card: ModelCard): HTMLElement[] {
 async function showCard(teamId: number): Promise<void> {
   const card = await getModel(teamId, modelId);
   document.title = `${card.name} — 3D-Каталог`;
+  const converted = card.files.filter((file) => file.converted).sort((a, b) => b.id - a.id);
+  const activeResult =
+    requestedJobId > 0
+      ? converted.find((file) => file.jobId === requestedJobId)
+      : converted.find((file) => file.sourceVersionNumber === card.current.versionNumber);
+  const historicalResult = Boolean(
+    activeResult && activeResult.sourceVersionNumber !== card.current.versionNumber,
+  );
 
   const viewerBox = h("div", { class: "viewer" });
 
@@ -355,40 +459,65 @@ async function showCard(teamId: number): Promise<void> {
       h("a", { href: "/pages/catalog.html" }, "Каталог"),
       ` / ${card.name}`,
     ),
-    h("div", { class: "model-top" }, viewerBox, buildInfoPanel(teamId, card)),
-    ...buildTabs(teamId, card),
+    ...(activeResult && historicalResult
+      ? [
+          h(
+            "div",
+            { class: "note info" },
+            `Открыта конвертация исходной версии v${activeResult.sourceVersionNumber}. Текущая исходная версия — v${card.current.versionNumber}.`,
+          ),
+        ]
+      : []),
+    h("div", { class: "model-top" }, viewerBox, buildInfoPanel(teamId, card, activeResult)),
+    ...buildTabs(teamId, card, converted, activeResult),
   );
 
   const view = await getModelView(teamId, card.id);
-  let closeViewer = await showViewer(viewerBox, view);
+  const resultView = activeResult
+    ? {
+        format: activeResult.format,
+        mainUrl: `/api/teams/${teamId}/models/${card.id}/files/${activeResult.id}`,
+        assets: [],
+        archive: activeResult.name.toLowerCase().endsWith(".zip"),
+      }
+    : view;
+  let closeViewer = await showViewer(viewerBox, resultView);
 
-  const converted = card.files.filter((file) => file.converted);
-  if (converted.length > 0) {
-    const select = h(
-      "select",
-      { class: "viewer-files", "aria-label": "Какой файл показать" },
-      h("option", { value: "" }, "Исходный файл"),
-      ...converted.map((file) =>
-        h("option", { value: String(file.id) }, `Результат: ${file.format}`),
-      ),
-    ) as HTMLSelectElement;
-    select.addEventListener("change", async () => {
-      const file = converted.find((item) => String(item.id) === select.value);
-      closeViewer();
-      select.disabled = true;
-      closeViewer = await showViewer(
-        viewerBox,
-        file
-          ? {
-              format: file.format,
-              mainUrl: `/api/teams/${teamId}/models/${card.id}/files/${file.id}`,
-              assets: [],
-            }
-          : view,
+  if (activeResult) {
+    const resultNumber = converted.length - converted.indexOf(activeResult);
+    if (historicalResult) {
+      viewerBox.append(
+        h(
+          "span",
+          { class: "viewer-files historical-view-label" },
+          `Результат №${resultNumber} · ${activeResult.format}`,
+        ),
       );
-      select.disabled = false;
-    });
-    viewerBox.append(select);
+    } else {
+      const select = h(
+        "select",
+        { class: "viewer-files", "aria-label": "Какой файл показать" },
+        h("option", { value: "" }, "Исходный файл"),
+        h(
+          "option",
+          { value: String(activeResult.id) },
+          `Результат №${resultNumber} · ${activeResult.format}`,
+        ),
+      ) as HTMLSelectElement;
+      select.value = String(activeResult.id);
+      const download = main.querySelector<HTMLAnchorElement>(".model-download")!;
+      select.addEventListener("change", async () => {
+        download.href = select.value
+          ? fileDownloadUrl(teamId, card.id, activeResult.id)
+          : versionDownloadUrl(teamId, card.id, card.current.versionId);
+        download.textContent = select.value ? "Скачать результат" : "Скачать исходный";
+        closeViewer();
+        select.disabled = true;
+        closeViewer = await showViewer(viewerBox, select.value ? resultView : view);
+        select.disabled = false;
+      });
+      viewerBox.append(select);
+    }
   }
 
   if (!card.current.hasPreview && card.canEdit) {

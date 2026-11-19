@@ -1,6 +1,6 @@
 import { h } from "@shared/ui/dom";
 import { errorText } from "@shared/ui/form";
-import { formatDate } from "@shared/ui/format";
+import { formatMoment } from "@shared/ui/format";
 import { getQualityReports, type QualityReport, type GeometrySummary } from "../api";
 import "../quality.css";
 
@@ -256,6 +256,9 @@ export async function showQualityReport(
   container: HTMLElement,
   teamId: number,
   modelId: number,
+  jobId: number | null,
+  currentVersionNumber: number,
+  resultNumber?: number,
 ): Promise<void> {
   let reports: QualityReport[];
   try {
@@ -267,37 +270,34 @@ export async function showQualityReport(
     return;
   }
 
-  if (reports.length === 0) {
+  const report =
+    jobId === null
+      ? reports.find((item) => item.sourceVersionNumber === currentVersionNumber && item.method === "demo")
+      : reports.find((item) => item.jobId === jobId);
+  if (jobId === null && !report) {
     container.replaceChildren(
       h(
         "div",
         { class: "empty-box" },
         h("b", {}, "Результатов пока нет"),
-        "После смены формата модели здесь появится отчёт о качестве.",
+        "После смены формата текущей версии модели здесь появится отчёт о качестве.",
       ),
     );
     return;
   }
 
-  const panels = h("div", {});
-  const select = h("select") as HTMLSelectElement;
-  reports.forEach((report, index) => {
-    const date = report.finishedAt ? ` · ${formatDate(report.finishedAt)}` : "";
-    select.append(
-      h(
-        "option",
-        { value: String(index) },
-        `${report.sourceFormat} → ${report.targetFormat}${date}`,
-      ),
-    );
-  });
-  select.addEventListener("change", () =>
-    panels.replaceChildren(buildPanels(reports[Number(select.value)], teamId, modelId)),
-  );
-  panels.append(buildPanels(reports[0], teamId, modelId));
+  if (!report) {
+    container.replaceChildren(h("div", { class: "empty-box" }, "Отчёт этой конвертации недоступен."));
+    return;
+  }
 
   container.replaceChildren(
-    h("div", { class: "qc-toolbar" }, h("span", {}, "Результат:"), select),
-    panels,
+    h(
+      "div",
+      { class: "qc-toolbar" },
+      `Конвертация${resultNumber ? ` №${resultNumber}` : ""} · ${report.sourceFormat} → ${report.targetFormat}`,
+      report.finishedAt ? ` · ${formatMoment(report.finishedAt)}` : null,
+    ),
+    buildPanels(report, teamId, modelId),
   );
 }

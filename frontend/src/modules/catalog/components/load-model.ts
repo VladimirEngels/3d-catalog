@@ -4,6 +4,7 @@ import { MTLLoader } from "three/addons/loaders/MTLLoader.js";
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { PLYLoader } from "three/addons/loaders/PLYLoader.js";
 import { STLLoader } from "three/addons/loaders/STLLoader.js";
+import { unzip, type Unzipped } from "fflate";
 import type { ModelView } from "../api";
 
 function createDefaultMaterial(geometry: THREE.BufferGeometry): THREE.Material {
@@ -46,9 +47,7 @@ function createManager(view: ModelView): THREE.LoadingManager {
   }
 
   manager.setURLModifier((url) => {
-    if (url.startsWith("data:") || url.startsWith("blob:")) {
-      return url;
-    }
+    if (url.startsWith("data:")) return url;
     return urlByName.get(lastPart(url)) ?? url;
   });
   return manager;
@@ -81,6 +80,26 @@ async function loadObjMaterials(
 }
 
 export async function loadModel(view: ModelView): Promise<THREE.Object3D> {
+  if (view.archive) {
+    const response = await fetch(view.mainUrl);
+    if (!response.ok) throw new Error("Не удалось получить архив модели");
+    const archive = new Uint8Array(await response.arrayBuffer());
+    const files = await new Promise<Unzipped>((resolve, reject) =>
+      unzip(archive, (error, result) =>
+        error ? reject(error) : resolve(result),
+      ),
+    );
+    const urls = Object.entries(files)
+      .filter(([name]) => !name.endsWith("/"))
+      .map(([name, bytes]) => ({ name, url: URL.createObjectURL(new Blob([bytes])) }));
+    try {
+      const obj = urls.find((file) => file.name.toLowerCase().endsWith(".obj"));
+      if (!obj) throw new Error("В архиве нет OBJ-модели");
+      return await loadModel({ format: "OBJ", mainUrl: obj.url, assets: urls });
+    } finally {
+      for (const file of urls) URL.revokeObjectURL(file.url);
+    }
+  }
   const manager = createManager(view);
 
   switch (view.format) {

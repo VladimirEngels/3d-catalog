@@ -12,6 +12,7 @@ export const qualityRouter = Router();
 
 interface CheckRow {
   job_id: number;
+  source_version_number: number;
   target_format: string;
   source_format: string;
   finished_at: Date | null;
@@ -37,11 +38,13 @@ qualityRouter.get(
     }
 
     const checks = await db.query<CheckRow>(
-      `SELECT j.id AS job_id, j.target_format, j.finished_at, q.id AS check_id, q.similarity_percent, q.needs_review,
+      `SELECT j.id AS job_id, v.version_number AS source_version_number,
+            j.target_format, j.finished_at, q.id AS check_id, q.similarity_percent, q.needs_review,
             (SELECT f.format FROM files f WHERE f.version_id = v.id ORDER BY f.id LIMIT 1) AS source_format
-     FROM (SELECT * FROM model_versions WHERE model_id = $1 ORDER BY version_number DESC LIMIT 1) v
+     FROM model_versions v
      JOIN conversion_jobs j ON j.version_id = v.id
      JOIN quality_checks q ON q.job_id = j.id
+     WHERE v.model_id = $1
      ORDER BY q.created_at DESC, q.id DESC`,
       [modelId],
     );
@@ -53,17 +56,18 @@ qualityRouter.get(
 
     const structural = await db.query<{
       job_id: number;
+      source_version_number: number;
       target_format: string;
       source_format: string;
       finished_at: Date;
       storage_path: string;
     }>(
-      `SELECT j.id AS job_id, j.target_format, j.finished_at, f.storage_path,
+      `SELECT j.id AS job_id, v.version_number AS source_version_number,
+        j.target_format, j.finished_at, f.storage_path,
         (SELECT original.format FROM files original WHERE original.version_id=v.id ORDER BY original.id LIMIT 1) AS source_format
        FROM model_versions v JOIN conversion_jobs j ON j.version_id=v.id
        JOIN LATERAL (SELECT storage_path FROM files WHERE job_id=j.id ORDER BY id LIMIT 1) f ON true
-       WHERE v.model_id=$1 AND v.version_number=(SELECT max(version_number) FROM model_versions WHERE model_id=$1)
-         AND j.status='done'
+       WHERE v.model_id=$1 AND j.status='done'
        ORDER BY j.finished_at DESC`,
       [modelId],
     );
@@ -73,6 +77,7 @@ qualityRouter.get(
         return report
           ? {
               jobId: row.job_id,
+              sourceVersionNumber: row.source_version_number,
               sourceFormat: row.source_format,
               targetFormat: row.target_format,
               finishedAt: row.finished_at,
@@ -87,6 +92,7 @@ qualityRouter.get(
       const own = issues.rows.filter((issue) => issue.check_id === check.check_id);
       return {
         jobId: check.job_id,
+        sourceVersionNumber: check.source_version_number,
         sourceFormat: check.source_format,
         targetFormat: check.target_format,
         finishedAt: check.finished_at,

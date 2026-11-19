@@ -92,13 +92,13 @@ function buildAction(job: Job): HTMLElement | null {
     return h("a", { class: "btn small", href: modelPage }, "Открыть модель");
   }
   if (job.status === "done" && job.quality !== null && job.resultFileId === null) {
-    return h("a", { class: "btn small", href: `${modelPage}#quality` }, "Отчёт");
+    return h("a", { class: "btn small", href: `${modelPage}&result=${job.id}#quality` }, "Отчёт");
   }
   if (job.status === "done" && job.resultFileId !== null) {
     return h(
       "div",
       {},
-      h("a", { class: "btn small", href: `${modelPage}#quality` }, "Отчёт"),
+      h("a", { class: "btn small", href: `${modelPage}&result=${job.id}#quality` }, "Отчёт"),
       h(
         "a",
         {

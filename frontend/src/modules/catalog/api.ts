@@ -49,6 +49,7 @@ export interface ModelView {
   format: ModelFormat;
   mainUrl: string;
   assets: { name: string; url: string }[];
+  archive?: boolean;
 }
 
 export function getModels(
@@ -138,6 +139,9 @@ export interface ModelFile {
   format: ModelFormat;
   sizeBytes: number;
   converted: boolean;
+  jobId: number | null;
+  sourceVersionNumber: number;
+  sourceFormat: ModelFormat;
   createdAt: string;
 }
 

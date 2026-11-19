@@ -38,6 +38,11 @@ export interface FileRow {
   created_at: Date;
 }
 
+export interface CardFileRow extends FileRow {
+  source_version_number: number;
+  source_format: string;
+}
+
 export interface TextureRow {
   id: number;
   file_name: string;
@@ -112,6 +117,20 @@ export async function listAllVersionFiles(versionId: number): Promise<FileRow[]>
      WHERE f.version_id = $1 OR j.version_id = $1
      ORDER BY f.job_id NULLS FIRST, f.id`,
     [versionId],
+  );
+  return result.rows;
+}
+
+export async function listCardFiles(modelId: number, currentVersionId: number): Promise<CardFileRow[]> {
+  const result = await db.query<CardFileRow>(
+    `SELECT f.*, v.version_number AS source_version_number,
+       (SELECT original.format FROM files original WHERE original.version_id=v.id ORDER BY original.id LIMIT 1) AS source_format
+     FROM files f
+     LEFT JOIN conversion_jobs j ON j.id=f.job_id
+     JOIN model_versions v ON v.id=COALESCE(f.version_id, j.version_id)
+     WHERE v.model_id=$1 AND ((f.job_id IS NULL AND f.version_id=$2) OR j.status='done')
+     ORDER BY f.job_id NULLS FIRST, f.id`,
+    [modelId, currentVersionId],
   );
   return result.rows;
 }
