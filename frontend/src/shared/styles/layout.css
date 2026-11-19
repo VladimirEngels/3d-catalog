@@ -1,22 +1,22 @@
 .layout {
   display: flex;
-  flex-direction: row-reverse;
+  flex-direction: row;
   min-height: calc(100vh / var(--site-scale, 1));
 }
 .sidebar {
-  width: 232px;
+  width: 236px;
   flex-shrink: 0;
-  --text: #e8ede8;
-  --text-muted: #a9b4aa;
-  --border: #37423a;
-  --surface: #252f28;
-  --bg: #141a16;
-  --accent: #b9e25a;
+  --text: #edf1e9;
+  --text-muted: #aebcaf;
+  --border: #435247;
+  --surface: #35443a;
+  --bg: #141c17;
+  --accent: #c8dba7;
   background: var(--menu-bg);
   color: var(--text);
   display: flex;
   flex-direction: column;
-  padding: 16px 12px;
+  padding: 20px 14px;
   position: sticky;
   top: 0;
   align-self: flex-start;
@@ -25,16 +25,41 @@
 }
 
 .logo {
-  font-family: var(--mono);
-  font-weight: 500;
-  font-size: 14px;
-  letter-spacing: 0.02em;
-  padding: 4px 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  padding: 4px 10px 20px;
 }
-.logo span {
-  color: var(--accent);
+.logo .brand-mark {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--menu-active);
+  border-radius: 10px;
+  color: var(--menu-active);
+  font: 700 17px var(--font);
+  letter-spacing: -0.08em;
 }
-
+.logo strong {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.sidebar .logo {
+  gap: 14px;
+  font: 500 14px var(--mono);
+  padding-left: 6px;
+  padding-right: 0;
+}
+.logo-name {
+  white-space: nowrap;
+}
+.logo-name b {
+  color: var(--menu-active);
+  font: 700 21px var(--font);
+  letter-spacing: -0.06em;
+}
 .team-switch {
   display: flex;
   align-items: center;
@@ -58,23 +83,18 @@
 .nav {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 6px;
 }
 .nav-title {
-  font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  word-spacing: -0.3em;
+  font: 500 13px "Segoe UI", system-ui, sans-serif;
   color: var(--text-muted);
-  padding: 14px 8px 6px;
+  padding: 16px 12px 6px;
 }
 .nav a {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 6px 8px;
+  padding: 10px 12px;
   border-radius: var(--radius);
   color: var(--text);
   text-decoration: none;
@@ -83,8 +103,8 @@
   background: var(--surface);
 }
 .nav a.active {
-  background: var(--menu-active);
-  color: var(--menu-active-text);
+  background: color-mix(in srgb, var(--menu-active) 15%, transparent);
+  color: var(--menu-active);
   font-weight: 600;
 }
 .nav .count {
@@ -105,7 +125,7 @@
 
 .main {
   flex: 1;
-  padding: 24px 28px;
+  padding: 32px 36px;
   min-width: 0;
 }
 
@@ -113,10 +133,10 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 18px;
+  margin-bottom: 24px;
 }
 .page-head h1 {
-  font-size: 20px;
+  font-size: 28px;
   font-weight: 600;
   margin: 0;
 }
@@ -203,11 +223,9 @@
 :root[data-menu="left"] .layout {
   flex-direction: row;
 }
-:root[data-menu="left"] .filters {
-  border-left: 0;
-  border-right: 1px solid var(--border);
+:root[data-menu="right"] .layout {
+  flex-direction: row-reverse;
 }
-
 .settings-link {
   display: block;
   font-size: 12px;
@@ -221,7 +239,8 @@
 
 @media (max-width: 1100px) {
   .layout,
-  :root[data-menu="left"] .layout {
+  :root[data-menu="left"] .layout,
+  :root[data-menu="right"] .layout {
     flex-direction: column;
   }
   .sidebar {

@@ -7,9 +7,9 @@
 body {
   margin: 0;
   min-width: 0;
-  font: 14px/1.45 var(--font);
-  color: var(--text);
-  background: var(--bg);
+  font: 15px/1.5 var(--font);
+  color: var(--foreground);
+  background: var(--background);
 }
 
 input[type="text"],
@@ -18,26 +18,26 @@ input[type="email"],
 input[type="password"],
 select {
   font: inherit;
-  color: var(--text);
-  height: 34px;
-  padding: 0 10px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
+  color: var(--field-foreground);
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--field-border);
+  border-radius: var(--field-radius);
+  background: var(--field-background);
 }
 .btn {
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  height: 38px;
-  padding: 0 14px;
+  height: 40px;
+  padding: 0 16px;
   font: inherit;
-  font-weight: 600;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text);
+  font-weight: 500;
+  border-radius: var(--field-radius);
+  border: 1px solid transparent;
+  background: var(--default);
+  color: var(--default-foreground);
   cursor: pointer;
 }
 .btn.primary {
@@ -63,6 +63,20 @@ select {
 
 a.btn {
   text-decoration: none;
+}
+
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: var(--ring-offset-width);
+}
+
+.btn:not(:disabled):hover {
+  border-color: var(--accent);
+}
+
+.btn.primary:not(:disabled):hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
 }
 
 :root[data-motion="off"] * {

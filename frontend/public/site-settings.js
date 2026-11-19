@@ -4,16 +4,16 @@
   var DEFAULTS = {
     theme: "light",
     scale: 100,
-    menu: "right",
+    menu: "left",
     tiles: "medium",
     catalogView: "grid",
     motion: "on",
     palette: "forest",
-    customColors: { accent: "#25623a", menu: "#1b231d", highlight: "#b9e25a" },
+    customColors: { accent: "#2d6047", menu: "#202b25", highlight: "#c8dba7" },
   };
 
   var PALETTES = {
-    forest: { accent: "#25623a", menu: "#1b231d", highlight: "#b9e25a" },
+    forest: { accent: "#2d6047", menu: "#202b25", highlight: "#c8dba7" },
     ocean: { accent: "#1f5f8b", menu: "#17222c", highlight: "#5cc8e8" },
     graphite: { accent: "#3c4650", menu: "#1d2126", highlight: "#e3b341" },
     plum: { accent: "#6b3a7a", menu: "#221a26", highlight: "#e58fd0" },

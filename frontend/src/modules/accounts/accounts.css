@@ -6,17 +6,22 @@
 }
 
 .auth-card {
-  width: 400px;
+  width: min(420px, 100%);
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 32px;
+  box-shadow: 0 24px 60px var(--shadow);
+  padding: 36px;
 }
 
 .auth-card .logo {
-  text-align: center;
+  justify-content: center;
   font-size: 22px;
-  padding: 0 0 6px;
+  padding: 0 0 12px;
+}
+.auth-card .brand-mark {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .auth-card .sub {
@@ -114,13 +119,20 @@
 }
 
 .settings-panel {
-  max-width: 760px;
+  max-width: 1120px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px 40px;
 }
 
-.setting {
+.settings-panel .setting {
   border: 0;
-  padding: 0;
-  margin: 0 0 22px;
+  border-bottom: 1px solid var(--border);
+  padding: 0 0 20px;
+  margin: 0;
+}
+.settings-panel .setting:last-of-type {
+  grid-column: 1 / -1;
 }
 
 .setting legend {
@@ -195,8 +207,13 @@
 }
 
 .settings-footer {
-  border-top: 1px solid var(--border);
-  padding-top: 16px;
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 1050px) {
+  .settings-panel {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 600px) {

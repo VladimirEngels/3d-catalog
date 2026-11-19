@@ -123,7 +123,7 @@ function buildVisual(report: QualityReport, teamId: number, modelId: number): HT
   };
   const panel = h(
     "div",
-    { class: "panel" },
+    { class: "panel visual-report" },
     h("h3", {}, "Визуальная похожесть"),
     h(
       "div",
@@ -140,32 +140,52 @@ function buildVisual(report: QualityReport, teamId: number, modelId: number): HT
       ? h("div", { class: "note warn" }, "Оценка ниже порога — проверьте модель вручную")
       : null,
   );
-  for (const view of visual.views) {
-    const image = (side: string, title: string) =>
-      h(
-        "figure",
-        {},
-        h("figcaption", {}, title),
-        h("img", {
-          src: `/api/teams/${teamId}/models/${modelId}/quality/${report.jobId}/images/${side}/${view.index}`,
-          alt: `${title}: ${names[view.name] ?? view.name}`,
-          loading: "lazy",
-        }),
-      );
-    panel.append(
-      h(
-        "h4",
-        {},
-        `${names[view.name] ?? view.name}: ${view.score === null ? "нет видимой поверхности" : view.score.toFixed(2) + " %"}`,
-      ),
-      h(
-        "div",
-        { class: "visual-pair" },
-        image("before", "Исходная модель"),
-        image("after", "Результат"),
-      ),
-    );
+  const views = visual.views;
+  if (views.length === 0) return panel;
+
+  const image = (title: string) => h("img", { alt: title }) as HTMLImageElement;
+  const beforeImage = image("Исходная модель");
+  const afterImage = image("Результат");
+  const viewName = h("strong");
+  const viewScore = h("span");
+  const previous = h(
+    "button",
+    { class: "btn", type: "button", "aria-label": "Предыдущий ракурс" },
+    "←",
+  );
+  const next = h(
+    "button",
+    { class: "btn", type: "button", "aria-label": "Следующий ракурс" },
+    "→",
+  );
+  const picture = (title: string, img: HTMLImageElement) =>
+    h("figure", {}, h("figcaption", {}, title), img);
+  let currentView = 0;
+  function showView(index: number): void {
+    currentView = (index + views.length) % views.length;
+    const view = views[currentView];
+    const name = names[view.name] ?? view.name;
+    viewName.textContent = `${name} · ${currentView + 1} из ${views.length}`;
+    viewScore.textContent =
+      view.score === null ? "Нет видимой поверхности" : `${view.score.toFixed(2)} %`;
+    beforeImage.src = `/api/teams/${teamId}/models/${modelId}/quality/${report.jobId}/images/before/${view.index}`;
+    afterImage.src = `/api/teams/${teamId}/models/${modelId}/quality/${report.jobId}/images/after/${view.index}`;
+    beforeImage.alt = `Исходная модель: ${name}`;
+    afterImage.alt = `Результат: ${name}`;
   }
+  previous.addEventListener("click", () => showView(currentView - 1));
+  next.addEventListener("click", () => showView(currentView + 1));
+  panel.append(
+    h(
+      "div",
+      { class: "visual-navigation" },
+      previous,
+      h("div", { class: "visual-position", "aria-live": "polite" }, viewName, viewScore),
+      next,
+    ),
+    h("div", { class: "visual-pair" }, picture("Исходная модель", beforeImage), picture("Результат", afterImage)),
+  );
+  showView(0);
   return panel;
 }
 
@@ -188,7 +208,7 @@ function buildMetrics(
   ];
   return h(
     "div",
-    { class: "panel" },
+    { class: "panel metrics-panel" },
     h("h3", {}, "Структурная проверка"),
     h(
       "div",

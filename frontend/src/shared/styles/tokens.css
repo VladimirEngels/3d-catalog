@@ -1,17 +1,17 @@
 :root {
-  --bg: #eef0ec;
-  --surface: #fafbf8;
-  --border: #cdd2c8;
-  --text: #161b17;
-  --text-muted: #525a53;
-  --accent: #25623a;
-  --accent-soft: #d8e8c8;
-  --accent-fill: #25623a;
+  --bg: #f2f3f0;
+  --surface: #ffffff;
+  --border: #d8ded6;
+  --text: #202822;
+  --text-muted: #5b665d;
+  --accent: #2d6047;
+  --accent-soft: #e5eddf;
+  --accent-fill: #2d6047;
   --on-accent: #ffffff;
-  --accent-hover: #3f8a58;
-  --menu-bg: #1b231d;
-  --menu-active: #b9e25a;
-  --menu-active-text: #141a16;
+  --accent-hover: #3c7557;
+  --menu-bg: #202b25;
+  --menu-active: #c8dba7;
+  --menu-active-text: #202b25;
 
   --ok: #0f6a35;
   --ok-soft: #dcefe3;
@@ -25,33 +25,52 @@
   --plate-warn: #f0b429;
   --plate-err: #b01616;
 
-  --bar-bg: #1b231d;
+  --bar-bg: #202b25;
   --shadow: rgba(20, 27, 23, 0.14);
 
   --stage: #141614;
   --stage-line: #8f8f8f;
 
-  --radius: 2px;
-  --gap: 14px;
+  --radius: 8px;
+  --gap: 18px;
   --font: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
   --mono: "IBM Plex Mono", Consolas, monospace;
+
+  --background: var(--bg);
+  --foreground: var(--text);
+  --surface-secondary: #e9ede8;
+  --surface-tertiary: #dfe5dd;
+  --overlay: var(--surface);
+  --muted: var(--text-muted);
+  --default: var(--surface-secondary);
+  --default-foreground: var(--text);
+  --field-background: var(--surface);
+  --field-foreground: var(--text);
+  --field-border: var(--border);
+  --field-placeholder: var(--text-muted);
+  --field-radius: 10px;
+  --focus: var(--accent);
+  --accent-foreground: var(--on-accent);
+  --success: var(--ok);
+  --warning: var(--warn);
+  --danger: var(--err);
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #151a16;
-  --surface: #1d231f;
-  --border: #363f38;
-  --text: #e8ede8;
-  --text-muted: #a9b4aa;
+  --bg: #181e1a;
+  --surface: #222a24;
+  --border: #3a473c;
+  --text: #edf1e9;
+  --text-muted: #aebcaf;
 
-  --accent: #b9e25a;
-  --accent-soft: #2d3a18;
-  --accent-fill: #b9e25a;
-  --on-accent: #141a16;
-  --accent-hover: #d4f08a;
+  --accent: #c8dba7;
+  --accent-soft: #34432b;
+  --accent-fill: #c8dba7;
+  --on-accent: #202b25;
+  --accent-hover: #dbe8c3;
 
-  --menu-bg: #0e120f;
+  --menu-bg: #141c17;
 
   --ok: #6fd095;
   --ok-soft: #16301f;
@@ -61,8 +80,12 @@
   --err: #f58a86;
   --err-soft: #3a1c1c;
 
-  --bar-bg: #2a332c;
+  --bar-bg: #2b382e;
   --shadow: rgba(0, 0, 0, 0.4);
 
   --stage: #0f110f;
+
+  --surface-secondary: #29332b;
+  --surface-tertiary: #344037;
+  --default: var(--surface-secondary);
 }

@@ -65,6 +65,7 @@ function showNoTeam(): void {
 }
 
 function showCatalog(teamId: number): void {
+  main.classList.add("catalog-main");
   let filters = emptyFilters();
   filters.collection = new URLSearchParams(location.search).get("collection") ?? "";
   let collections: Collection[] = [];
@@ -95,8 +96,6 @@ function showCatalog(teamId: number): void {
     const expanded = filtersHolder.classList.toggle("filters-open");
     filterToggle.setAttribute("aria-expanded", String(expanded));
   });
-  main.before(filtersHolder);
-
   const head = h("div", { class: "page-head" }, h("h1", {}, "Каталог"), countText);
   if (can(session, "upload")) {
     head.append(
@@ -115,7 +114,8 @@ function showCatalog(teamId: number): void {
 
   const searchInput = h("input", {
     type: "text",
-    placeholder: "Поиск по названию, описанию и тегам",
+    "aria-label": "Поиск моделей",
+    placeholder: "Поиск моделей",
   }) as HTMLInputElement;
   let searchTimer: number | undefined;
   searchInput.addEventListener("input", () => {
@@ -126,7 +126,7 @@ function showCatalog(teamId: number): void {
     }, 300);
   });
 
-  const sortSelect = h("select", { class: "sort-select" }) as HTMLSelectElement;
+  const sortSelect = h("select", { class: "sort-select", "aria-label": "Сортировка моделей" }) as HTMLSelectElement;
   const sortOptions: [CatalogSort, string][] = [
     ["new", "Сначала новые"],
     ["name", "По названию"],
@@ -177,9 +177,11 @@ function showCatalog(teamId: number): void {
       "div",
       { class: "toolbar" },
       h("label", { class: "search" }, icon("search"), searchInput),
+      filterToggle,
       sortSelect,
       h("div", { class: "segmented" }, gridButton, tableButton),
     ),
+    filtersHolder,
     chips,
     results,
     footer,
@@ -394,7 +396,7 @@ function showCatalog(teamId: number): void {
     if (panelIsStale) {
       const panel = buildFilters(filters, data, reload, resetFilters);
       panel.id = "catalog-filters";
-      filtersHolder.replaceChildren(filterToggle, panel);
+      filtersHolder.replaceChildren(panel);
       panelIsStale = false;
     }
     renderChips(data);

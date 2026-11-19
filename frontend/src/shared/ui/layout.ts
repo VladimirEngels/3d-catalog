@@ -66,7 +66,11 @@ export function pageHead(
 function buildSidebar(session: Session, active: string, area: "team" | "admin"): HTMLElement {
   const sidebar = h("aside", { class: "sidebar" });
 
-  const logo = h("div", { class: "logo" }, h("span", {}, "3D"), "-Каталог");
+  const logo = h(
+    "div",
+    { class: "logo" },
+    h("span", { class: "logo-name" }, h("b", {}, "3D"), "-Каталог"),
+  );
   const toggle = h(
     "button",
     {

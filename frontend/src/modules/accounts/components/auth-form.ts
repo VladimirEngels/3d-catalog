@@ -20,7 +20,7 @@ export function showAuthForm(options: AuthFormOptions): void {
   const form = h(
     "form",
     { class: "auth-card" },
-    h("div", { class: "logo" }, h("span", {}, "3D"), "-Каталог"),
+    h("div", { class: "logo" }, h("span", { class: "brand-mark" }, "3D"), h("strong", {}, "Каталог")),
     h("div", { class: "sub" }, options.subtitle),
     ...options.fields,
     errorBox,
